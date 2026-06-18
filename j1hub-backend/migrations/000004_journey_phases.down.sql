@@ -1,0 +1,2 @@
+ALTER TABLE users DROP CONSTRAINT IF EXISTS fk_current_phase;
+DROP TABLE IF EXISTS journey_phases CASCADE;

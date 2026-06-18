@@ -1,0 +1,1232 @@
+{
+	"info": {
+		"_postman_id": "c1f71df4-ec90-410a-b31c-b26a575a2d6a",
+		"name": "J1 Hub API Collection",
+		"description": "Postman Collection for testing J1 Hub Backend API endpoints. Includes public/authenticated endpoints, sample request bodies, parameters, and environment variables.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Public & General",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Check the health status of the application server."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Reviews",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/reviews?job_id=job-uuid-here",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reviews"
+							],
+							"query": [
+								{
+									"key": "job_id",
+									"value": "job-uuid-here",
+									"description": "Filter reviews by a specific job ID (optional)"
+								}
+							]
+						},
+						"description": "List all job reviews. Can optionally be filtered by job_id."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"securepassword123\",\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registers a new user and returns JWT tokens."
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"securepassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Logs in an existing user and returns JWT access & refresh tokens."
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refresh_token\": \"your_refresh_token_here\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/refresh",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"refresh"
+							]
+						},
+						"description": "Get a new JWT access token using a valid refresh token."
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logs out the authenticated user."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Profile",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/user/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"profile"
+							]
+						},
+						"description": "Retrieve the profile details of the authenticated user."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"bio\": \"Living and working in NYC on my J1 Visa!\",\n  \"avatar_url\": \"https://example.com/profiles/johndoe.jpg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/user/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"profile"
+							]
+						},
+						"description": "Update the profile details of the authenticated user."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Missions",
+			"item": [
+				{
+					"name": "List Available Missions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/missions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"missions"
+							]
+						},
+						"description": "Retrieve all available missions for the user."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Mission Detail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/missions/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"missions",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "mission-uuid-here",
+									"description": "The unique ID of the mission"
+								}
+							]
+						},
+						"description": "Get detailed view of a specific mission, including its sub-tasks."
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Proof (Verify)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "proof",
+									"description": "File upload containing proof of mission completion",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/missions/:id/verify",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"missions",
+								":id",
+								"verify"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "mission-uuid-here",
+									"description": "The unique ID of the mission to verify"
+								}
+							]
+						},
+						"description": "Submit a proof file (e.g. image/document) to request verification for a mission."
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle Task",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"completed\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tasks/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tasks",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "task-uuid-here",
+									"description": "The unique ID of the sub-task"
+								}
+							]
+						},
+						"description": "Check/uncheck a sub-task belonging to an active mission."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Journey",
+			"item": [
+				{
+					"name": "List Journey Phases",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/journey/phases",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"journey",
+								"phases"
+							]
+						},
+						"description": "List all standard phase templates in the journey."
+					},
+					"response": []
+				},
+				{
+					"name": "Advance Phase",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/journey/phase/transition",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"journey",
+								"phase",
+								"transition"
+							]
+						},
+						"description": "Try to transition to the next phase in the J1 journey if criteria are met."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Journey History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/journey/history",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"journey",
+								"history"
+							]
+						},
+						"description": "Get phase history and records of the authenticated user."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Leaderboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/leaderboard?scope=global&job_id=job-uuid-here",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"leaderboard"
+							],
+							"query": [
+								{
+									"key": "scope",
+									"value": "global",
+									"description": "Scope of the leaderboard (e.g. global, job)"
+								},
+								{
+									"key": "job_id",
+									"value": "job-uuid-here",
+									"description": "Filter by job ID if scope is job (optional)",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get user leaderboard entries."
+					},
+					"response": []
+				},
+				{
+					"name": "List Badges",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/user/badges",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"badges"
+							]
+						},
+						"description": "List badges unlocked by the authenticated user."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Credit Score History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/user/credit-score/history",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"credit-score",
+								"history"
+							]
+						},
+						"description": "List the credit score history records for the user."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Friends",
+			"item": [
+				{
+					"name": "Send Friend Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"target_user_id\": \"friend-user-uuid-here\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/friends/request",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"friends",
+								"request"
+							]
+						},
+						"description": "Send a friendship invitation request to another user."
+					},
+					"response": []
+				},
+				{
+					"name": "List Pending Requests",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/friends/requests/pending",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"friends",
+								"requests",
+								"pending"
+							]
+						},
+						"description": "List inbound pending friendship requests."
+					},
+					"response": []
+				},
+				{
+					"name": "Respond to Request",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"friendship_id\": \"friendship-uuid-here\",\n  \"accept\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/friends/respond",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"friends",
+								"respond"
+							]
+						},
+						"description": "Accept or reject an inbound friendship invitation."
+					},
+					"response": []
+				},
+				{
+					"name": "List Friends",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/friends",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"friends"
+							]
+						},
+						"description": "List all friends for the user."
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Friend",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/friends/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"friends",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "friend-user-or-friendship-uuid",
+									"description": "ID of the friendship record or user to remove"
+								}
+							]
+						},
+						"description": "Remove an existing friendship relation."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Radar (Nearby Users)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/radar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"radar"
+							]
+						},
+						"description": "Check the radar for nearby users/friends sharing geolocation details."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Expenses",
+			"item": [
+				{
+					"name": "List Expenses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/expenses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"expenses"
+							]
+						},
+						"description": "List all expense transactions involving the authenticated user."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Expense",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Weekly Groceries\",\n  \"total_amount\": 120.50,\n  \"currency\": \"USD\",\n  \"memo\": \"Shared groceries split evenly\",\n  \"due_date\": \"2026-06-25T23:59:59Z\",\n  \"splits\": [\n    {\n      \"user_id\": \"roommate-user-uuid-1\",\n      \"owe_amount\": 60.25\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/expenses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"expenses"
+							]
+						},
+						"description": "Create a new group expense transaction and specify target user splits."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Expense Detail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/expenses/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"expenses",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "expense-uuid-here",
+									"description": "The unique ID of the expense transaction"
+								}
+							]
+						},
+						"description": "Get detailed view of a specific expense transaction along with splits detail."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Expense",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/expenses/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"expenses",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "expense-uuid-here",
+									"description": "The unique ID of the expense to delete"
+								}
+							]
+						},
+						"description": "Delete an expense created by the user."
+					},
+					"response": []
+				},
+				{
+					"name": "List Pending Splits",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/expenses/pending",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"expenses",
+								"pending"
+							]
+						},
+						"description": "List pending expense splits that the user owes money for."
+					},
+					"response": []
+				},
+				{
+					"name": "Pay Expense Split",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "slip",
+									"description": "File upload containing payment slip/receipt",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/expenses/splits/:id/pay",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"expenses",
+								"splits",
+								":id",
+								"pay"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "split-uuid-here",
+									"description": "The unique ID of the expense split record"
+								}
+							]
+						},
+						"description": "Submit a payment receipt/slip for a specific split to mark it as paid (awaits creator approval)."
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Expense Split Payment",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/expenses/splits/:id/approve",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"expenses",
+								"splits",
+								":id",
+								"approve"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "split-uuid-here",
+									"description": "The unique ID of the expense split record to approve"
+								}
+							]
+						},
+						"description": "Approve the payment slip submitted by a split debtor (marks the split as resolved/settled)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notifications",
+			"item": [
+				{
+					"name": "List Notifications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/notifications",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"notifications"
+							]
+						},
+						"description": "Retrieve notifications list for the authenticated user."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Notification Read",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/notifications/:id/read",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"notifications",
+								":id",
+								"read"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "notification-uuid-here",
+									"description": "The unique ID of the notification"
+								}
+							]
+						},
+						"description": "Mark a specific notification as read."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark All Read",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/notifications/read-all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"notifications",
+								"read-all"
+							]
+						},
+						"description": "Mark all notifications for the current user as read."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Notification",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/notifications/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"notifications",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "notification-uuid-here",
+									"description": "The unique ID of the notification to delete"
+								}
+							]
+						},
+						"description": "Remove/delete a specific notification."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Jobs & Carts",
+			"item": [
+				{
+					"name": "List Jobs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/jobs?agency=InterExchange",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"jobs"
+							],
+							"query": [
+								{
+									"key": "agency",
+									"value": "InterExchange",
+									"description": "Filter jobs by agency name (optional)",
+									"disabled": true
+								}
+							]
+						},
+						"description": "List jobs with optional filters."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Job Detail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/jobs/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"jobs",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "job-uuid-here",
+									"description": "The unique ID of the job"
+								}
+							]
+						},
+						"description": "Get complete detailed info of a job including housing options and overall rating."
+					},
+					"response": []
+				},
+				{
+					"name": "Add to Cart",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"job_id\": \"job-uuid-here\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/cart",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"cart"
+							]
+						},
+						"description": "Add a job option to the user's wishlist cart."
+					},
+					"response": []
+				},
+				{
+					"name": "List Cart",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/cart",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"cart"
+							]
+						},
+						"description": "List all job offers currently wishlisted in the user's cart."
+					},
+					"response": []
+				},
+				{
+					"name": "Remove from Cart",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/cart/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"cart",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "job-or-cart-item-uuid",
+									"description": "The unique ID of the wishlisted item or job to remove"
+								}
+							]
+						},
+						"description": "Remove a job offer from the wishlist cart."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Job Review",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"job_id\": \"job-uuid-here\",\n  \"rating_stars\": 4.5,\n  \"review_text\": \"Great work culture and helpful supervisor!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/reviews",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reviews"
+							]
+						},
+						"description": "Write and publish a review and rating for a specific job experience."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "your_jwt_access_token_here",
+			"type": "string"
+		}
+	]
+}

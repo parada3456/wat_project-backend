@@ -1,0 +1,1518 @@
+{
+  "uuid": "ddff511c-7bc2-444b-851b-28df14080cca",
+  "lastMigration": 33,
+  "name": "J1Hub Backend Mock",
+  "endpointPrefix": "api/v1",
+  "latency": 0,
+  "port": 3005,
+  "hostname": "localhost",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "b2e9455b-2c07-445a-ab10-3e8ee26795cd",
+      "type": "http",
+      "documentation": "Check the health status of the application server.",
+      "method": "get",
+      "endpoint": "health",
+      "responses": [
+        {
+          "uuid": "a0fbc113-ef49-4dd6-825e-fd09a289dab6",
+          "body": "{\n  \"status\": \"ok\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Health Status",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "0d14c403-9c48-44d1-ba72-9c2fe18b567c",
+      "type": "http",
+      "documentation": "Registers a new user and returns JWT tokens.",
+      "method": "post",
+      "endpoint": "auth/register",
+      "responses": [
+        {
+          "uuid": "39b8f8f6-a09b-45e4-b6db-50913c57ecdb",
+          "body": "{\n  \"user_id\": \"{{faker 'string.uuid'}}\",\n  \"access_token\": \"mock-access-token-{{faker 'string.alphanumeric' 30}}\",\n  \"refresh_token\": \"mock-refresh-token-{{faker 'string.alphanumeric' 30}}\",\n  \"expires_at\": \"{{faker 'date.future'}}\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Registration Success",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "a5855043-94e0-4a1a-b2a5-8f229bce672f",
+      "type": "http",
+      "documentation": "Logs in an existing user and returns JWT access & refresh tokens.",
+      "method": "post",
+      "endpoint": "auth/login",
+      "responses": [
+        {
+          "uuid": "c69dd711-75e8-4d79-80f1-f8dab74b7f60",
+          "body": "{\n  \"user_id\": \"{{faker 'string.uuid'}}\",\n  \"access_token\": \"mock-access-token-{{faker 'string.alphanumeric' 30}}\",\n  \"refresh_token\": \"mock-refresh-token-{{faker 'string.alphanumeric' 30}}\",\n  \"expires_at\": \"{{faker 'date.future'}}\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Login Success",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "email",
+              "value": "ju",
+              "invert": false,
+              "operator": "equals"
+            },
+            {
+              "target": "body",
+              "modifier": "password",
+              "value": "ju",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "297e5bb9-bbe0-4b3c-aed3-324a1a524c18",
+          "body": "",
+          "latency": 0,
+          "statusCode": 404,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "765c1f39-9c67-404c-b700-d402ea49d73c",
+      "type": "http",
+      "documentation": "Get a new JWT access token using a valid refresh token.",
+      "method": "post",
+      "endpoint": "auth/refresh",
+      "responses": [
+        {
+          "uuid": "5f7f0bc8-833d-4e6a-a3ad-ba95f4ae1380",
+          "body": "{\n  \"access_token\": \"mock-access-token-{{faker 'string.alphanumeric' 30}}\",\n  \"refresh_token\": \"mock-refresh-token-{{faker 'string.alphanumeric' 30}}\",\n  \"expires_at\": \"{{faker 'date.future'}}\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Refresh Token Success",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "e84b4797-17e3-4ed8-9ffb-01d996faa4f5",
+      "type": "http",
+      "documentation": "Logs out the authenticated user.",
+      "method": "post",
+      "endpoint": "auth/logout",
+      "responses": [
+        {
+          "uuid": "81a61dd9-cb94-4858-8cee-d9734842d93d",
+          "body": "",
+          "latency": 0,
+          "statusCode": 204,
+          "label": "Logout Success",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "1ba7bfdd-1c46-4213-ac54-d140798181f3",
+      "type": "http",
+      "documentation": "Retrieve the profile details of the authenticated user.",
+      "method": "get",
+      "endpoint": "user/profile",
+      "responses": [
+        {
+          "uuid": "a129cc53-7ec3-48ea-9624-423a0ce29162",
+          "body": "{\n  \"user\": {\n    \"UserID\": \"{{faker 'string.uuid'}}\",\n    \"Email\": \"{{faker 'internet.email'}}\",\n    \"PasswordHash\": \"\",\n    \"FirstName\": \"{{faker 'person.firstName'}}\",\n    \"LastName\": \"{{faker 'person.lastName'}}\",\n    \"CurrentPhaseID\": \"{{faker 'string.uuid'}}\",\n    \"TotalLifetimePoints\": {{faker 'number.int' max=5000}},\n    \"CurrentPhasePoints\": {{faker 'number.int' max=1000}},\n    \"MissionStreak\": {{faker 'number.int' max=10}},\n    \"ArrivalDate\": \"{{faker 'date.past'}}\",\n    \"JobStartDate\": \"{{faker 'date.anytime'}}\",\n    \"CreatedAt\": \"{{faker 'date.past'}}\",\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  },\n  \"profile\": {\n    \"ProfileID\": \"{{faker 'string.uuid'}}\",\n    \"UserID\": \"{{faker 'string.uuid'}}\",\n    \"PhoneNumber\": \"{{faker 'phone.number'}}\",\n    \"Bio\": \"{{faker 'lorem.sentence'}}\",\n    \"AvatarURL\": \"{{faker 'image.avatar'}}\",\n    \"RadarVisibility\": \"Show_Anonymous\",\n    \"Lat\": {{faker 'location.latitude' min=40.0 max=41.0}},\n    \"Lng\": {{faker 'location.longitude' min=-74.0 max=-73.0}},\n    \"LocationUpdatedAt\": \"{{faker 'date.anytime'}}\",\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  },\n  \"credit_score\": {\n    \"CreditID\": \"{{faker 'string.uuid'}}\",\n    \"UserID\": \"{{faker 'string.uuid'}}\",\n    \"CurrentScore\": {{faker 'number.int' min=300 max=850}},\n    \"LastUpdated\": \"{{faker 'date.anytime'}}\"\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Profile Retrieval Success",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "636249f0-6b0c-4ffe-8e29-1aea12c3d2f0",
+      "type": "http",
+      "documentation": "Update the profile details of the authenticated user.",
+      "method": "patch",
+      "endpoint": "user/profile",
+      "responses": [
+        {
+          "uuid": "a5fac273-f1d1-4889-b05b-5438db2e2599",
+          "body": "",
+          "latency": 0,
+          "statusCode": 204,
+          "label": "Profile Update Success",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "40c950a3-d6e9-4411-b13d-315cee3813a8",
+      "type": "http",
+      "documentation": "Retrieve all available missions for the user.",
+      "method": "get",
+      "endpoint": "missions",
+      "responses": [
+        {
+          "uuid": "453a58a4-8cfe-482c-84cf-f96b50c67f14",
+          "body": "[\n  {{#repeat 3}}\n  {\n    \"UserMissionID\": \"{{faker 'string.uuid'}}\",\n    \"UserID\": \"{{faker 'string.uuid'}}\",\n    \"MissionID\": \"{{faker 'string.uuid'}}\",\n    \"Status\": \"{{oneOf (array 'Not_Started' 'In_Progress' 'Pending_Verification' 'Completed' 'Overdue')}}\",\n    \"CalculatedDueDate\": \"{{faker 'date.future'}}\",\n    \"ProofURL\": \"{{faker 'internet.url'}}\",\n    \"ProofSubmittedAt\": \"{{faker 'date.anytime'}}\",\n    \"VerifiedAt\": \"{{faker 'date.anytime'}}\",\n    \"VerifiedBy\": \"{{faker 'string.uuid'}}\",\n    \"BasePointsEarned\": {{faker 'number.int' min=50 max=200}},\n    \"SpeedBonusPoints\": {{faker 'number.int' min=0 max=50}},\n    \"StreakBonusPoints\": {{faker 'number.int' min=0 max=50}},\n    \"FirstCompleterBonusPoints\": {{faker 'number.int' min=0 max=100}},\n    \"TotalPointsEarned\": {{faker 'number.int' min=50 max=400}},\n    \"RewardedAt\": \"{{faker 'date.anytime'}}\",\n    \"CreatedAt\": \"{{faker 'date.past'}}\",\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  }\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "List Missions Success",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "28accdf6-75cb-4de2-abb9-e4c057517dc9",
+      "type": "http",
+      "documentation": "Get detailed view of a specific mission, including its sub-tasks.",
+      "method": "get",
+      "endpoint": "missions/:id",
+      "responses": [
+        {
+          "uuid": "995d7319-0e7c-4c9f-934f-b878263f6568",
+          "body": "{\n  \"mission\": {\n    \"MissionID\": \"{{urlParam 'id'}}\",\n    \"PhaseID\": \"{{faker 'string.uuid'}}\",\n    \"Title\": \"{{faker 'lorem.words' min=2 max=4}}\",\n    \"Description\": \"{{faker 'lorem.sentence'}}\",\n    \"Location\": \"{{faker 'location.city'}}, {{faker 'location.state'}}\",\n    \"BasePoints\": {{faker 'number.int' min=50 max=200}},\n    \"IsMandatory\": {{faker 'datatype.boolean'}},\n    \"VerificationType\": \"Upload\",\n    \"DueDateType\": \"Relative\",\n    \"FixedDueDate\": null,\n    \"RelativeTriggerEvent\": \"arrival_date\",\n    \"RelativeDaysOffset\": {{faker 'number.int' min=5 max=30}},\n    \"CreatedAt\": \"{{faker 'date.past'}}\",\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  },\n  \"user_mission\": {\n    \"UserMissionID\": \"{{faker 'string.uuid'}}\",\n    \"UserID\": \"{{faker 'string.uuid'}}\",\n    \"MissionID\": \"{{urlParam 'id'}}\",\n    \"Status\": \"In_Progress\",\n    \"CalculatedDueDate\": \"{{faker 'date.future'}}\",\n    \"ProofURL\": \"\",\n    \"ProofSubmittedAt\": null,\n    \"VerifiedAt\": null,\n    \"VerifiedBy\": \"\",\n    \"BasePointsEarned\": 0,\n    \"SpeedBonusPoints\": 0,\n    \"StreakBonusPoints\": 0,\n    \"FirstCompleterBonusPoints\": 0,\n    \"TotalPointsEarned\": 0,\n    \"RewardedAt\": null,\n    \"CreatedAt\": \"{{faker 'date.past'}}\",\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  },\n  \"tasks\": [\n    {{#repeat 3}}\n    {\n      \"TaskID\": \"{{faker 'string.uuid'}}\",\n      \"MissionID\": \"{{urlParam 'id'}}\",\n      \"Title\": \"{{faker 'lorem.sentence'}}\",\n      \"Description\": \"{{faker 'lorem.sentence'}}\",\n      \"CreatedAt\": \"{{faker 'date.past'}}\",\n      \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n    }\n    {{/repeat}}\n  ],\n  \"user_tasks\": [\n    {{#repeat 3}}\n    {\n      \"UserTaskID\": \"{{faker 'string.uuid'}}\",\n      \"UserID\": \"{{faker 'string.uuid'}}\",\n      \"TaskID\": \"{{faker 'string.uuid'}}\",\n      \"UserMissionID\": \"{{faker 'string.uuid'}}\",\n      \"IsCompleted\": {{faker 'datatype.boolean'}},\n      \"CompletedAt\": \"{{faker 'date.anytime'}}\",\n      \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n    }\n    {{/repeat}}\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Mission Detail Success",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "dbd049fd-7440-401d-9f76-b8b6aa5384ce",
+      "type": "http",
+      "documentation": "Submit a proof file to request verification for a mission.",
+      "method": "post",
+      "endpoint": "missions/:id/verify",
+      "responses": [
+        {
+          "uuid": "8eb5defe-26e2-4448-971a-247066f9469f",
+          "body": "",
+          "latency": 0,
+          "statusCode": 204,
+          "label": "Proof Submitted",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "0a1b4ce0-8170-4880-ae5f-9b1e26df38e3",
+      "type": "http",
+      "documentation": "Check/uncheck a sub-task belonging to an active mission.",
+      "method": "patch",
+      "endpoint": "tasks/:id",
+      "responses": [
+        {
+          "uuid": "37192542-940f-40ff-a372-0e84c53b7333",
+          "body": "",
+          "latency": 0,
+          "statusCode": 204,
+          "label": "Task Toggled",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "6c7086b9-3ee7-4a00-a1c5-b5f255fb52b2",
+      "type": "http",
+      "documentation": "List all standard phase templates in the journey.",
+      "method": "get",
+      "endpoint": "journey/phases",
+      "responses": [
+        {
+          "uuid": "8b6c3d22-9d4e-4c50-8fab-961296db3c94",
+          "body": "[\n  {\n    \"PhaseID\": \"{{faker 'string.uuid'}}\",\n    \"PhaseNumber\": 1,\n    \"Title\": \"Pre-Arrival & Preparation\",\n    \"Description\": \"Secure documents, visa application, housing prep\",\n    \"CreatedAt\": \"{{faker 'date.past'}}\",\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  },\n  {\n    \"PhaseID\": \"{{faker 'string.uuid'}}\",\n    \"PhaseNumber\": 2,\n    \"Title\": \"First 30 Days Settling In\",\n    \"Description\": \"SSN application, bank account setup, SEVIS check-in\",\n    \"CreatedAt\": \"{{faker 'date.past'}}\",\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  },\n  {\n    \"PhaseID\": \"{{faker 'string.uuid'}}\",\n    \"PhaseNumber\": 3,\n    \"Title\": \"Mid-Program Community Integration\",\n    \"Description\": \"Cultural exchange events, local community activities\",\n    \"CreatedAt\": \"{{faker 'date.past'}}\",\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Journey Phases List",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "222b78fe-a15d-465c-890e-3103a6aeac61",
+      "type": "http",
+      "documentation": "Try to transition to the next phase in the J1 journey if criteria are met.",
+      "method": "post",
+      "endpoint": "journey/phase/transition",
+      "responses": [
+        {
+          "uuid": "9da3d16f-d16e-49af-8713-ef4301b5b964",
+          "body": "{\n  \"success\": {{faker 'datatype.boolean'}}\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Phase Transition Try",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "e59ab46c-5655-459d-b2cd-63dc3b572c65",
+      "type": "http",
+      "documentation": "Get phase history and records of the authenticated user.",
+      "method": "get",
+      "endpoint": "journey/history",
+      "responses": [
+        {
+          "uuid": "ca83a46d-8e1d-4103-8898-56f11b1970a9",
+          "body": "[\n  {{#repeat 2}}\n  {\n    \"HistoryID\": \"{{faker 'string.uuid'}}\",\n    \"UserID\": \"{{faker 'string.uuid'}}\",\n    \"PhaseID\": \"{{faker 'string.uuid'}}\",\n    \"PhasePointsEarned\": {{faker 'number.int' min=200 max=800}},\n    \"EnteredAt\": \"{{faker 'date.past'}}\",\n    \"CompletedAt\": \"{{faker 'date.anytime'}}\"\n  }\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Journey History List",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "e6aafd5c-f25a-475f-bcf8-db41269c8ecd",
+      "type": "http",
+      "documentation": "Get user leaderboard entries.",
+      "method": "get",
+      "endpoint": "leaderboard",
+      "responses": [
+        {
+          "uuid": "3a658a2a-bc0a-41ca-b679-847204b8dd6f",
+          "body": "[\n  {{#repeat 5}}\n  {\n    \"Rank\": {{add @index 1}},\n    \"UserID\": \"{{faker 'string.uuid'}}\",\n    \"Name\": \"{{faker 'person.firstName'}} {{faker 'person.lastName'}}\",\n    \"Points\": {{faker 'number.int' min=100 max=2000}},\n    \"Streak\": {{faker 'number.int' min=0 max=12}},\n    \"Badges\": [\n      \"{{faker 'string.uuid'}}\",\n      \"{{faker 'string.uuid'}}\"\n    ]\n  }\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Leaderboard Success",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "f7dd2a2b-6245-410c-b310-e88cbf48cc61",
+      "type": "http",
+      "documentation": "List badges unlocked by the authenticated user.",
+      "method": "get",
+      "endpoint": "user/badges",
+      "responses": [
+        {
+          "uuid": "462bdca6-eb0c-4da0-8309-31f9b5bd2da0",
+          "body": "[\n  {{#repeat 3}}\n  {\n    \"UserBadgeID\": \"{{faker 'string.uuid'}}\",\n    \"UserID\": \"{{faker 'string.uuid'}}\",\n    \"BadgeID\": \"{{faker 'string.uuid'}}\",\n    \"SourceID\": \"{{faker 'string.uuid'}}\",\n    \"EarnedAt\": \"{{faker 'date.past'}}\"\n  }\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "User Badges List",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "3c9d50ed-a40b-47c0-8085-5c9c9c523001",
+      "type": "http",
+      "documentation": "List the credit score history records for the user.",
+      "method": "get",
+      "endpoint": "user/credit-score/history",
+      "responses": [
+        {
+          "uuid": "daa870e0-7707-42d3-ae06-30c44293d9c3",
+          "body": "[\n  {{#repeat 4}}\n  {\n    \"LedgerID\": \"{{faker 'string.uuid'}}\",\n    \"UserID\": \"{{faker 'string.uuid'}}\",\n    \"SourceType\": \"{{oneOf (array 'Mission_Base' 'Speed_Bonus' 'Streak_Bonus' 'First_Completer' 'Expense_Penalty' 'Admin_Adjust')}}\",\n    \"SourceID\": \"{{faker 'string.uuid'}}\",\n    \"Delta\": {{oneOf (array 50 100 150 -50 25)}},\n    \"LifetimeBalanceAfter\": {{faker 'number.int' min=500 max=2000}},\n    \"PhaseBalanceAfter\": {{faker 'number.int' min=100 max=800}},\n    \"Note\": \"{{faker 'lorem.sentence'}}\",\n    \"CreatedAt\": \"{{faker 'date.past'}}\"\n  }\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Credit Score Ledger List",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "6f62ed9c-252f-4ece-8be0-cddb818dc923",
+      "type": "http",
+      "documentation": "Send a friendship invitation request to another user.",
+      "method": "post",
+      "endpoint": "friends/request",
+      "responses": [
+        {
+          "uuid": "2f4c563d-04d4-4697-83a4-09cc72e5fa8c",
+          "body": "",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Request Sent",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "2d6421ab-dfcd-4a75-aea8-4de3c1787d0c",
+      "type": "http",
+      "documentation": "List inbound pending friendship requests.",
+      "method": "get",
+      "endpoint": "friends/requests/pending",
+      "responses": [
+        {
+          "uuid": "76957624-a407-4258-90df-e911353b717e",
+          "body": "[\n  {{#repeat 2}}\n  {\n    \"FriendshipID\": \"{{faker 'string.uuid'}}\",\n    \"UserID1\": \"{{faker 'string.uuid'}}\",\n    \"UserID2\": \"{{faker 'string.uuid'}}\",\n    \"Status\": \"Pending\",\n    \"CreatedAt\": \"{{faker 'date.past'}}\",\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  }\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Pending Requests List",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "ce777437-004a-41b2-8ea3-d689d6ff3664",
+      "type": "http",
+      "documentation": "Accept or reject an inbound friendship invitation.",
+      "method": "patch",
+      "endpoint": "friends/respond",
+      "responses": [
+        {
+          "uuid": "a54452f3-5687-43cb-8901-9636a57012be",
+          "body": "",
+          "latency": 0,
+          "statusCode": 204,
+          "label": "Request Answered",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "a209b322-70b0-41ff-afef-22a3b4eb4ab0",
+      "type": "http",
+      "documentation": "List all friends for the user.",
+      "method": "get",
+      "endpoint": "friends",
+      "responses": [
+        {
+          "uuid": "d0fbf529-9471-4735-ae90-b50f9d831a6a",
+          "body": "[\n  {{#repeat 3}}\n  {\n    \"FriendshipID\": \"{{faker 'string.uuid'}}\",\n    \"UserID1\": \"{{faker 'string.uuid'}}\",\n    \"UserID2\": \"{{faker 'string.uuid'}}\",\n    \"Status\": \"Accepted\",\n    \"CreatedAt\": \"{{faker 'date.past'}}\",\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  }\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Friends List",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "8296e6a9-e99b-4c8f-a66a-c1b31f5bfaa1",
+      "type": "http",
+      "documentation": "Remove an existing friendship relation.",
+      "method": "delete",
+      "endpoint": "friends/:id",
+      "responses": [
+        {
+          "uuid": "0aa5f64b-21c3-4cc5-a3b5-8f7cb501ae0b",
+          "body": "",
+          "latency": 0,
+          "statusCode": 204,
+          "label": "Friend Removed",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "093d5f90-c662-4a5b-8fc3-f935865be549",
+      "type": "http",
+      "documentation": "Check the radar for nearby users/friends sharing geolocation details.",
+      "method": "get",
+      "endpoint": "radar",
+      "responses": [
+        {
+          "uuid": "cbd004ee-c965-43c2-aca5-2ad21775c8ba",
+          "body": "[\n  {{#repeat 4}}\n  {\n    \"UserID\": \"{{faker 'string.uuid'}}\",\n    \"Name\": \"{{faker 'person.firstName'}} {{faker 'person.lastName'}}\",\n    \"AvatarURL\": \"{{faker 'image.avatar'}}\",\n    \"Lat\": {{faker 'location.latitude' min=40.7 max=40.8}},\n    \"Lng\": {{faker 'location.longitude' min=-74.0 max=-73.9}}\n  }\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Radar Nearby List",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "7630b00b-39e6-4b1b-a4d0-f8908046612b",
+      "type": "http",
+      "documentation": "List all expense transactions involving the authenticated user.",
+      "method": "get",
+      "endpoint": "expenses",
+      "responses": [
+        {
+          "uuid": "9d0a462b-a782-4504-90c5-1b1dbdf611cb",
+          "body": "[\n  {{#repeat 3}}\n  {\n    \"TransactionID\": \"{{faker 'string.uuid'}}\",\n    \"PaidByUserID\": \"{{faker 'string.uuid'}}\",\n    \"Title\": \"{{faker 'lorem.words' min=2 max=4}}\",\n    \"TotalAmount\": {{faker 'number.float' min=10 max=500 fractionDigits=2}},\n    \"Currency\": \"USD\",\n    \"Memo\": \"{{faker 'lorem.sentence'}}\",\n    \"TransactionDate\": \"{{faker 'date.past'}}\",\n    \"DueDate\": \"{{faker 'date.future'}}\",\n    \"CreatedAt\": \"{{faker 'date.past'}}\",\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  }\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "List Expenses",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "9144d894-0185-46cb-8f06-096eecd3463c",
+      "type": "http",
+      "documentation": "Create a new group expense transaction and specify target user splits.",
+      "method": "post",
+      "endpoint": "expenses",
+      "responses": [
+        {
+          "uuid": "53b516bb-9216-4742-8903-2bfc1b72c7be",
+          "body": "",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Expense Created",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "6e53b8ad-2ffb-4618-84de-10cc2a8a7165",
+      "type": "http",
+      "documentation": "Get detailed view of a specific expense transaction along with splits detail.",
+      "method": "get",
+      "endpoint": "expenses/:id",
+      "responses": [
+        {
+          "uuid": "cb44ba34-558d-4123-baa9-359b9b7c9836",
+          "body": "{\n  \"transaction\": {\n    \"TransactionID\": \"{{urlParam 'id'}}\",\n    \"PaidByUserID\": \"{{faker 'string.uuid'}}\",\n    \"Title\": \"{{faker 'lorem.words' min=2 max=4}}\",\n    \"TotalAmount\": {{faker 'number.float' min=10 max=500 fractionDigits=2}},\n    \"Currency\": \"USD\",\n    \"Memo\": \"{{faker 'lorem.sentence'}}\",\n    \"TransactionDate\": \"{{faker 'date.past'}}\",\n    \"DueDate\": \"{{faker 'date.future'}}\",\n    \"CreatedAt\": \"{{faker 'date.past'}}\",\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  },\n  \"splits\": [\n    {{#repeat 2}}\n    {\n      \"SplitID\": \"{{faker 'string.uuid'}}\",\n      \"TransactionID\": \"{{urlParam 'id'}}\",\n      \"UserID\": \"{{faker 'string.uuid'}}\",\n      \"OweAmount\": {{faker 'number.float' min=5 max=250 fractionDigits=2}},\n      \"PaymentStatus\": \"{{oneOf (array 'Pending' 'Submitted' 'Approved' 'Overdue')}}\",\n      \"PaymentMethod\": \"Venmo\",\n      \"PayslipURL\": \"{{faker 'internet.url'}}\",\n      \"ApprovalStatus\": \"{{oneOf (array 'Pending_Approval' 'Approved' 'Rejected')}}\",\n      \"SettledAt\": \"{{faker 'date.anytime'}}\",\n      \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n    }\n    {{/repeat}}\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Expense Detail",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "b0826c90-495f-4d4b-a7c8-de576c8a23de",
+      "type": "http",
+      "documentation": "Delete an expense created by the user.",
+      "method": "delete",
+      "endpoint": "expenses/:id",
+      "responses": [
+        {
+          "uuid": "543a669a-9bc0-4005-ac2a-230bb2ba7419",
+          "body": "",
+          "latency": 0,
+          "statusCode": 204,
+          "label": "Expense Deleted",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "b9287873-c85e-4b1a-a104-34fe7cbc7e2d",
+      "type": "http",
+      "documentation": "List pending expense splits that the user owes money for.",
+      "method": "get",
+      "endpoint": "expenses/pending",
+      "responses": [
+        {
+          "uuid": "5793bd08-8b28-44d8-954f-38519220539d",
+          "body": "[\n  {{#repeat 2}}\n  {\n    \"SplitID\": \"{{faker 'string.uuid'}}\",\n    \"TransactionID\": \"{{faker 'string.uuid'}}\",\n    \"UserID\": \"{{faker 'string.uuid'}}\",\n    \"OweAmount\": {{faker 'number.float' min=5 max=250 fractionDigits=2}},\n    \"PaymentStatus\": \"Pending\",\n    \"PaymentMethod\": \"\",\n    \"PayslipURL\": \"\",\n    \"ApprovalStatus\": \"Pending_Approval\",\n    \"SettledAt\": null,\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  }\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Pending Splits List",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "eaeedaee-d389-475b-ae66-d2743087e6ea",
+      "type": "http",
+      "documentation": "Submit a payment receipt/slip for a specific split to mark it as paid.",
+      "method": "post",
+      "endpoint": "expenses/splits/:id/pay",
+      "responses": [
+        {
+          "uuid": "884d0a82-8ff6-4fc1-85ef-15c44649baa6",
+          "body": "",
+          "latency": 0,
+          "statusCode": 204,
+          "label": "Split Paid",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "6b6d6109-0237-44ee-8bc5-ac1477e7fdbd",
+      "type": "http",
+      "documentation": "Approve the payment slip submitted by a split debtor.",
+      "method": "patch",
+      "endpoint": "expenses/splits/:id/approve",
+      "responses": [
+        {
+          "uuid": "22cd827a-2b16-4c0e-a380-57e16b985cfc",
+          "body": "",
+          "latency": 0,
+          "statusCode": 204,
+          "label": "Payment Approved",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "cd585237-8d29-4354-b9dc-c34b69131057",
+      "type": "http",
+      "documentation": "Retrieve notifications list for the authenticated user.",
+      "method": "get",
+      "endpoint": "notifications",
+      "responses": [
+        {
+          "uuid": "895ac56c-0c4a-4af0-982a-6a4dd0ae86a3",
+          "body": "[\n  {{#repeat 3}}\n  {\n    \"NotificationID\": \"{{faker 'string.uuid'}}\",\n    \"UserID\": \"{{faker 'string.uuid'}}\",\n    \"Title\": \"{{faker 'lorem.sentence' min=3 max=6}}\",\n    \"Body\": \"{{faker 'lorem.paragraph'}}\",\n    \"IsRead\": {{faker 'datatype.boolean'}},\n    \"CreatedAt\": \"{{faker 'date.past'}}\"\n  }\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Notifications List",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "323ac896-8114-4081-a6fe-fe475bb04c9d",
+      "type": "http",
+      "documentation": "Mark a specific notification as read.",
+      "method": "patch",
+      "endpoint": "notifications/:id/read",
+      "responses": [
+        {
+          "uuid": "c1775385-fd89-472f-975c-9864b15eed04",
+          "body": "",
+          "latency": 0,
+          "statusCode": 204,
+          "label": "Notification Marked Read",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "d6e9d0e0-c4b9-492e-bdf5-122a0a51d1ba",
+      "type": "http",
+      "documentation": "Mark all notifications for the current user as read.",
+      "method": "patch",
+      "endpoint": "notifications/read-all",
+      "responses": [
+        {
+          "uuid": "519a2c05-5a71-4c83-867f-66fb84629073",
+          "body": "",
+          "latency": 0,
+          "statusCode": 204,
+          "label": "All Notifications Read",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "5c871b3f-642f-4120-bf22-37942fca2e95",
+      "type": "http",
+      "documentation": "Remove/delete a specific notification.",
+      "method": "delete",
+      "endpoint": "notifications/:id",
+      "responses": [
+        {
+          "uuid": "1a8b1b85-6756-4bcc-a96a-c9159e1f8007",
+          "body": "",
+          "latency": 0,
+          "statusCode": 204,
+          "label": "Notification Deleted",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "114af8fa-c9c7-47c2-8b31-91b6663b4346",
+      "type": "http",
+      "documentation": "List jobs with optional filters.",
+      "method": "get",
+      "endpoint": "jobs",
+      "responses": [
+        {
+          "uuid": "510a005f-2f0a-4008-9241-ca03777e79e8",
+          "body": "[\n  {{#repeat 5}}\n  {\n    \"JobID\": \"{{faker 'string.uuid'}}\",\n    \"AgencyName\": \"{{oneOf (array 'InterExchange' 'CIEE' 'Alliance Abroad' 'Intrax')}}\",\n    \"EmployerTitle\": \"{{faker 'company.name'}}\",\n    \"Position\": \"{{oneOf (array 'Lifeguard' 'Ride Operator' 'Sales Associate' 'Housekeeper' 'Food Service')}}\",\n    \"PositionType\": \"Seasonal\",\n    \"LocationCity\": \"{{faker 'location.city'}}\",\n    \"LocationState\": \"{{faker 'location.state' abst=true}}\",\n    \"GroupLocation\": \"{{faker 'location.city'} Area\",\n    \"USSponsor\": {{faker 'datatype.boolean'}},\n    \"SalaryRangeMin\": {{faker 'number.float' min=12 max=16 fractionDigits=2}},\n    \"SalaryRangeMax\": {{faker 'number.float' min=17 max=22 fractionDigits=2}},\n    \"AvailableSlots\": {{faker 'number.int' min=1 max=10}},\n    \"Description\": \"{{faker 'lorem.paragraph'}}\",\n    \"SourceURL\": \"{{faker 'internet.url'}}\",\n    \"ScrapeAt\": \"{{faker 'date.past'}}\",\n    \"PostedAt\": \"{{faker 'date.past'}}\",\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  }\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "List Jobs",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "c0e7eaf2-77c0-4f84-bf8a-32dd52c477b8",
+      "type": "http",
+      "documentation": "Get complete detailed info of a job including housing options and overall rating.",
+      "method": "get",
+      "endpoint": "jobs/:id",
+      "responses": [
+        {
+          "uuid": "bffb8be4-aa00-4b55-b99a-ecd3c42f88b6",
+          "body": "{\n  \"job\": {\n    \"JobID\": \"{{urlParam 'id'}}\",\n    \"AgencyName\": \"{{oneOf (array 'InterExchange' 'CIEE' 'Alliance Abroad' 'Intrax')}}\",\n    \"EmployerTitle\": \"{{faker 'company.name'}}\",\n    \"Position\": \"{{oneOf (array 'Lifeguard' 'Ride Operator' 'Sales Associate' 'Housekeeper' 'Food Service')}}\",\n    \"PositionType\": \"Seasonal\",\n    \"LocationCity\": \"{{faker 'location.city'}}\",\n    \"LocationState\": \"{{faker 'location.state' abst=true}}\",\n    \"GroupLocation\": \"{{faker 'location.city'}} Area\",\n    \"USSponsor\": {{faker 'datatype.boolean'}},\n    \"SalaryRangeMin\": {{faker 'number.float' min=12 max=16 fractionDigits=2}},\n    \"SalaryRangeMax\": {{faker 'number.float' min=17 max=22 fractionDigits=2}},\n    \"AvailableSlots\": {{faker 'number.int' min=1 max=10}},\n    \"Description\": \"{{faker 'lorem.paragraph'}}\",\n    \"SourceURL\": \"{{faker 'internet.url'}}\",\n    \"ScrapeAt\": \"{{faker 'date.past'}}\",\n    \"PostedAt\": \"{{faker 'date.past'}}\",\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  },\n  \"housing\": [\n    {\n      \"HousingID\": \"{{faker 'string.uuid'}}\",\n      \"JobID\": \"{{urlParam 'id'}}\",\n      \"Description\": \"{{faker 'lorem.sentence'}}\",\n      \"WeeklyRate\": {{faker 'number.float' min=75 max=150 fractionDigits=2}},\n      \"Deposit\": {{faker 'number.float' min=150 max=300 fractionDigits=2}},\n      \"Transportation\": \"Walking/Biking\",\n      \"RangeMinStartDate\": \"{{faker 'date.future'}}\",\n      \"RangeMaxStartDate\": \"{{faker 'date.future'}}\",\n      \"CreatedAt\": \"{{faker 'date.past'}}\",\n      \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n    }\n  ],\n  \"rating\": {\n    \"RatingSummaryID\": \"{{faker 'string.uuid'}}\",\n    \"JobID\": \"{{urlParam 'id'}}\",\n    \"OverallRate\": {{faker 'number.float' min=3.5 max=5 fractionDigits=1}},\n    \"AgencyRate\": {{faker 'number.float' min=3.5 max=5 fractionDigits=1}},\n    \"JobRate\": {{faker 'number.float' min=3.5 max=5 fractionDigits=1}},\n    \"CoworkersRate\": {{faker 'number.float' min=3.5 max=5 fractionDigits=1}},\n    \"TownRate\": {{faker 'number.float' min=3.5 max=5 fractionDigits=1}},\n    \"HoursRate\": {{faker 'number.float' min=3.5 max=5 fractionDigits=1}},\n    \"HousingRate\": {{faker 'number.float' min=3.5 max=5 fractionDigits=1}},\n    \"SecondJobFeasibilityRate\": {{faker 'number.float' min=3.5 max=5 fractionDigits=1}},\n    \"OvertimeAvailabilityRate\": {{faker 'number.float' min=3.5 max=5 fractionDigits=1}},\n    \"ReviewCount\": {{faker 'number.int' min=5 max=50}},\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Job Detail",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "6cd6692d-b7b4-4427-a5bb-759d290004f8",
+      "type": "http",
+      "documentation": "Add a job option to the user's wishlist cart.",
+      "method": "post",
+      "endpoint": "cart",
+      "responses": [
+        {
+          "uuid": "e1a6abfd-6ae0-4b75-8cf6-7cfd8a468793",
+          "body": "",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Added to Cart",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "ef3d6430-467b-438f-8e45-7459cbe6d52f",
+      "type": "http",
+      "documentation": "List all job offers currently wishlisted in the user's cart.",
+      "method": "get",
+      "endpoint": "cart",
+      "responses": [
+        {
+          "uuid": "a14a10a9-ed23-4693-b76d-c8c94ba0d8cf",
+          "body": "[\n  {{#repeat 2}}\n  {\n    \"CartID\": \"{{faker 'string.uuid'}}\",\n    \"UserID\": \"{{faker 'string.uuid'}}\",\n    \"JobID\": \"{{faker 'string.uuid'}}\",\n    \"Status\": \"Saved\",\n    \"AddedAt\": \"{{faker 'date.past'}}\",\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  }\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "List Wishlist Cart",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "953305bf-d2be-47c2-bc85-e5c465ebde1b",
+      "type": "http",
+      "documentation": "Remove a job offer from the wishlist cart.",
+      "method": "delete",
+      "endpoint": "cart/:id",
+      "responses": [
+        {
+          "uuid": "70e5d882-4b39-466f-be90-abc1c73cde7b",
+          "body": "",
+          "latency": 0,
+          "statusCode": 204,
+          "label": "Removed from Cart",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "8d57588c-6ab5-4249-ab22-d8ba8b17f1ac",
+      "type": "http",
+      "documentation": "Write and publish a review and rating for a specific job experience.",
+      "method": "post",
+      "endpoint": "reviews",
+      "responses": [
+        {
+          "uuid": "fccbd0e9-9cdc-4448-b18f-81ede3d7c380",
+          "body": "",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Review Created",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "86cd53b8-0c42-4b2b-a97a-9d5f74c19433",
+      "type": "http",
+      "documentation": "List reviews. Can optionally be filtered by job_id.",
+      "method": "get",
+      "endpoint": "reviews",
+      "responses": [
+        {
+          "uuid": "bf799b53-be50-44ee-a7d0-451915efdcc4",
+          "body": "[\n  {{#repeat 3}}\n  {\n    \"ReviewID\": \"{{faker 'string.uuid'}}\",\n    \"JobID\": \"{{#if (queryParam 'job_id')}}{{queryParam 'job_id'}}{{else}}{{faker 'string.uuid'}}{{/if}}\",\n    \"UserID\": \"{{faker 'string.uuid'}}\",\n    \"RatingStars\": {{faker 'number.float' min=3.0 max=5.0 fractionDigits=1}},\n    \"ReviewText\": \"{{faker 'lorem.paragraph'}}\",\n    \"TipsForNextGeneration\": \"{{faker 'lorem.sentence'}}\",\n    \"ScoreAgency\": {{faker 'number.float' min=3.0 max=5.0 fractionDigits=1}},\n    \"ScoreJob\": {{faker 'number.float' min=3.0 max=5.0 fractionDigits=1}},\n    \"ScoreCoworkers\": {{faker 'number.float' min=3.0 max=5.0 fractionDigits=1}},\n    \"ScoreTown\": {{faker 'number.float' min=3.0 max=5.0 fractionDigits=1}},\n    \"ScoreHours\": {{faker 'number.float' min=3.0 max=5.0 fractionDigits=1}},\n    \"ScoreHousing\": {{faker 'number.float' min=3.0 max=5.0 fractionDigits=1}},\n    \"ScoreSecondJobFeasibility\": {{faker 'number.float' min=3.0 max=5.0 fractionDigits=1}},\n    \"ScoreOvertimeAvailability\": {{faker 'number.float' min=3.0 max=5.0 fractionDigits=1}},\n    \"CreatedAt\": \"{{faker 'date.past'}}\",\n    \"UpdatedAt\": \"{{faker 'date.anytime'}}\"\n  }\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Reviews List",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "b2e9455b-2c07-445a-ab10-3e8ee26795cd"
+    },
+    {
+      "type": "route",
+      "uuid": "0d14c403-9c48-44d1-ba72-9c2fe18b567c"
+    },
+    {
+      "type": "route",
+      "uuid": "a5855043-94e0-4a1a-b2a5-8f229bce672f"
+    },
+    {
+      "type": "route",
+      "uuid": "765c1f39-9c67-404c-b700-d402ea49d73c"
+    },
+    {
+      "type": "route",
+      "uuid": "e84b4797-17e3-4ed8-9ffb-01d996faa4f5"
+    },
+    {
+      "type": "route",
+      "uuid": "1ba7bfdd-1c46-4213-ac54-d140798181f3"
+    },
+    {
+      "type": "route",
+      "uuid": "636249f0-6b0c-4ffe-8e29-1aea12c3d2f0"
+    },
+    {
+      "type": "route",
+      "uuid": "40c950a3-d6e9-4411-b13d-315cee3813a8"
+    },
+    {
+      "type": "route",
+      "uuid": "28accdf6-75cb-4de2-abb9-e4c057517dc9"
+    },
+    {
+      "type": "route",
+      "uuid": "dbd049fd-7440-401d-9f76-b8b6aa5384ce"
+    },
+    {
+      "type": "route",
+      "uuid": "0a1b4ce0-8170-4880-ae5f-9b1e26df38e3"
+    },
+    {
+      "type": "route",
+      "uuid": "6c7086b9-3ee7-4a00-a1c5-b5f255fb52b2"
+    },
+    {
+      "type": "route",
+      "uuid": "222b78fe-a15d-465c-890e-3103a6aeac61"
+    },
+    {
+      "type": "route",
+      "uuid": "e59ab46c-5655-459d-b2cd-63dc3b572c65"
+    },
+    {
+      "type": "route",
+      "uuid": "e6aafd5c-f25a-475f-bcf8-db41269c8ecd"
+    },
+    {
+      "type": "route",
+      "uuid": "f7dd2a2b-6245-410c-b310-e88cbf48cc61"
+    },
+    {
+      "type": "route",
+      "uuid": "3c9d50ed-a40b-47c0-8085-5c9c9c523001"
+    },
+    {
+      "type": "route",
+      "uuid": "6f62ed9c-252f-4ece-8be0-cddb818dc923"
+    },
+    {
+      "type": "route",
+      "uuid": "2d6421ab-dfcd-4a75-aea8-4de3c1787d0c"
+    },
+    {
+      "type": "route",
+      "uuid": "ce777437-004a-41b2-8ea3-d689d6ff3664"
+    },
+    {
+      "type": "route",
+      "uuid": "a209b322-70b0-41ff-afef-22a3b4eb4ab0"
+    },
+    {
+      "type": "route",
+      "uuid": "8296e6a9-e99b-4c8f-a66a-c1b31f5bfaa1"
+    },
+    {
+      "type": "route",
+      "uuid": "093d5f90-c662-4a5b-8fc3-f935865be549"
+    },
+    {
+      "type": "route",
+      "uuid": "7630b00b-39e6-4b1b-a4d0-f8908046612b"
+    },
+    {
+      "type": "route",
+      "uuid": "9144d894-0185-46cb-8f06-096eecd3463c"
+    },
+    {
+      "type": "route",
+      "uuid": "6e53b8ad-2ffb-4618-84de-10cc2a8a7165"
+    },
+    {
+      "type": "route",
+      "uuid": "b0826c90-495f-4d4b-a7c8-de576c8a23de"
+    },
+    {
+      "type": "route",
+      "uuid": "b9287873-c85e-4b1a-a104-34fe7cbc7e2d"
+    },
+    {
+      "type": "route",
+      "uuid": "eaeedaee-d389-475b-ae66-d2743087e6ea"
+    },
+    {
+      "type": "route",
+      "uuid": "6b6d6109-0237-44ee-8bc5-ac1477e7fdbd"
+    },
+    {
+      "type": "route",
+      "uuid": "cd585237-8d29-4354-b9dc-c34b69131057"
+    },
+    {
+      "type": "route",
+      "uuid": "323ac896-8114-4081-a6fe-fe475bb04c9d"
+    },
+    {
+      "type": "route",
+      "uuid": "d6e9d0e0-c4b9-492e-bdf5-122a0a51d1ba"
+    },
+    {
+      "type": "route",
+      "uuid": "5c871b3f-642f-4120-bf22-37942fca2e95"
+    },
+    {
+      "type": "route",
+      "uuid": "114af8fa-c9c7-47c2-8b31-91b6663b4346"
+    },
+    {
+      "type": "route",
+      "uuid": "c0e7eaf2-77c0-4f84-bf8a-32dd52c477b8"
+    },
+    {
+      "type": "route",
+      "uuid": "6cd6692d-b7b4-4427-a5bb-759d290004f8"
+    },
+    {
+      "type": "route",
+      "uuid": "ef3d6430-467b-438f-8e45-7459cbe6d52f"
+    },
+    {
+      "type": "route",
+      "uuid": "953305bf-d2be-47c2-bc85-e5c465ebde1b"
+    },
+    {
+      "type": "route",
+      "uuid": "8d57588c-6ab5-4249-ab22-d8ba8b17f1ac"
+    },
+    {
+      "type": "route",
+      "uuid": "86cd53b8-0c42-4b2b-a97a-9d5f74c19433"
+    }
+  ],
+  "proxyMode": false,
+  "proxyRemovePrefix": false,
+  "proxyHost": "",
+  "proxyReqHeaders": [],
+  "proxyResHeaders": [],
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    },
+    {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    },
+    {
+      "key": "Access-Control-Allow-Methods",
+      "value": "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+    },
+    {
+      "key": "Access-Control-Allow-Headers",
+      "value": "Content-Type, Authorization, X-Requested-With"
+    }
+  ],
+  "data": [],
+  "callbacks": []
+}

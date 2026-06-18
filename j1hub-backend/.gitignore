@@ -1,0 +1,20 @@
+# ไฟล์ Executable ที่ได้จากการบิวด์ (เมื่อใช้ go build)
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+# ซ่อนไฟล์ binary หลักที่คุณบิวด์ขึ้นมาใช้งาน (เช่น บิวด์ใส่โฟลเดอร์ bin)
+bin/
+main
+
+# เทมเพลตและแคชการทดสอบ
+*.test
+*.out
+.cover/
+
+# ไฟล์คอนฟิกูเรชันและความลับ (สำคัญมากสำหรับ j1hub-backend ของคุณ)
+.env
+.env.*
+config.yaml
+configs/fcm-credentials.json

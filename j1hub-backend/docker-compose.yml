@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: j1hub
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    environment:
+      - DATABASE_URL=postgres://user:password@postgres:5432/j1hub?sslmode=disable
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
