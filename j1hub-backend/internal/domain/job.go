@@ -24,80 +24,80 @@ func (s CartStatus) Valid() bool {
 }
 
 type JobPosting struct {
-	JobID          string
-	AgencyName     string
-	EmployerTitle  string
-	Position       string
-	PositionType   string
-	LocationCity   string
-	LocationState  string
-	GroupLocation  string
-	USSponsor      bool
-	SalaryRangeMin float64
-	SalaryRangeMax float64
-	AvailableSlots int
-	Description    string
-	SourceURL      string
-	ScrapeAt       time.Time
-	PostedAt       time.Time
-	UpdatedAt      time.Time
+	JobID          string    `json:"job_id"`
+	AgencyName     string    `json:"agency_name"`
+	EmployerTitle  string    `json:"employer_title"`
+	Position       string    `json:"position"`
+	PositionType   string    `json:"position_type"`
+	LocationCity   string    `json:"location_city"`
+	LocationState  string    `json:"location_state"`
+	GroupLocation  string    `json:"group_location"`
+	USSponsor      bool      `json:"us_sponsor"`
+	SalaryRangeMin float64   `json:"salary_range_min"`
+	SalaryRangeMax float64   `json:"salary_range_max"`
+	AvailableSlots int       `json:"available_slots"`
+	Description    string    `json:"description"`
+	SourceURL      string    `json:"source_url"`
+	ScrapeAt       time.Time `json:"scrape_at"`
+	PostedAt       time.Time `json:"posted_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 type JobHousing struct {
-	HousingID         string
-	JobID             string
-	Description       string
-	WeeklyRate        float64
-	Deposit           float64
-	Transportation    string
-	RangeMinStartDate time.Time
-	RangeMaxStartDate time.Time
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	HousingID         string    `json:"housing_id"`
+	JobID             string    `json:"job_id"`
+	Description       string    `json:"description"`
+	WeeklyRate        float64   `json:"weekly_rate"`
+	Deposit           float64   `json:"deposit"`
+	Transportation    string    `json:"transportation"`
+	RangeMinStartDate time.Time `json:"range_min_start_date"`
+	RangeMaxStartDate time.Time `json:"range_max_start_date"`
+	CreatedAt         time.Time `json:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at"`
 }
 
 type UserCart struct {
-	CartID    string
-	UserID    string
-	JobID     string
-	Status    CartStatus
-	AddedAt   time.Time
-	UpdatedAt time.Time
+	CartID    string     `json:"cart_id"`
+	UserID    string     `json:"user_id"`
+	JobID     string     `json:"job_id"`
+	Status    CartStatus `json:"status"`
+	AddedAt   time.Time  `json:"added_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
 }
 
 type JobOverallRating struct {
-	RatingSummaryID          string
-	JobID                    string
-	OverallRate              float64
-	AgencyRate               float64
-	JobRate                  float64
-	CoworkersRate            float64
-	TownRate                 float64
-	HoursRate                float64
-	HousingRate              float64
-	SecondJobFeasibilityRate float64
-	OvertimeAvailabilityRate float64
-	ReviewCount              int
-	UpdatedAt                time.Time
+	RatingSummaryID          string    `json:"rating_summary_id"`
+	JobID                    string    `json:"job_id"`
+	OverallRate              float64   `json:"overall_rate"`
+	AgencyRate               float64   `json:"agency_rate"`
+	JobRate                  float64   `json:"job_rate"`
+	CoworkersRate            float64   `json:"coworkers_rate"`
+	TownRate                 float64   `json:"town_rate"`
+	HoursRate                float64   `json:"hours_rate"`
+	HousingRate              float64   `json:"housing_rate"`
+	SecondJobFeasibilityRate float64   `json:"second_job_feasibility_rate"`
+	OvertimeAvailabilityRate float64   `json:"overtime_availability_rate"`
+	ReviewCount              int       `json:"review_count"`
+	UpdatedAt                time.Time `json:"updated_at"`
 }
 
 type JobReview struct {
-	ReviewID                  string
-	JobID                     string
-	UserID                    string
-	RatingStars               float64
-	ReviewText                string
-	TipsForNextGeneration     string
-	ScoreAgency               float64
-	ScoreJob                  float64
-	ScoreCoworkers            float64
-	ScoreTown                 float64
-	ScoreHours                float64
-	ScoreHousing              float64
-	ScoreSecondJobFeasibility float64
-	ScoreOvertimeAvailability float64
-	CreatedAt                 time.Time
-	UpdatedAt                 time.Time
+	ReviewID                  string    `json:"review_id"`
+	JobID                     string    `json:"job_id"`
+	UserID                    string    `json:"user_id"`
+	RatingStars               float64   `json:"rating_stars"`
+	ReviewText                string    `json:"review_text"`
+	TipsForNextGeneration     string    `json:"tips_for_next_generation"`
+	ScoreAgency               float64   `json:"score_agency"`
+	ScoreJob                  float64   `json:"score_job"`
+	ScoreCoworkers            float64   `json:"score_coworkers"`
+	ScoreTown                 float64   `json:"score_town"`
+	ScoreHours                float64   `json:"score_hours"`
+	ScoreHousing              float64   `json:"score_housing"`
+	ScoreSecondJobFeasibility float64   `json:"score_second_job_feasibility"`
+	ScoreOvertimeAvailability float64   `json:"score_overtime_availability"`
+	CreatedAt                 time.Time `json:"created_at"`
+	UpdatedAt                 time.Time `json:"updated_at"`
 }
 
 func (r *JobReview) ScoreMap() map[string]float64 {

@@ -104,3 +104,37 @@ func TestLogger(t *testing.T) {
 	middleware.Logger(next).ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 }
+
+func TestCORS(t *testing.T) {
+	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	corsMW := middleware.CORS(next)
+
+	// Test GET request without Origin
+	req := httptest.NewRequest("GET", "/", nil)
+	w := httptest.NewRecorder()
+	corsMW.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "*", w.Header().Get("Access-Control-Allow-Origin"))
+
+	// Test GET request with Origin
+	req = httptest.NewRequest("GET", "/", nil)
+	req.Header.Set("Origin", "http://example.com")
+	w = httptest.NewRecorder()
+	corsMW.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "http://example.com", w.Header().Get("Access-Control-Allow-Origin"))
+	assert.Equal(t, "true", w.Header().Get("Access-Control-Allow-Credentials"))
+
+	// Test OPTIONS preflight request
+	req = httptest.NewRequest("OPTIONS", "/", nil)
+	req.Header.Set("Origin", "http://example.com")
+	req.Header.Set("Access-Control-Request-Headers", "Content-Type, Authorization")
+	w = httptest.NewRecorder()
+	corsMW.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "http://example.com", w.Header().Get("Access-Control-Allow-Origin"))
+	assert.Equal(t, "Content-Type, Authorization", w.Header().Get("Access-Control-Allow-Headers"))
+}

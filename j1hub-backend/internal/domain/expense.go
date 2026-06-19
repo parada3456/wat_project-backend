@@ -41,29 +41,29 @@ func (s ApprovalStatus) Valid() bool {
 }
 
 type ExpenseTransaction struct {
-	TransactionID   string
-	PaidByUserID    string
-	Title           string
-	TotalAmount     float64
-	Currency        string
-	Memo            string
-	TransactionDate time.Time
-	DueDate         time.Time
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
+	TransactionID   string    `json:"transaction_id"`
+	PaidByUserID    string    `json:"paid_by_user_id"`
+	Title           string    `json:"title"`
+	TotalAmount     float64   `json:"total_amount"`
+	Currency        string    `json:"currency"`
+	Memo            string    `json:"memo"`
+	TransactionDate time.Time `json:"transaction_date"`
+	DueDate         time.Time `json:"due_date"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 type ExpenseSplit struct {
-	SplitID        string
-	TransactionID  string
-	UserID         string
-	OweAmount      float64
-	PaymentStatus  PaymentStatus
-	PaymentMethod  string
-	PayslipURL     string
-	ApprovalStatus ApprovalStatus
-	SettledAt      *time.Time
-	UpdatedAt      time.Time
+	SplitID        string         `json:"split_id"`
+	TransactionID  string         `json:"transaction_id"`
+	UserID         string         `json:"user_id"`
+	OweAmount      float64        `json:"owe_amount"`
+	PaymentStatus  PaymentStatus  `json:"payment_status"`
+	PaymentMethod  string         `json:"payment_method"`
+	PayslipURL     string         `json:"payslip_url"`
+	ApprovalStatus ApprovalStatus `json:"approval_status"`
+	SettledAt      *time.Time     `json:"settled_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
 }
 
 func (s *ExpenseSplit) IsSettled() bool {
