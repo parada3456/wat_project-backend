@@ -1326,7 +1326,7 @@ func TestRouter_NewRouter(t *testing.T) {
 	notifH := handler.NewNotificationHandler(nil)
 	jobH := handler.NewJobHandler(nil)
 
-	r := handler.NewRouter(issuer, authH, userH, missionH, journeyH, friendH, expenseH, notifH, jobH)
+	r := handler.NewRouter(issuer, authH, userH, missionH, journeyH, friendH, expenseH, notifH, jobH, nil)
 	assert.NotNil(t, r)
 
 	// test public route health

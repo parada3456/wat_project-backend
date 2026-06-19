@@ -47,6 +47,7 @@ func main() {
 	umRepo := postgres.NewUserMissionRepository(pool)
 	ledgerRepo := postgres.NewPointLedgerRepository(pool)
 	splitRepo := postgres.NewExpenseSplitRepository(pool)
+	adminRepo := postgres.NewAdminRepository(pool)
 
 	// Adapters
 	hasher := auth.NewArgon2Hasher()
@@ -84,6 +85,7 @@ func main() {
 
 	notifRepo := postgres.NewNotificationRepository(pool)
 	notifUC := usecase.NewNotificationUseCase(notifRepo)
+	adminUC := usecase.NewAdminUseCase(pool, adminRepo, userRepo, umRepo, missionRepo, ledgerRepo, notifier, rewardEngine, clock)
 
 	jobRepo := postgres.NewJobRepository(pool)
 	housingRepo := postgres.NewJobHousingRepository(pool)
@@ -103,8 +105,9 @@ func main() {
 	expenseH := handler.NewExpenseHandler(expenseUC)
 	notifH := handler.NewNotificationHandler(notifUC)
 	jobH := handler.NewJobHandler(jobUC)
+	adminH := handler.NewAdminHandler(adminUC)
 
-	r := handler.NewRouter(issuer, authH, userH, missionH, journeyH, friendH, expenseH, notifH, jobH)
+	r := handler.NewRouter(issuer, authH, userH, missionH, journeyH, friendH, expenseH, notifH, jobH, adminH)
 
 	// Jobs
 	overdueExpenseJob := usecase.NewOverdueExpenseJob(splitRepo, creditRepo, ledgerRepo, notifier)

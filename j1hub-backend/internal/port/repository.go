@@ -148,3 +148,10 @@ type NotificationRepository interface {
 type LeaderboardRepository interface {
 	FindByScope(ctx context.Context, scope, jobID string) ([]domain.User, error)
 }
+
+type AdminRepository interface {
+	GetStats(ctx context.Context) (*AdminStats, error)
+	ListPendingVerifications(ctx context.Context) ([]domain.UserMission, error)
+	SearchUsers(ctx context.Context, query string) ([]domain.User, error)
+}
+
