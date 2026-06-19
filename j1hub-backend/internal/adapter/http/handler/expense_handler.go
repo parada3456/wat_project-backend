@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
@@ -31,10 +32,12 @@ type ExpenseHandler struct {
 }
 
 func NewExpenseHandler(expenseUC ManageExpenseUC) *ExpenseHandler {
+	log.Println("debugprint: entering NewExpenseHandler")
 	return &ExpenseHandler{expenseUC: expenseUC, validate: validator.New()}
 }
 
 func (h *ExpenseHandler) ListExpenses(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*ExpenseHandler).ListExpenses")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -62,6 +65,7 @@ type createExpenseReq struct {
 }
 
 func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*ExpenseHandler).CreateExpense")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -103,6 +107,7 @@ func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ExpenseHandler) GetExpenseDetail(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*ExpenseHandler).GetExpenseDetail")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -123,6 +128,7 @@ func (h *ExpenseHandler) GetExpenseDetail(w http.ResponseWriter, r *http.Request
 }
 
 func (h *ExpenseHandler) DeleteExpense(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*ExpenseHandler).DeleteExpense")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -140,6 +146,7 @@ func (h *ExpenseHandler) DeleteExpense(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ExpenseHandler) ListPending(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*ExpenseHandler).ListPending")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -155,6 +162,7 @@ func (h *ExpenseHandler) ListPending(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ExpenseHandler) PaySplit(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*ExpenseHandler).PaySplit")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -162,7 +170,7 @@ func (h *ExpenseHandler) PaySplit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := chi.URLParam(r, "id")
-	
+
 	r.ParseMultipartForm(10 << 20)
 	file, header, err := r.FormFile("slip")
 	if err != nil {
@@ -181,6 +189,7 @@ func (h *ExpenseHandler) PaySplit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ExpenseHandler) ApproveSplit(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*ExpenseHandler).ApproveSplit")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})

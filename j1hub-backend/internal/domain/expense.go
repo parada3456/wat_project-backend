@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"log"
 	"time"
 )
 
@@ -14,6 +15,7 @@ const (
 )
 
 func (s PaymentStatus) Valid() bool {
+	log.Println("debugprint: entering (PaymentStatus).Valid")
 	switch s {
 	case PaymentPending, PaymentSubmitted, PaymentApproved, PaymentOverdue:
 		return true
@@ -30,6 +32,7 @@ const (
 )
 
 func (s ApprovalStatus) Valid() bool {
+	log.Println("debugprint: entering (ApprovalStatus).Valid")
 	switch s {
 	case ApprovalPending, ApprovalApproved, ApprovalRejected:
 		return true
@@ -64,5 +67,6 @@ type ExpenseSplit struct {
 }
 
 func (s *ExpenseSplit) IsSettled() bool {
+	log.Println("debugprint: entering (*ExpenseSplit).IsSettled")
 	return s.PaymentStatus == PaymentApproved
 }

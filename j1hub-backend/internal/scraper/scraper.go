@@ -1,6 +1,8 @@
 package scraper
 
 import (
+	"log"
+
 	"github.com/gocolly/colly/v2"
 	"github.com/j1hub/backend/internal/domain"
 )
@@ -10,6 +12,7 @@ type Scraper struct {
 }
 
 func NewScraper() *Scraper {
+	log.Println("debugprint: entering NewScraper")
 	c := colly.NewCollector()
 	c.Limit(&colly.LimitRule{
 		DomainGlob:  "*",

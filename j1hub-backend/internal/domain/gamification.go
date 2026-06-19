@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"log"
 	"time"
 )
 
@@ -16,6 +17,7 @@ const (
 )
 
 func (s SourceType) Valid() bool {
+	log.Println("debugprint: entering (SourceType).Valid")
 	switch s {
 	case SourceMissionBase, SourceSpeedBonus, SourceStreakBonus, SourceFirstCompleter, SourceExpensePenalty, SourceAdminAdjust:
 		return true
@@ -34,6 +36,7 @@ const (
 )
 
 func (t TriggerType) Valid() bool {
+	log.Println("debugprint: entering (TriggerType).Valid")
 	switch t {
 	case TriggerSpeed, TriggerStreak, TriggerFirstCompleter, TriggerPhaseComplete, TriggerManual:
 		return true

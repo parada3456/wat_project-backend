@@ -17,6 +17,7 @@ type fcmNotifier struct {
 }
 
 func NewFCMNotifier(cfg *config.Config, userRepo port.UserRepository) port.NotifierPort {
+	log.Println("debugprint: entering NewFCMNotifier")
 	opt := option.WithCredentialsFile(cfg.FCMCredentialsPath)
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
@@ -34,6 +35,7 @@ func NewFCMNotifier(cfg *config.Config, userRepo port.UserRepository) port.Notif
 }
 
 func (n *fcmNotifier) Send(ctx context.Context, userID, title, body string) error {
+	log.Println("debugprint: entering (*fcmNotifier).Send")
 	user, err := n.userRepo.FindByID(ctx, userID)
 	if err != nil {
 		return err
@@ -54,6 +56,7 @@ func (n *fcmNotifier) Send(ctx context.Context, userID, title, body string) erro
 type noopNotifier struct{}
 
 func (n *noopNotifier) Send(ctx context.Context, userID, title, body string) error {
+	log.Println("debugprint: entering (*noopNotifier).Send")
 	log.Printf("NOOP Push to %s: %s - %s", userID, title, body)
 	return nil
 }

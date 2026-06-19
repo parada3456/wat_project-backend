@@ -17,10 +17,12 @@ type OverdueExpenseJob struct {
 }
 
 func NewOverdueExpenseJob(splitRepo port.ExpenseSplitRepository, creditRepo port.CreditScoreRepository, ledgerRepo port.PointLedgerRepository, notifier port.NotifierPort) *OverdueExpenseJob {
+	log.Println("debugprint: entering NewOverdueExpenseJob")
 	return &OverdueExpenseJob{splitRepo: splitRepo, creditRepo: creditRepo, ledgerRepo: ledgerRepo, notifier: notifier}
 }
 
 func (j *OverdueExpenseJob) Run(ctx context.Context) error {
+	log.Println("debugprint: entering (*OverdueExpenseJob).Run")
 	splits, err := j.splitRepo.FindOverdue(ctx)
 	if err != nil {
 		return err

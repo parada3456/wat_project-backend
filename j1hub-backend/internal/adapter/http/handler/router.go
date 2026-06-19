@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -21,6 +22,7 @@ func NewRouter(
 	notifH *NotificationHandler,
 	jobH *JobHandler,
 ) http.Handler {
+	log.Println("debugprint: entering NewRouter")
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)

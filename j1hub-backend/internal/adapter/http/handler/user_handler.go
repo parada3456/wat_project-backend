@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -22,10 +23,12 @@ type UserHandler struct {
 }
 
 func NewUserHandler(userUC UserUC) *UserHandler {
+	log.Println("debugprint: entering NewUserHandler")
 	return &UserHandler{userUC: userUC, validate: validator.New()}
 }
 
 func (h *UserHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*UserHandler).GetProfile")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -49,6 +52,7 @@ type updateProfileReq struct {
 }
 
 func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*UserHandler).UpdateProfile")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})

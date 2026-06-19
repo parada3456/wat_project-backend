@@ -5,6 +5,7 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/j1hub/backend/internal/port"
@@ -20,6 +21,7 @@ type argon2Hasher struct {
 }
 
 func NewArgon2Hasher() port.PasswordHasher {
+	log.Println("debugprint: entering NewArgon2Hasher")
 	return &argon2Hasher{
 		time:    1,
 		memory:  64 * 1024,
@@ -30,6 +32,7 @@ func NewArgon2Hasher() port.PasswordHasher {
 }
 
 func (h *argon2Hasher) Hash(plain string) (string, error) {
+	log.Println("debugprint: entering (*argon2Hasher).Hash")
 	salt := make([]byte, h.saltLen)
 	if _, err := rand.Read(salt); err != nil {
 		return "", err
@@ -45,6 +48,7 @@ func (h *argon2Hasher) Hash(plain string) (string, error) {
 }
 
 func (h *argon2Hasher) Verify(plain, hash string) bool {
+	log.Println("debugprint: entering (*argon2Hasher).Verify")
 	parts := strings.Split(hash, "$")
 	if len(parts) != 6 {
 		return false

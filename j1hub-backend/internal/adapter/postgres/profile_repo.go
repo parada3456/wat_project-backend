@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/j1hub/backend/internal/domain"
@@ -16,10 +17,12 @@ type profileRepo struct {
 }
 
 func NewProfileRepository(pool *pgxpool.Pool) port.ProfileRepository {
+	log.Println("debugprint: entering NewProfileRepository")
 	return &profileRepo{pool: pool}
 }
 
 func (r *profileRepo) Create(ctx context.Context, p *domain.Profile) error {
+	log.Println("debugprint: entering (*profileRepo).Create")
 	query := `
 		INSERT INTO profiles (
 			profile_id, user_id, phone_number, bio, avatar_url, 
@@ -37,6 +40,7 @@ func (r *profileRepo) Create(ctx context.Context, p *domain.Profile) error {
 }
 
 func (r *profileRepo) FindByUserID(ctx context.Context, userID string) (*domain.Profile, error) {
+	log.Println("debugprint: entering (*profileRepo).FindByUserID")
 	query := `
 		SELECT 
 			profile_id, user_id, phone_number, bio, avatar_url, 
@@ -64,6 +68,7 @@ func (r *profileRepo) FindByUserID(ctx context.Context, userID string) (*domain.
 }
 
 func (r *profileRepo) Update(ctx context.Context, p *domain.Profile) error {
+	log.Println("debugprint: entering (*profileRepo).Update")
 	query := `
 		UPDATE profiles SET 
 			phone_number = $1, bio = $2, avatar_url = $3, 
@@ -80,6 +85,7 @@ func (r *profileRepo) Update(ctx context.Context, p *domain.Profile) error {
 }
 
 func (r *profileRepo) UpdateLocation(ctx context.Context, userID string, lat, lng float64) error {
+	log.Println("debugprint: entering (*profileRepo).UpdateLocation")
 	query := `
 		UPDATE profiles SET 
 			current_coordinates = ST_SetSRID(ST_MakePoint($1, $2), 4326),
@@ -95,6 +101,7 @@ func (r *profileRepo) UpdateLocation(ctx context.Context, userID string, lat, ln
 }
 
 func (r *profileRepo) UpdateVisibility(ctx context.Context, userID string, visibility domain.RadarVisibility) error {
+	log.Println("debugprint: entering (*profileRepo).UpdateVisibility")
 	query := `UPDATE profiles SET radar_visibility = $1, updated_at = NOW() WHERE user_id = $2`
 	_, err := r.pool.Exec(ctx, query, visibility, userID)
 	if err != nil {

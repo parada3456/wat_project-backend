@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"log"
 
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
@@ -26,6 +27,7 @@ func NewManageJobUseCase(
 	cartRepo port.UserCartRepository,
 	clock timeutil.Clock,
 ) *ManageJobUseCase {
+	log.Println("debugprint: entering NewManageJobUseCase")
 	return &ManageJobUseCase{
 		jobRepo:     jobRepo,
 		housingRepo: housingRepo,
@@ -37,6 +39,7 @@ func NewManageJobUseCase(
 }
 
 func (uc *ManageJobUseCase) AddToCart(ctx context.Context, userID, jobID string) error {
+	log.Println("debugprint: entering (*ManageJobUseCase).AddToCart")
 	existing, err := uc.cartRepo.FindByUserAndJob(ctx, userID, jobID)
 	if err == nil && existing != nil {
 		return domain.ErrConflict
@@ -55,6 +58,7 @@ func (uc *ManageJobUseCase) AddToCart(ctx context.Context, userID, jobID string)
 }
 
 func (uc *ManageJobUseCase) WriteReview(ctx context.Context, userID, jobID string, rv *domain.JobReview) error {
+	log.Println("debugprint: entering (*ManageJobUseCase).WriteReview")
 	rv.ReviewID = uid.New("rvw_")
 	rv.UserID = userID
 	rv.JobID = jobID
@@ -69,10 +73,12 @@ func (uc *ManageJobUseCase) WriteReview(ctx context.Context, userID, jobID strin
 }
 
 func (uc *ManageJobUseCase) ListJobs(ctx context.Context, filters map[string]interface{}) ([]domain.JobPosting, error) {
+	log.Println("debugprint: entering (*ManageJobUseCase).ListJobs")
 	return uc.jobRepo.FindWithFilters(ctx, filters)
 }
 
 func (uc *ManageJobUseCase) GetJobDetail(ctx context.Context, jobID string) (*domain.JobPosting, []domain.JobHousing, *domain.JobOverallRating, error) {
+	log.Println("debugprint: entering (*ManageJobUseCase).GetJobDetail")
 	job, err := uc.jobRepo.FindByID(ctx, jobID)
 	if err != nil {
 		return nil, nil, nil, err
@@ -83,11 +89,17 @@ func (uc *ManageJobUseCase) GetJobDetail(ctx context.Context, jobID string) (*do
 }
 
 func (uc *ManageJobUseCase) ListCart(ctx context.Context, userID string) ([]domain.UserCart, error) {
-	// Need FindByUser in repo
+	log.
+		// Need FindByUser in repo
+		Println("debugprint: entering (*ManageJobUseCase).ListCart")
+
 	return nil, nil
 }
 
 func (uc *ManageJobUseCase) RemoveFromCart(ctx context.Context, userID, cartID string) error {
-	// Check ownership and delete
+	log.
+		// Check ownership and delete
+		Println("debugprint: entering (*ManageJobUseCase).RemoveFromCart")
+
 	return nil
 }

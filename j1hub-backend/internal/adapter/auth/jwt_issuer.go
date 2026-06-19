@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -16,6 +17,7 @@ type jwtIssuer struct {
 }
 
 func NewJWTIssuer(cfg *config.Config) port.TokenIssuer {
+	log.Println("debugprint: entering NewJWTIssuer")
 	return &jwtIssuer{
 		secret:        []byte(cfg.JWTSecret),
 		accessExpiry:  cfg.JWTExpiry(),
@@ -24,6 +26,7 @@ func NewJWTIssuer(cfg *config.Config) port.TokenIssuer {
 }
 
 func (i *jwtIssuer) Issue(userID string, isAdmin bool) (*port.TokenPair, error) {
+	log.Println("debugprint: entering (*jwtIssuer).Issue")
 	expiresAt := time.Now().Add(i.accessExpiry)
 	accessClaims := jwt.MapClaims{
 		"sub":      userID,
@@ -58,6 +61,7 @@ func (i *jwtIssuer) Issue(userID string, isAdmin bool) (*port.TokenPair, error) 
 }
 
 func (i *jwtIssuer) Verify(tokenString string) (*port.Claims, error) {
+	log.Printf("debugprint: entering (*jwtIssuer).Verify with token: %q", tokenString)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -66,23 +70,32 @@ func (i *jwtIssuer) Verify(tokenString string) (*port.Claims, error) {
 	})
 
 	if err != nil {
+		log.Printf("debugprint: (*jwtIssuer).Verify Parse error: %v", err)
 		return nil, err
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		log.Printf("debugprint: (*jwtIssuer).Verify claims parsed successfully: %+v", claims)
 		if claims["type"] != "access" {
+			log.Printf("debugprint: (*jwtIssuer).Verify invalid token type: expected 'access', got %q", claims["type"])
 			return nil, fmt.Errorf("invalid token type")
 		}
+		
+		userID, _ := claims["sub"].(string)
+		isAdmin, _ := claims["is_admin"].(bool)
 		return &port.Claims{
-			UserID:  claims["sub"].(string),
-			IsAdmin: claims["is_admin"].(bool),
+			UserID:  userID,
+			IsAdmin: isAdmin,
 		}, nil
 	}
 
+	log.Println("debugprint: (*jwtIssuer).Verify - token parsed but claims are invalid or token not Valid")
 	return nil, fmt.Errorf("invalid token")
 }
 
+
 func (i *jwtIssuer) Refresh(refreshTokenString string) (*port.TokenPair, error) {
+	log.Println("debugprint: entering (*jwtIssuer).Refresh")
 	token, err := jwt.Parse(refreshTokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -100,7 +113,7 @@ func (i *jwtIssuer) Refresh(refreshTokenString string) (*port.TokenPair, error) 
 		}
 		userID := claims["sub"].(string)
 		// In a real app, check if userID is still valid/not blocked
-		// For now, just issue new pair. We don't have isAdmin in refresh claims, 
+		// For now, just issue new pair. We don't have isAdmin in refresh claims,
 		// but we could add it or fetch from DB.
 		return i.Issue(userID, false) // Default to non-admin for refresh for now
 	}

@@ -15,6 +15,7 @@ type ScrapeJobsUseCase struct {
 }
 
 func NewScrapeJobsUseCase(jobRepo port.JobPostingRepository, housingRepo port.JobHousingRepository) *ScrapeJobsUseCase {
+	log.Println("debugprint: entering NewScrapeJobsUseCase")
 	return &ScrapeJobsUseCase{
 		jobRepo:     jobRepo,
 		housingRepo: housingRepo,
@@ -22,6 +23,7 @@ func NewScrapeJobsUseCase(jobRepo port.JobPostingRepository, housingRepo port.Jo
 }
 
 func (uc *ScrapeJobsUseCase) Run(ctx context.Context) error {
+	log.Println("debugprint: entering (*ScrapeJobsUseCase).Run")
 	scr := scraper.NewScraper()
 	results := make(chan scraper.Result, 100)
 	var wg sync.WaitGroup

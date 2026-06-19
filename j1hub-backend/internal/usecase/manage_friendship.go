@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"log"
 
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
@@ -17,10 +18,12 @@ type ManageFriendshipUseCase struct {
 }
 
 func NewManageFriendshipUseCase(friendRepo port.FriendshipRepository, userRepo port.UserRepository, notifier port.NotifierPort, clock timeutil.Clock) *ManageFriendshipUseCase {
+	log.Println("debugprint: entering NewManageFriendshipUseCase")
 	return &ManageFriendshipUseCase{friendRepo: friendRepo, userRepo: userRepo, notifier: notifier, clock: clock}
 }
 
 func (uc *ManageFriendshipUseCase) SendRequest(ctx context.Context, senderID, targetID string) error {
+	log.Println("debugprint: entering (*ManageFriendshipUseCase).SendRequest")
 	if senderID == targetID {
 		return domain.ErrConflict
 	}
@@ -54,6 +57,7 @@ func (uc *ManageFriendshipUseCase) SendRequest(ctx context.Context, senderID, ta
 }
 
 func (uc *ManageFriendshipUseCase) RespondToRequest(ctx context.Context, responderID, friendshipID string, accept bool) error {
+	log.Println("debugprint: entering (*ManageFriendshipUseCase).RespondToRequest")
 	f, err := uc.friendRepo.FindByID(ctx, friendshipID)
 	if err != nil {
 		return err
@@ -86,15 +90,22 @@ func (uc *ManageFriendshipUseCase) RespondToRequest(ctx context.Context, respond
 }
 
 func (uc *ManageFriendshipUseCase) ListFriends(ctx context.Context, userID string) ([]domain.Friendship, error) {
+	log.Println("debugprint: entering (*ManageFriendshipUseCase).ListFriends")
 	return uc.friendRepo.FindFriendsOf(ctx, userID)
 }
 
 func (uc *ManageFriendshipUseCase) ListPendingRequests(ctx context.Context, userID string) ([]domain.Friendship, error) {
-	// Need FindPendingFor in repo
+	log.
+		// Need FindPendingFor in repo
+		Println("debugprint: entering (*ManageFriendshipUseCase).ListPendingRequests")
+
 	return nil, nil
 }
 
 func (uc *ManageFriendshipUseCase) RemoveFriend(ctx context.Context, userID, friendshipID string) error {
-	// Need Delete in repo
+	log.
+		// Need Delete in repo
+		Println("debugprint: entering (*ManageFriendshipUseCase).RemoveFriend")
+
 	return nil
 }

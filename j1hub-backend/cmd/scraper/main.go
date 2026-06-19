@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	log.Println("debugprint: entering main")
 	s := scraper.NewScraper()
 
 	results := make(chan scraper.Result)
@@ -69,6 +70,7 @@ func main() {
 }
 
 func exportToJSON(filename string, data interface{}) error {
+	log.Println("debugprint: entering exportToJSON")
 	file, err := os.Create(filename)
 	if err != nil {
 		return err

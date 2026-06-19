@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -28,6 +29,7 @@ type AuthHandler struct {
 }
 
 func NewAuthHandler(registerUC RegisterUserUC, loginUC LoginUC) *AuthHandler {
+	log.Println("debugprint: entering NewAuthHandler")
 	return &AuthHandler{
 		registerUC: registerUC,
 		loginUC:    loginUC,
@@ -52,6 +54,7 @@ type refreshReq struct {
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*AuthHandler).Register")
 	var req registerReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body", Err: err})
@@ -84,6 +87,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*AuthHandler).Login")
 	var req loginReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body", Err: err})
@@ -113,12 +117,16 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	// For stateless JWT, client just discards token. 
-	// If we want to blacklist, we would do it here.
+	log.
+		// For stateless JWT, client just discards token.
+		// If we want to blacklist, we would do it here.
+		Println("debugprint: entering (*AuthHandler).Logout")
+
 	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*AuthHandler).Refresh")
 	var req refreshReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body", Err: err})

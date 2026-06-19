@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/j1hub/backend/internal/domain"
@@ -14,10 +15,12 @@ type leaderboardRepo struct {
 }
 
 func NewLeaderboardRepository(pool *pgxpool.Pool) port.LeaderboardRepository {
+	log.Println("debugprint: entering NewLeaderboardRepository")
 	return &leaderboardRepo{pool: pool}
 }
 
 func (r *leaderboardRepo) FindByScope(ctx context.Context, scope, jobID string) ([]domain.User, error) {
+	log.Println("debugprint: entering (*leaderboardRepo).FindByScope")
 	query := `
 		SELECT u.user_id, u.email, u.first_name, u.last_name, u.current_phase_id, u.total_lifetime_points, u.current_phase_points, u.mission_streak, u.arrival_date, u.job_start_date, u.created_at, u.updated_at
 		FROM users u`
@@ -42,8 +45,8 @@ func (r *leaderboardRepo) FindByScope(ctx context.Context, scope, jobID string) 
 		var arrivalDate *time.Time
 		var jobStartDate *time.Time
 		if err := rows.Scan(
-			&u.UserID, &u.Email, &u.FirstName, &u.LastName, 
-			&currentPhaseID, &u.TotalLifetimePoints, &u.CurrentPhasePoints, 
+			&u.UserID, &u.Email, &u.FirstName, &u.LastName,
+			&currentPhaseID, &u.TotalLifetimePoints, &u.CurrentPhasePoints,
 			&u.MissionStreak, &arrivalDate, &jobStartDate, &u.CreatedAt, &u.UpdatedAt,
 		); err != nil {
 			return nil, err

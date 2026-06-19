@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"log"
 
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
@@ -22,6 +23,7 @@ func NewMissionUseCase(
 	utRepo port.UserTaskRepository,
 	userRepo port.UserRepository,
 ) *MissionUseCase {
+	log.Println("debugprint: entering NewMissionUseCase")
 	return &MissionUseCase{
 		missionRepo: missionRepo,
 		umRepo:      umRepo,
@@ -39,6 +41,7 @@ type MissionDetailResponse struct {
 }
 
 func (uc *MissionUseCase) ListAvailableMissions(ctx context.Context, userID string) ([]domain.UserMission, error) {
+	log.Println("debugprint: entering (*MissionUseCase).ListAvailableMissions")
 	user, err := uc.userRepo.FindByID(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -48,6 +51,7 @@ func (uc *MissionUseCase) ListAvailableMissions(ctx context.Context, userID stri
 }
 
 func (uc *MissionUseCase) GetMissionDetail(ctx context.Context, userID, userMissionID string) (*MissionDetailResponse, error) {
+	log.Println("debugprint: entering (*MissionUseCase).GetMissionDetail")
 	um, err := uc.umRepo.FindByID(ctx, userMissionID)
 	if err != nil {
 		return nil, err
@@ -80,6 +84,9 @@ func (uc *MissionUseCase) GetMissionDetail(ctx context.Context, userID, userMiss
 }
 
 func (uc *MissionUseCase) ToggleTask(ctx context.Context, userID, userTaskID string, completed bool) error {
-	// Need to check ownership and update user task
+	log.
+		// Need to check ownership and update user task
+		Println("debugprint: entering (*MissionUseCase).ToggleTask")
+
 	return nil
 }

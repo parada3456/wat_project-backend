@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
@@ -37,6 +38,7 @@ func NewJourneyHandler(
 	advanceUC AdvancePhaseUC,
 	leaderboardUC LeaderboardUC,
 ) *JourneyHandler {
+	log.Println("debugprint: entering NewJourneyHandler")
 	return &JourneyHandler{
 		journeyUC:     journeyUC,
 		advanceUC:     advanceUC,
@@ -45,6 +47,7 @@ func NewJourneyHandler(
 }
 
 func (h *JourneyHandler) ListPhases(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*JourneyHandler).ListPhases")
 	phases, err := h.journeyUC.ListPhases(r.Context())
 	if err != nil {
 		apperror.RespondError(w, err)
@@ -54,6 +57,7 @@ func (h *JourneyHandler) ListPhases(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *JourneyHandler) AdvancePhase(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*JourneyHandler).AdvancePhase")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -70,6 +74,7 @@ func (h *JourneyHandler) AdvancePhase(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *JourneyHandler) GetHistory(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*JourneyHandler).GetHistory")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -85,9 +90,10 @@ func (h *JourneyHandler) GetHistory(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *JourneyHandler) GetLeaderboard(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*JourneyHandler).GetLeaderboard")
 	scope := r.URL.Query().Get("scope")
 	jobID := r.URL.Query().Get("job_id")
-	
+
 	entries, err := h.leaderboardUC.GetLeaderboard(r.Context(), scope, jobID)
 	if err != nil {
 		apperror.RespondError(w, err)
@@ -97,6 +103,7 @@ func (h *JourneyHandler) GetLeaderboard(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *JourneyHandler) ListBadges(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*JourneyHandler).ListBadges")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -112,6 +119,7 @@ func (h *JourneyHandler) ListBadges(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *JourneyHandler) GetCreditHistory(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*JourneyHandler).GetCreditHistory")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})

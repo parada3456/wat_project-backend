@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -29,6 +30,7 @@ type MissionHandler struct {
 }
 
 func NewMissionHandler(missionUC MissionUC, completeUC CompleteMissionUC) *MissionHandler {
+	log.Println("debugprint: entering NewMissionHandler")
 	return &MissionHandler{
 		missionUC:  missionUC,
 		completeUC: completeUC,
@@ -36,6 +38,7 @@ func NewMissionHandler(missionUC MissionUC, completeUC CompleteMissionUC) *Missi
 }
 
 func (h *MissionHandler) ListMissions(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*MissionHandler).ListMissions")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -52,6 +55,7 @@ func (h *MissionHandler) ListMissions(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *MissionHandler) GetMissionDetail(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*MissionHandler).GetMissionDetail")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -69,6 +73,7 @@ func (h *MissionHandler) GetMissionDetail(w http.ResponseWriter, r *http.Request
 }
 
 func (h *MissionHandler) SubmitProof(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*MissionHandler).SubmitProof")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -76,7 +81,7 @@ func (h *MissionHandler) SubmitProof(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := chi.URLParam(r, "id")
-	
+
 	// Need to handle multipart form for file upload
 	// For simplicity, let's assume JSON for now or handle multipart
 	r.ParseMultipartForm(10 << 20) // 10MB max
@@ -101,6 +106,7 @@ type toggleTaskReq struct {
 }
 
 func (h *MissionHandler) ToggleTask(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*MissionHandler).ToggleTask")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})

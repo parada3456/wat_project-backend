@@ -15,6 +15,7 @@ func NewScheduler(
 	overdueMissionJob *usecase.OverdueMissionJob,
 	scrapeJobsJob *usecase.ScrapeJobsUseCase,
 ) *cron.Cron {
+	log.Println("debugprint: entering NewScheduler")
 	c := cron.New()
 
 	c.AddFunc(cfg.CronOverdueExpense, func() {

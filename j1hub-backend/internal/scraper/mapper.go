@@ -1,7 +1,10 @@
 package scraper
 
+import "log"
+
 // MapLocationRank converts raw classification strings from sources to internal ranks.
 func MapLocationRank(source, sourceType string) string {
+	log.Println("debugprint: entering MapLocationRank")
 	if sourceType == "Acadex" {
 		switch source {
 		case "A":

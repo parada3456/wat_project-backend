@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"log"
 	"time"
 )
 
@@ -14,6 +15,7 @@ const (
 )
 
 func (s CartStatus) Valid() bool {
+	log.Println("debugprint: entering (CartStatus).Valid")
 	switch s {
 	case CartSaved, CartViewed, CartApplied, CartRemoved:
 		return true
@@ -99,6 +101,7 @@ type JobReview struct {
 }
 
 func (r *JobReview) ScoreMap() map[string]float64 {
+	log.Println("debugprint: entering (*JobReview).ScoreMap")
 	return map[string]float64{
 		"agency":                 r.ScoreAgency,
 		"job":                    r.ScoreJob,

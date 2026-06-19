@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"log"
 
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
@@ -18,6 +19,7 @@ func NewUserUseCase(
 	profileRepo port.ProfileRepository,
 	creditRepo port.CreditScoreRepository,
 ) *UserUseCase {
+	log.Println("debugprint: entering NewUserUseCase")
 	return &UserUseCase{
 		userRepo:    userRepo,
 		profileRepo: profileRepo,
@@ -32,6 +34,7 @@ type UserProfileResponse struct {
 }
 
 func (uc *UserUseCase) GetProfile(ctx context.Context, userID string) (*UserProfileResponse, error) {
+	log.Println("debugprint: entering (*UserUseCase).GetProfile")
 	user, err := uc.userRepo.FindByID(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -62,6 +65,7 @@ type UpdateProfileCommand struct {
 }
 
 func (uc *UserUseCase) UpdateProfile(ctx context.Context, userID string, cmd UpdateProfileCommand) error {
+	log.Println("debugprint: entering (*UserUseCase).UpdateProfile")
 	user, err := uc.userRepo.FindByID(ctx, userID)
 	if err != nil {
 		return err

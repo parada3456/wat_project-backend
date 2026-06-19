@@ -13,6 +13,7 @@ import (
 )
 
 func NewPool(cfg *config.Config) (*pgxpool.Pool, error) {
+	log.Println("debugprint: entering NewPool")
 	pool, err := pgxpool.New(context.Background(), cfg.DatabaseURL)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create connection pool: %w", err)
@@ -27,6 +28,7 @@ func NewPool(cfg *config.Config) (*pgxpool.Pool, error) {
 }
 
 func RunMigrations(databaseURL string, migrationsPath string) error {
+	log.Println("debugprint: entering RunMigrations")
 	m, err := migrate.New("file://"+migrationsPath, databaseURL)
 	if err != nil {
 		return fmt.Errorf("could not create migrate instance: %w", err)

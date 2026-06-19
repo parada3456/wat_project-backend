@@ -14,6 +14,7 @@ type AppError struct {
 }
 
 func (e *AppError) Error() string {
+	log.Println("debugprint: entering (*AppError).Error")
 	if e.Err != nil {
 		return e.Message + ": " + e.Err.Error()
 	}
@@ -21,6 +22,7 @@ func (e *AppError) Error() string {
 }
 
 func RespondError(w http.ResponseWriter, err error) {
+	log.Println("debugprint: entering RespondError")
 	var appErr *AppError
 	if !errors.As(err, &appErr) {
 		appErr = &AppError{

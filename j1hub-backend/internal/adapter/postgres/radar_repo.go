@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"log"
 
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
@@ -13,10 +14,12 @@ type radarRepo struct {
 }
 
 func NewRadarRepository(pool *pgxpool.Pool) port.RadarRepository {
+	log.Println("debugprint: entering NewRadarRepository")
 	return &radarRepo{pool: pool}
 }
 
 func (r *radarRepo) FindNearby(ctx context.Context, lat, lng, radius float64, staleMinutes int) ([]domain.Profile, error) {
+	log.Println("debugprint: entering (*radarRepo).FindNearby")
 	query := `
 		SELECT 
 			profile_id, user_id, phone_number, bio, avatar_url, 

@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 )
 
 func (s *Scraper) ScrapeIHappy(url string, results chan<- Result) {
+	log.Println("debugprint: entering (*Scraper).ScrapeIHappy")
 	c := s.Collector.Clone()
 
 	// If this URL is already a detail page, parse it directly
@@ -36,6 +38,7 @@ func (s *Scraper) ScrapeIHappy(url string, results chan<- Result) {
 }
 
 func (s *Scraper) parseIHappyDetail(absoluteURL string, de *colly.HTMLElement, results chan<- Result) {
+	log.Println("debugprint: entering (*Scraper).parseIHappyDetail")
 	jobID := GenerateJobID(absoluteURL)
 
 	employerTitle := ""

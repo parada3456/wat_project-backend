@@ -16,10 +16,12 @@ type OverdueMissionJob struct {
 }
 
 func NewOverdueMissionJob(umRepo port.UserMissionRepository, missionRepo port.MissionRepository, userRepo port.UserRepository, notifier port.NotifierPort) *OverdueMissionJob {
+	log.Println("debugprint: entering NewOverdueMissionJob")
 	return &OverdueMissionJob{umRepo: umRepo, missionRepo: missionRepo, userRepo: userRepo, notifier: notifier}
 }
 
 func (j *OverdueMissionJob) Run(ctx context.Context) error {
+	log.Println("debugprint: entering (*OverdueMissionJob).Run")
 	ums, err := j.umRepo.FindOverdue(ctx)
 	if err != nil {
 		return err

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"log"
 
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/infrastructure/config"
@@ -16,6 +17,7 @@ type RadarUseCase struct {
 }
 
 func NewRadarUseCase(cfg *config.Config, profileRepo port.ProfileRepository, radarRepo port.RadarRepository, friendRepo port.FriendshipRepository) *RadarUseCase {
+	log.Println("debugprint: entering NewRadarUseCase")
 	return &RadarUseCase{cfg: cfg, profileRepo: profileRepo, radarRepo: radarRepo, friendRepo: friendRepo}
 }
 
@@ -28,6 +30,7 @@ type RadarEntry struct {
 }
 
 func (uc *RadarUseCase) GetRadar(ctx context.Context, requesterID string) ([]RadarEntry, error) {
+	log.Println("debugprint: entering (*RadarUseCase).GetRadar")
 	p, err := uc.profileRepo.FindByUserID(ctx, requesterID)
 	if err != nil {
 		return nil, err

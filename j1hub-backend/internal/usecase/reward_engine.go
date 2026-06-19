@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"log"
 
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/infrastructure/config"
@@ -15,10 +16,12 @@ type RewardEngine struct {
 }
 
 func NewRewardEngine(cfg *config.Config, userRepo port.UserRepository, umRepo port.UserMissionRepository) *RewardEngine {
+	log.Println("debugprint: entering NewRewardEngine")
 	return &RewardEngine{cfg: cfg, userRepo: userRepo, umRepo: umRepo}
 }
 
 func (re *RewardEngine) Calculate(ctx context.Context, um *domain.UserMission, user *domain.User, mission *domain.Mission) (*domain.PointReward, error) {
+	log.Println("debugprint: entering (*RewardEngine).Calculate")
 	reward := &domain.PointReward{
 		Base: mission.BasePoints,
 	}

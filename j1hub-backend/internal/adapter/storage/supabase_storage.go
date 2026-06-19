@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/j1hub/backend/internal/infrastructure/config"
@@ -16,6 +17,7 @@ type supabaseStorage struct {
 }
 
 func NewSupabaseStorage(cfg *config.Config) port.StoragePort {
+	log.Println("debugprint: entering NewSupabaseStorage")
 	return &supabaseStorage{
 		url: cfg.SupabaseURL,
 		key: cfg.SupabaseServiceKey,
@@ -23,8 +25,11 @@ func NewSupabaseStorage(cfg *config.Config) port.StoragePort {
 }
 
 func (s *supabaseStorage) UploadFile(ctx context.Context, bucket, key string, data io.Reader, contentType string) (string, error) {
-	// Simple implementation using Supabase Storage REST API
-	// URL: {url}/storage/v1/object/{bucket}/{key}
+	log.
+		// Simple implementation using Supabase Storage REST API
+		// URL: {url}/storage/v1/object/{bucket}/{key}
+		Println("debugprint: entering (*supabaseStorage).UploadFile")
+
 	uploadURL := fmt.Sprintf("%s/storage/v1/object/%s/%s", s.url, bucket, key)
 
 	req, err := http.NewRequestWithContext(ctx, "POST", uploadURL, data)

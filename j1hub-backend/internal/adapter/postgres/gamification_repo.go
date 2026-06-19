@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"log"
 
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
@@ -14,16 +15,19 @@ type pointLedgerRepo struct {
 }
 
 func NewPointLedgerRepository(pool *pgxpool.Pool) port.PointLedgerRepository {
+	log.Println("debugprint: entering NewPointLedgerRepository")
 	return &pointLedgerRepo{pool: pool}
 }
 
 func (r *pointLedgerRepo) Insert(ctx context.Context, l *domain.PointLedger) error {
+	log.Println("debugprint: entering (*pointLedgerRepo).Insert")
 	query := `INSERT INTO point_ledger (ledger_id, user_id, source_type, source_id, delta, lifetime_balance_after, phase_balance_after, note, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 	_, err := r.pool.Exec(ctx, query, l.LedgerID, l.UserID, l.SourceType, l.SourceID, l.Delta, l.LifetimeBalanceAfter, l.PhaseBalanceAfter, l.Note, l.CreatedAt)
 	return err
 }
 
 func (r *pointLedgerRepo) InsertBatch(ctx context.Context, ledgers []domain.PointLedger) error {
+	log.Println("debugprint: entering (*pointLedgerRepo).InsertBatch")
 	batch := &pgx.Batch{}
 	for _, l := range ledgers {
 		batch.Queue(`INSERT INTO point_ledger (ledger_id, user_id, source_type, source_id, delta, lifetime_balance_after, phase_balance_after, note, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
@@ -37,10 +41,12 @@ type badgeRepo struct {
 }
 
 func NewBadgeRepository(pool *pgxpool.Pool) port.BadgeRepository {
+	log.Println("debugprint: entering NewBadgeRepository")
 	return &badgeRepo{pool: pool}
 }
 
 func (r *badgeRepo) FindByTriggerType(ctx context.Context, triggerType domain.TriggerType) ([]domain.Badge, error) {
+	log.Println("debugprint: entering (*badgeRepo).FindByTriggerType")
 	rows, err := r.pool.Query(ctx, `SELECT badge_id, title, description, trigger_type, icon_url, created_at FROM badges WHERE trigger_type = $1`, triggerType)
 	if err != nil {
 		return nil, err
@@ -58,7 +64,10 @@ func (r *badgeRepo) FindByTriggerType(ctx context.Context, triggerType domain.Tr
 }
 
 func (r *badgeRepo) FindEligible(ctx context.Context, userID string, triggerType domain.TriggerType) ([]domain.Badge, error) {
-	// Simple implementation: find all badges of this trigger type that the user doesn't have yet
+	log.
+		// Simple implementation: find all badges of this trigger type that the user doesn't have yet
+		Println("debugprint: entering (*badgeRepo).FindEligible")
+
 	query := `
 		SELECT b.badge_id, b.title, b.description, b.trigger_type, b.icon_url, b.created_at 
 		FROM badges b 
@@ -85,16 +94,19 @@ type userBadgeRepo struct {
 }
 
 func NewUserBadgeRepository(pool *pgxpool.Pool) port.UserBadgeRepository {
+	log.Println("debugprint: entering NewUserBadgeRepository")
 	return &userBadgeRepo{pool: pool}
 }
 
 func (r *userBadgeRepo) Insert(ctx context.Context, ub *domain.UserBadge) error {
+	log.Println("debugprint: entering (*userBadgeRepo).Insert")
 	_, err := r.pool.Exec(ctx, `INSERT INTO user_badges (user_badge_id, user_id, badge_id, source_id, earned_at) VALUES ($1, $2, $3, $4, $5)`,
 		ub.UserBadgeID, ub.UserID, ub.BadgeID, ub.SourceID, ub.EarnedAt)
 	return err
 }
 
 func (r *userBadgeRepo) FindByUser(ctx context.Context, userID string) ([]domain.UserBadge, error) {
+	log.Println("debugprint: entering (*userBadgeRepo).FindByUser")
 	rows, err := r.pool.Query(ctx, `SELECT user_badge_id, user_id, badge_id, source_id, earned_at FROM user_badges WHERE user_id = $1`, userID)
 	if err != nil {
 		return nil, err
@@ -116,16 +128,19 @@ type creditScoreRepo struct {
 }
 
 func NewCreditScoreRepository(pool *pgxpool.Pool) port.CreditScoreRepository {
+	log.Println("debugprint: entering NewCreditScoreRepository")
 	return &creditScoreRepo{pool: pool}
 }
 
 func (r *creditScoreRepo) Create(ctx context.Context, c *domain.CreditScore) error {
+	log.Println("debugprint: entering (*creditScoreRepo).Create")
 	_, err := r.pool.Exec(ctx, `INSERT INTO credit_scores (credit_id, user_id, current_score, last_updated) VALUES ($1, $2, $3, $4)`,
 		c.CreditID, c.UserID, c.CurrentScore, c.LastUpdated)
 	return err
 }
 
 func (r *creditScoreRepo) FindByUserID(ctx context.Context, userID string) (*domain.CreditScore, error) {
+	log.Println("debugprint: entering (*creditScoreRepo).FindByUserID")
 	var c domain.CreditScore
 	err := r.pool.QueryRow(ctx, `SELECT credit_id, user_id, current_score, last_updated FROM credit_scores WHERE user_id = $1`, userID).Scan(&c.CreditID, &c.UserID, &c.CurrentScore, &c.LastUpdated)
 	if err == pgx.ErrNoRows {
@@ -135,6 +150,7 @@ func (r *creditScoreRepo) FindByUserID(ctx context.Context, userID string) (*dom
 }
 
 func (r *creditScoreRepo) Decrement(ctx context.Context, userID string, delta int) error {
+	log.Println("debugprint: entering (*creditScoreRepo).Decrement")
 	_, err := r.pool.Exec(ctx, `UPDATE credit_scores SET current_score = current_score - $1, last_updated = NOW() WHERE user_id = $2`, delta, userID)
 	return err
 }

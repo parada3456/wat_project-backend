@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/j1hub/backend/internal/port"
 )
@@ -14,6 +15,7 @@ type LeaderboardUseCase struct {
 }
 
 func NewLeaderboardUseCase(leaderRepo port.LeaderboardRepository, profileRepo port.ProfileRepository, ubRepo port.UserBadgeRepository) *LeaderboardUseCase {
+	log.Println("debugprint: entering NewLeaderboardUseCase")
 	return &LeaderboardUseCase{leaderRepo: leaderRepo, profileRepo: profileRepo, ubRepo: ubRepo}
 }
 
@@ -27,6 +29,7 @@ type LeaderboardEntry struct {
 }
 
 func (uc *LeaderboardUseCase) GetLeaderboard(ctx context.Context, scope, jobID string) ([]LeaderboardEntry, error) {
+	log.Println("debugprint: entering (*LeaderboardUseCase).GetLeaderboard")
 	users, err := uc.leaderRepo.FindByScope(ctx, scope, jobID)
 	if err != nil {
 		return nil, err

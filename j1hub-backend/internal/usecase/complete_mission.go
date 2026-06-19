@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"io"
+	"log"
 
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
@@ -38,6 +39,7 @@ func NewCompleteMissionUseCase(
 	rewardEngine *RewardEngine,
 	clock timeutil.Clock,
 ) *CompleteMissionUseCase {
+	log.Println("debugprint: entering NewCompleteMissionUseCase")
 	return &CompleteMissionUseCase{
 		umRepo:       umRepo,
 		missionRepo:  missionRepo,
@@ -55,6 +57,7 @@ func NewCompleteMissionUseCase(
 }
 
 func (uc *CompleteMissionUseCase) SubmitProof(ctx context.Context, userID, userMissionID string, file io.Reader, contentType string) error {
+	log.Println("debugprint: entering (*CompleteMissionUseCase).SubmitProof")
 	um, err := uc.umRepo.FindByID(ctx, userMissionID)
 	if err != nil {
 		return err
@@ -83,6 +86,7 @@ func (uc *CompleteMissionUseCase) SubmitProof(ctx context.Context, userID, userM
 }
 
 func (uc *CompleteMissionUseCase) VerifyMission(ctx context.Context, adminID, userMissionID string, approved bool) error {
+	log.Println("debugprint: entering (*CompleteMissionUseCase).VerifyMission")
 	um, err := uc.umRepo.FindByID(ctx, userMissionID)
 	if err != nil {
 		return err

@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -23,10 +24,12 @@ type NotificationHandler struct {
 }
 
 func NewNotificationHandler(notifUC NotificationUC) *NotificationHandler {
+	log.Println("debugprint: entering NewNotificationHandler")
 	return &NotificationHandler{notifUC: notifUC}
 }
 
 func (h *NotificationHandler) ListNotifications(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*NotificationHandler).ListNotifications")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -42,6 +45,7 @@ func (h *NotificationHandler) ListNotifications(w http.ResponseWriter, r *http.R
 }
 
 func (h *NotificationHandler) MarkRead(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*NotificationHandler).MarkRead")
 	id := chi.URLParam(r, "id")
 	err := h.notifUC.MarkRead(r.Context(), id)
 	if err != nil {
@@ -52,6 +56,7 @@ func (h *NotificationHandler) MarkRead(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *NotificationHandler) MarkAllRead(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*NotificationHandler).MarkAllRead")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -67,6 +72,7 @@ func (h *NotificationHandler) MarkAllRead(w http.ResponseWriter, r *http.Request
 }
 
 func (h *NotificationHandler) DeleteNotification(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*NotificationHandler).DeleteNotification")
 	id := chi.URLParam(r, "id")
 	err := h.notifUC.Delete(r.Context(), id)
 	if err != nil {

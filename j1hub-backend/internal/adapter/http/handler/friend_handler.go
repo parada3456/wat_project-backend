@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -30,6 +31,7 @@ type FriendHandler struct {
 }
 
 func NewFriendHandler(friendshipUC FriendshipUC, radarUC RadarUC) *FriendHandler {
+	log.Println("debugprint: entering NewFriendHandler")
 	return &FriendHandler{friendshipUC: friendshipUC, radarUC: radarUC}
 }
 
@@ -38,6 +40,7 @@ type friendRequestReq struct {
 }
 
 func (h *FriendHandler) SendRequest(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*FriendHandler).SendRequest")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -60,6 +63,7 @@ func (h *FriendHandler) SendRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *FriendHandler) ListPendingRequests(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*FriendHandler).ListPendingRequests")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -81,6 +85,7 @@ type respondFriendReq struct {
 }
 
 func (h *FriendHandler) RespondToRequest(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*FriendHandler).RespondToRequest")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -103,6 +108,7 @@ func (h *FriendHandler) RespondToRequest(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *FriendHandler) ListFriends(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*FriendHandler).ListFriends")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -119,6 +125,7 @@ func (h *FriendHandler) ListFriends(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *FriendHandler) RemoveFriend(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*FriendHandler).RemoveFriend")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
@@ -136,6 +143,7 @@ func (h *FriendHandler) RemoveFriend(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *FriendHandler) GetRadar(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*FriendHandler).GetRadar")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})

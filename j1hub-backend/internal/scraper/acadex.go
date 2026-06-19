@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"log"
 	"strings"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 )
 
 func (s *Scraper) ScrapeAcadex(url string, results chan<- Result) {
+	log.Println("debugprint: entering (*Scraper).ScrapeAcadex")
 	c := s.Collector.Clone()
 
 	// If this URL is already a detail page, parse it directly
@@ -39,8 +41,9 @@ func (s *Scraper) ScrapeAcadex(url string, results chan<- Result) {
 }
 
 func (s *Scraper) parseAcadexDetail(absoluteURL string, positionType string, de *colly.HTMLElement, results chan<- Result) {
+	log.Println("debugprint: entering (*Scraper).parseAcadexDetail")
 	jobID := GenerateJobID(absoluteURL)
-	
+
 	titleText := de.ChildText(".location_title")
 	if titleText == "" {
 		titleText = de.ChildText("h1")
@@ -116,6 +119,7 @@ func (s *Scraper) parseAcadexDetail(absoluteURL string, positionType string, de 
 }
 
 func parseLocation(loc string) (string, string) {
+	log.Println("debugprint: entering parseLocation")
 	parts := strings.Split(loc, ",")
 	if len(parts) == 2 {
 		return strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])

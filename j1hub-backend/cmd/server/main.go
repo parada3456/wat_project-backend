@@ -22,6 +22,7 @@ import (
 )
 
 func main() {
+	log.Println("debugprint: entering main")
 	cfg := config.MustLoad()
 
 	pool, err := db.NewPool(cfg)
@@ -58,29 +59,29 @@ func main() {
 	registerUC := usecase.NewRegisterUserUseCase(pool, userRepo, profileRepo, creditRepo, phaseRepo, historyRepo, missionRepo, umRepo, hasher, issuer, clock)
 	loginUC := usecase.NewLoginUseCase(userRepo, hasher, issuer)
 	userUC := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo)
-	
+
 	taskRepo := postgres.NewTaskRepository(pool)
 	utRepo := postgres.NewUserTaskRepository(pool)
 	badgeRepo := postgres.NewBadgeRepository(pool)
 	ubRepo := postgres.NewUserBadgeRepository(pool)
-	
+
 	leaderRepo := postgres.NewLeaderboardRepository(pool)
-	
+
 	missionUC := usecase.NewMissionUseCase(missionRepo, umRepo, taskRepo, utRepo, userRepo)
 	completeUC := usecase.NewCompleteMissionUseCase(umRepo, missionRepo, taskRepo, utRepo, userRepo, ledgerRepo, badgeRepo, ubRepo, storage, notifier, rewardEngine, clock)
 	journeyUC := usecase.NewJourneyUseCase(phaseRepo, historyRepo, badgeRepo, ubRepo, creditRepo)
 	advanceUC := usecase.NewAdvancePhaseUseCase(userRepo, umRepo, phaseRepo, historyRepo, missionRepo, notifier, clock)
 	leaderboardUC := usecase.NewLeaderboardUseCase(leaderRepo, profileRepo, ubRepo)
-	
+
 	friendRepo := postgres.NewFriendshipRepository(pool)
 	radarRepo := postgres.NewRadarRepository(pool)
-	
+
 	friendshipUC := usecase.NewManageFriendshipUseCase(friendRepo, userRepo, notifier, clock)
 	radarUC := usecase.NewRadarUseCase(cfg, profileRepo, radarRepo, friendRepo)
-	
+
 	txnRepo := postgres.NewExpenseRepository(pool)
 	expenseUC := usecase.NewManageExpenseUseCase(txnRepo, splitRepo, storage, notifier, clock)
-	
+
 	notifRepo := postgres.NewNotificationRepository(pool)
 	notifUC := usecase.NewNotificationUseCase(notifRepo)
 
@@ -89,7 +90,7 @@ func main() {
 	ratingRepo := postgres.NewJobOverallRatingRepository(pool)
 	reviewRepo := postgres.NewJobReviewRepository(pool)
 	cartRepo := postgres.NewUserCartRepository(pool)
-	
+
 	jobUC := usecase.NewManageJobUseCase(jobRepo, housingRepo, ratingRepo, reviewRepo, cartRepo, clock)
 	scrapeJobsUC := usecase.NewScrapeJobsUseCase(jobRepo, housingRepo)
 

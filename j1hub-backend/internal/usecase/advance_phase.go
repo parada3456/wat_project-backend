@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"log"
 
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
@@ -28,6 +29,7 @@ func NewAdvancePhaseUseCase(
 	notifier port.NotifierPort,
 	clock timeutil.Clock,
 ) *AdvancePhaseUseCase {
+	log.Println("debugprint: entering NewAdvancePhaseUseCase")
 	return &AdvancePhaseUseCase{
 		userRepo:    userRepo,
 		umRepo:      umRepo,
@@ -40,6 +42,7 @@ func NewAdvancePhaseUseCase(
 }
 
 func (uc *AdvancePhaseUseCase) TryAdvancePhase(ctx context.Context, userID string) (bool, error) {
+	log.Println("debugprint: entering (*AdvancePhaseUseCase).TryAdvancePhase")
 	user, err := uc.userRepo.FindByID(ctx, userID)
 	if err != nil {
 		return false, err

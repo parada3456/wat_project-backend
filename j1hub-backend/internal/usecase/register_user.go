@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/j1hub/backend/internal/domain"
@@ -42,6 +43,7 @@ func NewRegisterUserUseCase(
 	tokenIssuer port.TokenIssuer,
 	clock timeutil.Clock,
 ) *RegisterUserUseCase {
+	log.Println("debugprint: entering NewRegisterUserUseCase")
 	return &RegisterUserUseCase{
 		pool:        pool,
 		userRepo:    userRepo,
@@ -65,6 +67,7 @@ type RegisterCommand struct {
 }
 
 func (uc *RegisterUserUseCase) Register(ctx context.Context, cmd RegisterCommand) (*domain.User, *port.TokenPair, error) {
+	log.Println("debugprint: entering (*RegisterUserUseCase).Register")
 	hash, err := uc.hasher.Hash(cmd.Password)
 	if err != nil {
 		return nil, nil, err
@@ -129,6 +132,7 @@ type InitJourneyCommand struct {
 }
 
 func (uc *RegisterUserUseCase) InitializeJourney(ctx context.Context, userID string, cmd InitJourneyCommand) error {
+	log.Println("debugprint: entering (*RegisterUserUseCase).InitializeJourney")
 	user, err := uc.userRepo.FindByID(ctx, userID)
 	if err != nil {
 		return err

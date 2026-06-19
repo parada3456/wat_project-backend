@@ -34,6 +34,7 @@ type RewardConfig struct {
 }
 
 func MustLoad() *Config {
+	log.Println("debugprint: entering MustLoad")
 	viper.SetConfigFile(".env")
 	viper.AutomaticEnv()
 
@@ -63,5 +64,6 @@ func MustLoad() *Config {
 }
 
 func (c *Config) JWTExpiry() time.Duration {
+	log.Println("debugprint: entering (*Config).JWTExpiry")
 	return time.Duration(c.JWTExpiryHours) * time.Hour
 }

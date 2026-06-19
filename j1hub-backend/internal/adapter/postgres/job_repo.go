@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
@@ -15,11 +16,15 @@ type jobRepo struct {
 }
 
 func NewJobRepository(pool *pgxpool.Pool) port.JobPostingRepository {
+	log.Println("debugprint: entering NewJobRepository")
 	return &jobRepo{pool: pool}
 }
 
 func (r *jobRepo) FindWithFilters(ctx context.Context, filters map[string]interface{}) ([]domain.JobPosting, error) {
-	// Simple implementation with static filters for now, can be expanded to dynamic
+	log.
+		// Simple implementation with static filters for now, can be expanded to dynamic
+		Println("debugprint: entering (*jobRepo).FindWithFilters")
+
 	query := `SELECT job_id, agency_name, employer_title, position, position_type, location_city, location_state, group_location, us_sponsor, salary_range_min, salary_range_max, available_slots, description, source_url, scrape_at, posted_at, updated_at FROM job_postings WHERE 1=1`
 	var args []interface{}
 	i := 1
@@ -51,6 +56,7 @@ func (r *jobRepo) FindWithFilters(ctx context.Context, filters map[string]interf
 }
 
 func (r *jobRepo) FindByID(ctx context.Context, id string) (*domain.JobPosting, error) {
+	log.Println("debugprint: entering (*jobRepo).FindByID")
 	var j domain.JobPosting
 	err := r.pool.QueryRow(ctx, `SELECT job_id, agency_name, employer_title, position, position_type, location_city, location_state, group_location, us_sponsor, salary_range_min, salary_range_max, available_slots, description, source_url, scrape_at, posted_at, updated_at FROM job_postings WHERE job_id = $1`, id).Scan(&j.JobID, &j.AgencyName, &j.EmployerTitle, &j.Position, &j.PositionType, &j.LocationCity, &j.LocationState, &j.GroupLocation, &j.USSponsor, &j.SalaryRangeMin, &j.SalaryRangeMax, &j.AvailableSlots, &j.Description, &j.SourceURL, &j.ScrapeAt, &j.PostedAt, &j.UpdatedAt)
 	if err == pgx.ErrNoRows {
@@ -60,6 +66,7 @@ func (r *jobRepo) FindByID(ctx context.Context, id string) (*domain.JobPosting, 
 }
 
 func (r *jobRepo) Upsert(ctx context.Context, job *domain.JobPosting) error {
+	log.Println("debugprint: entering (*jobRepo).Upsert")
 	query := `
 		INSERT INTO job_postings (
 			job_id, agency_name, employer_title, position, position_type,
@@ -95,10 +102,12 @@ type jobHousingRepo struct {
 }
 
 func NewJobHousingRepository(pool *pgxpool.Pool) port.JobHousingRepository {
+	log.Println("debugprint: entering NewJobHousingRepository")
 	return &jobHousingRepo{pool: pool}
 }
 
 func (r *jobHousingRepo) FindByJobID(ctx context.Context, jobID string) ([]domain.JobHousing, error) {
+	log.Println("debugprint: entering (*jobHousingRepo).FindByJobID")
 	rows, err := r.pool.Query(ctx, `SELECT housing_id, job_id, description, weekly_rate, deposit, transportation, range_min_start_date, range_max_start_date, created_at, updated_at FROM job_housings WHERE job_id = $1`, jobID)
 	if err != nil {
 		return nil, err
@@ -116,6 +125,7 @@ func (r *jobHousingRepo) FindByJobID(ctx context.Context, jobID string) ([]domai
 }
 
 func (r *jobHousingRepo) Upsert(ctx context.Context, h *domain.JobHousing) error {
+	log.Println("debugprint: entering (*jobHousingRepo).Upsert")
 	query := `
 		INSERT INTO job_housings (
 			housing_id, job_id, description, weekly_rate, deposit,
@@ -139,10 +149,12 @@ type jobRatingRepo struct {
 }
 
 func NewJobOverallRatingRepository(pool *pgxpool.Pool) port.JobOverallRatingRepository {
+	log.Println("debugprint: entering NewJobOverallRatingRepository")
 	return &jobRatingRepo{pool: pool}
 }
 
 func (r *jobRatingRepo) FindByJobID(ctx context.Context, jobID string) (*domain.JobOverallRating, error) {
+	log.Println("debugprint: entering (*jobRatingRepo).FindByJobID")
 	var rating domain.JobOverallRating
 	err := r.pool.QueryRow(ctx, `SELECT rating_summary_id, job_id, overall_rate, agency_rate, job_rate, coworkers_rate, town_rate, hours_rate, housing_rate, second_job_feasibility_rate, overtime_availability_rate, review_count, updated_at FROM job_overall_ratings WHERE job_id = $1`, jobID).Scan(&rating.RatingSummaryID, &rating.JobID, &rating.OverallRate, &rating.AgencyRate, &rating.JobRate, &rating.CoworkersRate, &rating.TownRate, &rating.HoursRate, &rating.HousingRate, &rating.SecondJobFeasibilityRate, &rating.OvertimeAvailabilityRate, &rating.ReviewCount, &rating.UpdatedAt)
 	if err == pgx.ErrNoRows {
@@ -152,6 +164,7 @@ func (r *jobRatingRepo) FindByJobID(ctx context.Context, jobID string) (*domain.
 }
 
 func (r *jobRatingRepo) Recalculate(ctx context.Context, jobID string) error {
+	log.Println("debugprint: entering (*jobRatingRepo).Recalculate")
 	query := `
 		INSERT INTO job_overall_ratings (rating_summary_id, job_id, overall_rate, agency_rate, job_rate, coworkers_rate, town_rate, hours_rate, housing_rate, second_job_feasibility_rate, overtime_availability_rate, review_count, updated_at)
 		SELECT 
@@ -180,16 +193,19 @@ type jobReviewRepo struct {
 }
 
 func NewJobReviewRepository(pool *pgxpool.Pool) port.JobReviewRepository {
+	log.Println("debugprint: entering NewJobReviewRepository")
 	return &jobReviewRepo{pool: pool}
 }
 
 func (r *jobReviewRepo) Insert(ctx context.Context, rv *domain.JobReview) error {
+	log.Println("debugprint: entering (*jobReviewRepo).Insert")
 	query := `INSERT INTO job_reviews (review_id, job_id, user_id, rating_stars, review_text, tips_for_next_generation, score_agency, score_job, score_coworkers, score_town, score_hours, score_housing, score_second_job_feasibility, score_overtime_availability, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`
 	_, err := r.pool.Exec(ctx, query, rv.ReviewID, rv.JobID, rv.UserID, rv.RatingStars, rv.ReviewText, rv.TipsForNextGeneration, rv.ScoreAgency, rv.ScoreJob, rv.ScoreCoworkers, rv.ScoreTown, rv.ScoreHours, rv.ScoreHousing, rv.ScoreSecondJobFeasibility, rv.ScoreOvertimeAvailability, rv.CreatedAt, rv.UpdatedAt)
 	return err
 }
 
 func (r *jobReviewRepo) FindByJobID(ctx context.Context, jobID string) ([]domain.JobReview, error) {
+	log.Println("debugprint: entering (*jobReviewRepo).FindByJobID")
 	rows, err := r.pool.Query(ctx, `SELECT review_id, job_id, user_id, rating_stars, review_text, tips_for_next_generation, score_agency, score_job, score_coworkers, score_town, score_hours, score_housing, score_second_job_feasibility, score_overtime_availability, created_at, updated_at FROM job_reviews WHERE job_id = $1 ORDER BY created_at DESC`, jobID)
 	if err != nil {
 		return nil, err
@@ -211,16 +227,19 @@ type userCartRepo struct {
 }
 
 func NewUserCartRepository(pool *pgxpool.Pool) port.UserCartRepository {
+	log.Println("debugprint: entering NewUserCartRepository")
 	return &userCartRepo{pool: pool}
 }
 
 func (r *userCartRepo) Insert(ctx context.Context, c *domain.UserCart) error {
+	log.Println("debugprint: entering (*userCartRepo).Insert")
 	_, err := r.pool.Exec(ctx, `INSERT INTO user_carts (cart_id, user_id, job_id, status, added_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`,
 		c.CartID, c.UserID, c.JobID, c.Status, c.AddedAt, c.UpdatedAt)
 	return err
 }
 
 func (r *userCartRepo) FindByUserAndJob(ctx context.Context, userID, jobID string) (*domain.UserCart, error) {
+	log.Println("debugprint: entering (*userCartRepo).FindByUserAndJob")
 	var c domain.UserCart
 	err := r.pool.QueryRow(ctx, `SELECT cart_id, user_id, job_id, status, added_at, updated_at FROM user_carts WHERE user_id = $1 AND job_id = $2`, userID, jobID).Scan(&c.CartID, &c.UserID, &c.JobID, &c.Status, &c.AddedAt, &c.UpdatedAt)
 	if err == pgx.ErrNoRows {
@@ -230,6 +249,7 @@ func (r *userCartRepo) FindByUserAndJob(ctx context.Context, userID, jobID strin
 }
 
 func (r *userCartRepo) FindByID(ctx context.Context, id string) (*domain.UserCart, error) {
+	log.Println("debugprint: entering (*userCartRepo).FindByID")
 	var c domain.UserCart
 	err := r.pool.QueryRow(ctx, `SELECT cart_id, user_id, job_id, status, added_at, updated_at FROM user_carts WHERE cart_id = $1`, id).Scan(&c.CartID, &c.UserID, &c.JobID, &c.Status, &c.AddedAt, &c.UpdatedAt)
 	if err == pgx.ErrNoRows {
@@ -239,6 +259,7 @@ func (r *userCartRepo) FindByID(ctx context.Context, id string) (*domain.UserCar
 }
 
 func (r *userCartRepo) UpdateStatus(ctx context.Context, id string, status domain.CartStatus) error {
+	log.Println("debugprint: entering (*userCartRepo).UpdateStatus")
 	_, err := r.pool.Exec(ctx, `UPDATE user_carts SET status = $1, updated_at = NOW() WHERE cart_id = $2`, status, id)
 	return err
 }

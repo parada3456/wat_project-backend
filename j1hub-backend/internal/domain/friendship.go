@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"log"
 	"time"
 )
 
@@ -13,6 +14,7 @@ const (
 )
 
 func (s FriendshipStatus) Valid() bool {
+	log.Println("debugprint: entering (FriendshipStatus).Valid")
 	switch s {
 	case FriendshipPending, FriendshipAccepted, FriendshipBlocked:
 		return true
@@ -30,6 +32,7 @@ type Friendship struct {
 }
 
 func CanonicalOrder(a, b string) (string, string) {
+	log.Println("debugprint: entering CanonicalOrder")
 	if a < b {
 		return a, b
 	}

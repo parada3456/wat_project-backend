@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/j1hub/backend/internal/domain"
@@ -16,10 +17,12 @@ type userRepo struct {
 }
 
 func NewUserRepository(pool *pgxpool.Pool) port.UserRepository {
+	log.Println("debugprint: entering NewUserRepository")
 	return &userRepo{pool: pool}
 }
 
 func stringToNull(s string) interface{} {
+	log.Println("debugprint: entering stringToNull")
 	if s == "" {
 		return nil
 	}
@@ -27,6 +30,7 @@ func stringToNull(s string) interface{} {
 }
 
 func timeToNull(t time.Time) interface{} {
+	log.Println("debugprint: entering timeToNull")
 	if t.IsZero() {
 		return nil
 	}
@@ -34,6 +38,7 @@ func timeToNull(t time.Time) interface{} {
 }
 
 func scanUser(row pgx.Row) (*domain.User, error) {
+	log.Println("debugprint: entering scanUser")
 	var u domain.User
 	var currentPhaseID *string
 	var arrivalDate *time.Time
@@ -62,6 +67,7 @@ func scanUser(row pgx.Row) (*domain.User, error) {
 }
 
 func (r *userRepo) Create(ctx context.Context, u *domain.User) error {
+	log.Println("debugprint: entering (*userRepo).Create")
 	query := `
 		INSERT INTO users (
 			user_id, email, password_hash, first_name, last_name, 
@@ -81,6 +87,7 @@ func (r *userRepo) Create(ctx context.Context, u *domain.User) error {
 }
 
 func (r *userRepo) FindByID(ctx context.Context, id string) (*domain.User, error) {
+	log.Println("debugprint: entering (*userRepo).FindByID")
 	query := `
 		SELECT 
 			user_id, email, password_hash, first_name, last_name, 
@@ -100,6 +107,7 @@ func (r *userRepo) FindByID(ctx context.Context, id string) (*domain.User, error
 }
 
 func (r *userRepo) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
+	log.Println("debugprint: entering (*userRepo).FindByEmail")
 	query := `
 		SELECT 
 			user_id, email, password_hash, first_name, last_name, 
@@ -119,6 +127,7 @@ func (r *userRepo) FindByEmail(ctx context.Context, email string) (*domain.User,
 }
 
 func (r *userRepo) Update(ctx context.Context, u *domain.User) error {
+	log.Println("debugprint: entering (*userRepo).Update")
 	query := `
 		UPDATE users SET 
 			email = $1, first_name = $2, last_name = $3, 
@@ -138,6 +147,7 @@ func (r *userRepo) Update(ctx context.Context, u *domain.User) error {
 }
 
 func (r *userRepo) IncrementPoints(ctx context.Context, userID string, lifetimeDelta, phaseDelta int) error {
+	log.Println("debugprint: entering (*userRepo).IncrementPoints")
 	query := `
 		UPDATE users SET 
 			total_lifetime_points = total_lifetime_points + $1,
@@ -153,6 +163,7 @@ func (r *userRepo) IncrementPoints(ctx context.Context, userID string, lifetimeD
 }
 
 func (r *userRepo) ResetStreak(ctx context.Context, userID string) error {
+	log.Println("debugprint: entering (*userRepo).ResetStreak")
 	query := `UPDATE users SET mission_streak = 0, updated_at = NOW() WHERE user_id = $1`
 	_, err := r.pool.Exec(ctx, query, userID)
 	if err != nil {
@@ -162,6 +173,7 @@ func (r *userRepo) ResetStreak(ctx context.Context, userID string) error {
 }
 
 func (r *userRepo) SetPhase(ctx context.Context, userID, phaseID string) error {
+	log.Println("debugprint: entering (*userRepo).SetPhase")
 	query := `UPDATE users SET current_phase_id = $1, updated_at = NOW() WHERE user_id = $2`
 	_, err := r.pool.Exec(ctx, query, phaseID, userID)
 	if err != nil {
@@ -171,6 +183,7 @@ func (r *userRepo) SetPhase(ctx context.Context, userID, phaseID string) error {
 }
 
 func (r *userRepo) Delete(ctx context.Context, id string) error {
+	log.Println("debugprint: entering (*userRepo).Delete")
 	query := `DELETE FROM users WHERE user_id = $1`
 	_, err := r.pool.Exec(ctx, query, id)
 	if err != nil {

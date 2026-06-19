@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"time"
 
 	"github.com/j1hub/backend/internal/domain"
@@ -27,6 +28,7 @@ func NewManageExpenseUseCase(
 	notifier port.NotifierPort,
 	clock timeutil.Clock,
 ) *ManageExpenseUseCase {
+	log.Println("debugprint: entering NewManageExpenseUseCase")
 	return &ManageExpenseUseCase{
 		txnRepo:   txnRepo,
 		splitRepo: splitRepo,
@@ -49,6 +51,7 @@ type CreateExpenseCmd struct {
 }
 
 func (uc *ManageExpenseUseCase) CreateExpense(ctx context.Context, payerID string, cmd CreateExpenseCmd) error {
+	log.Println("debugprint: entering (*ManageExpenseUseCase).CreateExpense")
 	txn := &domain.ExpenseTransaction{
 		TransactionID:   uid.New("txn_"),
 		PaidByUserID:    payerID,
@@ -93,6 +96,7 @@ func (uc *ManageExpenseUseCase) CreateExpense(ctx context.Context, payerID strin
 }
 
 func (uc *ManageExpenseUseCase) SubmitSlip(ctx context.Context, debtorID, splitID string, file io.Reader, contentType string) error {
+	log.Println("debugprint: entering (*ManageExpenseUseCase).SubmitSlip")
 	split, err := uc.splitRepo.FindByID(ctx, splitID)
 	if err != nil {
 		return err
@@ -110,6 +114,7 @@ func (uc *ManageExpenseUseCase) SubmitSlip(ctx context.Context, debtorID, splitI
 }
 
 func (uc *ManageExpenseUseCase) ApproveSplit(ctx context.Context, payerID, splitID string) error {
+	log.Println("debugprint: entering (*ManageExpenseUseCase).ApproveSplit")
 	split, err := uc.splitRepo.FindByID(ctx, splitID)
 	if err != nil {
 		return err
@@ -134,11 +139,15 @@ func (uc *ManageExpenseUseCase) ApproveSplit(ctx context.Context, payerID, split
 }
 
 func (uc *ManageExpenseUseCase) ListExpenses(ctx context.Context, userID string) ([]domain.ExpenseTransaction, error) {
-	// Need FindByUser in repo
+	log.
+		// Need FindByUser in repo
+		Println("debugprint: entering (*ManageExpenseUseCase).ListExpenses")
+
 	return nil, nil
 }
 
 func (uc *ManageExpenseUseCase) GetExpenseDetail(ctx context.Context, userID, transactionID string) (*domain.ExpenseTransaction, []domain.ExpenseSplit, error) {
+	log.Println("debugprint: entering (*ManageExpenseUseCase).GetExpenseDetail")
 	txn, err := uc.txnRepo.FindByID(ctx, transactionID)
 	if err != nil {
 		return nil, nil, err
@@ -148,11 +157,17 @@ func (uc *ManageExpenseUseCase) GetExpenseDetail(ctx context.Context, userID, tr
 }
 
 func (uc *ManageExpenseUseCase) DeleteExpense(ctx context.Context, userID, transactionID string) error {
-	// Check ownership and delete
+	log.
+		// Check ownership and delete
+		Println("debugprint: entering (*ManageExpenseUseCase).DeleteExpense")
+
 	return nil
 }
 
 func (uc *ManageExpenseUseCase) ListPendingExpenses(ctx context.Context, userID string) ([]domain.ExpenseSplit, error) {
-	// Need FindPendingByUser in repo
+	log.
+		// Need FindPendingByUser in repo
+		Println("debugprint: entering (*ManageExpenseUseCase).ListPendingExpenses")
+
 	return nil, nil
 }

@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"log"
 	"time"
 )
 
@@ -13,6 +14,7 @@ const (
 )
 
 func (v RadarVisibility) Valid() bool {
+	log.Println("debugprint: entering (RadarVisibility).Valid")
 	switch v {
 	case VisibilityShowAnonymous, VisibilityShowFriends, VisibilityHidden:
 		return true
