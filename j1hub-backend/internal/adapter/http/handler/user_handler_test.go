@@ -34,6 +34,18 @@ func (m *MockUserUC) UpdateProfile(ctx context.Context, userID string, cmd useca
 	return m.Called(ctx, userID, cmd).Error(0)
 }
 
+func (m *MockUserUC) UpdateLocation(ctx context.Context, userID string, lat, lng float64) error {
+	return m.Called(ctx, userID, lat, lng).Error(0)
+}
+
+func (m *MockUserUC) UpdateSettings(ctx context.Context, userID string, settings map[string]interface{}) error {
+	return m.Called(ctx, userID, settings).Error(0)
+}
+
+func (m *MockUserUC) DeleteAccount(ctx context.Context, userID string, password string) error {
+	return m.Called(ctx, userID, password).Error(0)
+}
+
 func TestUserHandler_GetProfile_Success(t *testing.T) {
 	userUC := new(MockUserUC)
 	h := handler.NewUserHandler(userUC)

@@ -15,8 +15,8 @@ func TestUserUseCase_GetProfile_Success(t *testing.T) {
 	userRepo := new(MockUserRepository)
 	profileRepo := new(MockProfileRepository)
 	creditRepo := new(MockCreditScoreRepository)
-
-	uc := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo)
+	hasher := new(MockHasher)
+	uc := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo, hasher)
 
 	ctx := context.Background()
 	userID := "usr_123"
@@ -46,8 +46,8 @@ func TestUserUseCase_GetProfile_UserNotFound(t *testing.T) {
 	userRepo := new(MockUserRepository)
 	profileRepo := new(MockProfileRepository)
 	creditRepo := new(MockCreditScoreRepository)
-
-	uc := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo)
+	hasher := new(MockHasher)
+	uc := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo, hasher)
 
 	ctx := context.Background()
 	userID := "usr_nonexistent"
@@ -65,8 +65,8 @@ func TestUserUseCase_UpdateProfile_Success(t *testing.T) {
 	userRepo := new(MockUserRepository)
 	profileRepo := new(MockProfileRepository)
 	creditRepo := new(MockCreditScoreRepository)
-
-	uc := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo)
+	hasher := new(MockHasher)
+	uc := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo, hasher)
 
 	ctx := context.Background()
 	userID := "usr_123"

@@ -25,7 +25,7 @@ func NewRouter(
 ) http.Handler {
 	log.Println("debugprint: entering NewRouter")
 	r := chi.NewRouter()
-
+	r.Use(middleware.CORS)
 	r.Use(middleware.Logger)
 	r.Use(chimiddleware.Recoverer)
 
@@ -48,6 +48,9 @@ func NewRouter(
 			// User routes
 			r.Get("/user/profile", userH.GetProfile)
 			r.Patch("/user/profile", userH.UpdateProfile)
+			r.Post("/user/location", userH.UpdateLocation)
+			r.Patch("/user/settings", userH.UpdateSettings)
+			r.Delete("/user/account", userH.DeleteAccount)
 
 			// Mission routes
 			r.Get("/missions", missionH.ListMissions)
@@ -62,6 +65,7 @@ func NewRouter(
 			r.Get("/leaderboard", journeyH.GetLeaderboard)
 			r.Get("/user/badges", journeyH.ListBadges)
 			r.Get("/user/credit-score/history", journeyH.GetCreditHistory)
+			r.Get("/user/credit-history", journeyH.GetCreditHistory)
 
 			// Friend routes
 			r.Post("/friends/request", friendH.SendRequest)

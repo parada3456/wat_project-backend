@@ -23,30 +23,30 @@ func (v RadarVisibility) Valid() bool {
 }
 
 type User struct {
-	UserID              string
-	Email               string
-	PasswordHash        string
-	FirstName           string
-	LastName            string
-	CurrentPhaseID      string
-	TotalLifetimePoints int
-	CurrentPhasePoints  int
-	MissionStreak       int
-	ArrivalDate         time.Time
-	JobStartDate        time.Time
-	CreatedAt           time.Time
-	UpdatedAt           time.Time
+	UserID              string    `json:"user_id"`
+	Email               string    `json:"email"`
+	PasswordHash        string    `json:"password_hash,omitempty"`
+	FirstName           string    `json:"first_name"`
+	LastName            string    `json:"last_name"`
+	CurrentPhaseID      string    `json:"current_phase_id"`
+	TotalLifetimePoints int       `json:"total_lifetime_points"`
+	CurrentPhasePoints  int       `json:"current_phase_points"`
+	MissionStreak       int       `json:"mission_streak"`
+	ArrivalDate         time.Time `json:"arrival_date"`
+	JobStartDate        time.Time `json:"job_start_date"`
+	CreatedAt           time.Time `json:"created_at"`
+	UpdatedAt           time.Time `json:"updated_at"`
 }
 
 type Profile struct {
-	ProfileID         string
-	UserID            string
-	PhoneNumber       string
-	Bio               string
-	AvatarURL         string
-	RadarVisibility   RadarVisibility
-	Lat               float64
-	Lng               float64
-	LocationUpdatedAt time.Time
-	UpdatedAt         time.Time
+	ProfileID         string          `json:"profile_id"`
+	UserID            string          `json:"user_id"`
+	PhoneNumber       string          `json:"phone_number"`
+	Bio               string          `json:"bio"`
+	AvatarURL         string          `json:"avatar_url"`
+	RadarVisibility   RadarVisibility `json:"radar_visibility"`
+	Lat               float64         `json:"lat"`
+	Lng               float64         `json:"lng"`
+	LocationUpdatedAt time.Time       `json:"location_updated_at"`
+	UpdatedAt         time.Time       `json:"updated_at"`
 }

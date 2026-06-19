@@ -23,12 +23,12 @@ func (s FriendshipStatus) Valid() bool {
 }
 
 type Friendship struct {
-	FriendshipID string
-	UserID1      string
-	UserID2      string
-	Status       FriendshipStatus
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	FriendshipID string           `json:"friendship_id"`
+	UserID1      string           `json:"user_id1"`
+	UserID2      string           `json:"user_id2"`
+	Status       FriendshipStatus `json:"status"`
+	CreatedAt    time.Time        `json:"created_at"`
+	UpdatedAt    time.Time        `json:"updated_at"`
 }
 
 func CanonicalOrder(a, b string) (string, string) {

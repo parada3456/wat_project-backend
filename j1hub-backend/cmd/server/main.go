@@ -59,7 +59,7 @@ func main() {
 	rewardEngine := usecase.NewRewardEngine(cfg, userRepo, umRepo)
 	registerUC := usecase.NewRegisterUserUseCase(pool, userRepo, profileRepo, creditRepo, phaseRepo, historyRepo, missionRepo, umRepo, hasher, issuer, clock)
 	loginUC := usecase.NewLoginUseCase(userRepo, hasher, issuer)
-	userUC := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo)
+	userUC := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo, hasher)
 
 	taskRepo := postgres.NewTaskRepository(pool)
 	utRepo := postgres.NewUserTaskRepository(pool)
