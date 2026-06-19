@@ -21,6 +21,7 @@ func NewRouter(
 	expenseH *ExpenseHandler,
 	notifH *NotificationHandler,
 	jobH *JobHandler,
+	adminH *AdminHandler,
 ) http.Handler {
 	log.Println("debugprint: entering NewRouter")
 	r := chi.NewRouter()
@@ -102,7 +103,12 @@ func NewRouter(
 			r.Use(middleware.RequireAdmin)
 
 			// Admin routes
-			// ...
+			r.Get("/admin/dashboard/stats", adminH.GetStats)
+			r.Get("/admin/user-missions", adminH.ListPendingVerifications)
+			r.Patch("/admin/user-missions/{id}/verify", adminH.VerifyMission)
+			r.Get("/admin/users", adminH.ListUsers)
+			r.Get("/admin/users/{id}", adminH.GetUserDetail)
+			r.Post("/admin/users/{id}/adjust-points", adminH.AdjustPoints)
 		})
 	})
 

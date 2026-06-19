@@ -4,6 +4,8 @@ import (
 	"context"
 	"io"
 	"time"
+
+	"github.com/j1hub/backend/internal/domain"
 )
 
 type PasswordHasher interface {
@@ -35,3 +37,29 @@ type StoragePort interface {
 type NotifierPort interface {
 	Send(ctx context.Context, userID, title, body string) error
 }
+
+type AdminStats struct {
+	TotalUsers           int `json:"totalUsers"`
+	ActiveUsers          int `json:"activeUsers"`
+	PendingVerifications int `json:"pendingVerifications"`
+	ActiveJobs           int `json:"activeJobs"`
+	AverageCreditScore   int `json:"averageCreditScore"`
+	TotalPointsAwarded   int `json:"totalPointsAwarded"`
+}
+
+type PointsAdjustmentResult struct {
+	UserID               string `json:"userId"`
+	LifetimeBalanceAfter int    `json:"lifetimeBalanceAfter"`
+	PhaseBalanceAfter    int    `json:"phaseBalanceAfter"`
+	LedgerID             string `json:"ledgerId"`
+}
+
+type AdminUseCase interface {
+	GetDashboardStats(ctx context.Context) (*AdminStats, error)
+	ListPendingVerifications(ctx context.Context) ([]domain.UserMission, error)
+	VerifyMission(ctx context.Context, adminID, userMissionID string, approved bool, rejectionReason *string) (*domain.UserMission, error)
+	ListUsers(ctx context.Context, search string) ([]domain.User, error)
+	GetUserDetail(ctx context.Context, id string) (*domain.User, error)
+	AdjustPoints(ctx context.Context, userID string, delta int, reason string) (*PointsAdjustmentResult, error)
+}
+
