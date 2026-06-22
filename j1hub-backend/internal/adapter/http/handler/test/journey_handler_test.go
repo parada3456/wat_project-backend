@@ -1,12 +1,15 @@
 package handler_test
+
 import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+
 	"github.com/j1hub/backend/internal/adapter/http/handler"
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
-	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
 	"github.com/j1hub/backend/internal/usecase"
 	"github.com/stretchr/testify/assert"
@@ -18,7 +21,7 @@ func TestJourneyHandler_ListPhases(t *testing.T) {
 	h := handler.NewJourneyHandler(journeyUC, nil, nil)
 
 	// success path
-	journeyUC.On("ListPhases", mock.Anything).Return([]domain.JourneyPhase{{PhaseID: "p1"}}, nil).Once()
+	journeyUC.On("ListPhases", mock.Anything).Return([]gamificationdomain.JourneyPhase{{PhaseID: "p1"}}, nil).Once()
 	req := httptest.NewRequest("GET", "/journey/phases", nil)
 	w := httptest.NewRecorder()
 	h.ListPhases(w, req)
@@ -31,7 +34,6 @@ func TestJourneyHandler_ListPhases(t *testing.T) {
 	h.ListPhases(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
-
 
 func TestJourneyHandler_AdvancePhase(t *testing.T) {
 	advanceUC := new(MockAdvancePhaseUC)
@@ -60,7 +62,6 @@ func TestJourneyHandler_AdvancePhase(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
-
 func TestJourneyHandler_GetHistory(t *testing.T) {
 	journeyUC := new(MockJourneyUC)
 	h := handler.NewJourneyHandler(journeyUC, nil, nil)
@@ -72,7 +73,7 @@ func TestJourneyHandler_GetHistory(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	journeyUC.On("GetHistory", mock.Anything, "usr_1").Return([]domain.UserPhaseHistory{}, nil).Once()
+	journeyUC.On("GetHistory", mock.Anything, "usr_1").Return([]gamificationdomain.UserPhaseHistory{}, nil).Once()
 	req = httptest.NewRequest("GET", "/journey/history", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -87,7 +88,6 @@ func TestJourneyHandler_GetHistory(t *testing.T) {
 	h.GetHistory(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
-
 
 func TestJourneyHandler_GetLeaderboard(t *testing.T) {
 	leaderboardUC := new(MockLeaderboardUC)
@@ -108,7 +108,6 @@ func TestJourneyHandler_GetLeaderboard(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
-
 func TestJourneyHandler_ListBadges(t *testing.T) {
 	journeyUC := new(MockJourneyUC)
 	h := handler.NewJourneyHandler(journeyUC, nil, nil)
@@ -120,7 +119,7 @@ func TestJourneyHandler_ListBadges(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	journeyUC.On("ListUserBadges", mock.Anything, "usr_1").Return([]domain.UserBadge{}, nil).Once()
+	journeyUC.On("ListUserBadges", mock.Anything, "usr_1").Return([]gamificationdomain.UserBadge{}, nil).Once()
 	req = httptest.NewRequest("GET", "/user/badges", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -136,7 +135,6 @@ func TestJourneyHandler_ListBadges(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
-
 func TestJourneyHandler_GetCreditHistory(t *testing.T) {
 	journeyUC := new(MockJourneyUC)
 	h := handler.NewJourneyHandler(journeyUC, nil, nil)
@@ -148,7 +146,7 @@ func TestJourneyHandler_GetCreditHistory(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	journeyUC.On("GetCreditScoreHistory", mock.Anything, "usr_1").Return([]domain.PointLedger{}, nil).Once()
+	journeyUC.On("GetCreditScoreHistory", mock.Anything, "usr_1").Return([]gamificationdomain.PointLedger{}, nil).Once()
 	req = httptest.NewRequest("GET", "/user/credit-score/history", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -164,7 +162,6 @@ func TestJourneyHandler_GetCreditHistory(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
-
 func TestJourneyHandler_GetPointsLedger(t *testing.T) {
 	journeyUC := new(MockJourneyUC)
 	h := handler.NewJourneyHandler(journeyUC, nil, nil)
@@ -176,7 +173,7 @@ func TestJourneyHandler_GetPointsLedger(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	journeyUC.On("GetPointsLedger", mock.Anything, "usr_1").Return([]domain.PointLedger{}, nil).Once()
+	journeyUC.On("GetPointsLedger", mock.Anything, "usr_1").Return([]gamificationdomain.PointLedger{}, nil).Once()
 	req = httptest.NewRequest("GET", "/user/points/ledger", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()

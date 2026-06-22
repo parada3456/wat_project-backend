@@ -4,7 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/j1hub/backend/internal/domain"
+	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+
 	"github.com/j1hub/backend/internal/usecase"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,7 +22,7 @@ func TestJourneyUseCase_ListUserBadges_Success(t *testing.T) {
 
 	ctx := context.Background()
 	userID := "usr_123"
-	mockBadges := []domain.UserBadge{
+	mockBadges := []gamificationdomain.UserBadge{
 		{UserID: userID, BadgeID: "badge_1"},
 		{UserID: userID, BadgeID: "badge_2"},
 	}
@@ -67,7 +68,7 @@ func TestJourneyUseCase_GetPointsLedger_Success(t *testing.T) {
 
 	ctx := context.Background()
 	userID := "usr_123"
-	mockLedger := []domain.PointLedger{
+	mockLedger := []gamificationdomain.PointLedger{
 		{LedgerID: "ldg_1", UserID: userID, Delta: 100},
 	}
 

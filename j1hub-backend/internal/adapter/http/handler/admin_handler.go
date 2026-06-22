@@ -49,8 +49,6 @@ func (h *AdminHandler) ListPendingVerifications(w http.ResponseWriter, r *http.R
 	apperror.RespondList(w, ums, page, pageSize, len(ums))
 }
 
-
-
 func (h *AdminHandler) VerifyMission(w http.ResponseWriter, r *http.Request) {
 	userMissionID := chi.URLParam(r, "id")
 	claims := middleware.GetClaims(r.Context())
@@ -101,8 +99,6 @@ func (h *AdminHandler) GetUserDetail(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(user)
 }
-
-
 
 func (h *AdminHandler) AdjustPoints(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "id")

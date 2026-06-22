@@ -15,4 +15,3 @@ type UpdateLocationReq struct {
 type DeleteAccountReq struct {
 	CurrentPassword string `json:"current_password" validate:"required"`
 }
-

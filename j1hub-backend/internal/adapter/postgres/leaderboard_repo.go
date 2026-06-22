@@ -5,7 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/j1hub/backend/internal/domain"
+	userdomain "github.com/j1hub/backend/internal/user/domain"
+
 	"github.com/j1hub/backend/internal/port"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -19,7 +20,7 @@ func NewLeaderboardRepository(pool *pgxpool.Pool) port.LeaderboardRepository {
 	return &leaderboardRepo{pool: pool}
 }
 
-func (r *leaderboardRepo) FindByScope(ctx context.Context, scope, jobID string) ([]domain.User, error) {
+func (r *leaderboardRepo) FindByScope(ctx context.Context, scope, jobID string) ([]userdomain.User, error) {
 	log.Println("debugprint: entering (*leaderboardRepo).FindByScope")
 	query := `
 		SELECT u.user_id, u.email, u.first_name, u.last_name, u.current_phase_id, u.total_lifetime_points, u.current_phase_points, u.mission_streak, u.arrival_date, u.job_start_date, u.created_at, u.updated_at
@@ -38,9 +39,9 @@ func (r *leaderboardRepo) FindByScope(ctx context.Context, scope, jobID string) 
 		return nil, err
 	}
 	defer rows.Close()
-	var users []domain.User
+	var users []userdomain.User
 	for rows.Next() {
-		var u domain.User
+		var u userdomain.User
 		var currentPhaseID *string
 		var arrivalDate *time.Time
 		var jobStartDate *time.Time

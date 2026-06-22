@@ -7,18 +7,19 @@ import (
 	"net/http"
 	"strconv"
 
+	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
-	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/usecase"
 	"github.com/j1hub/backend/pkg/apperror"
 )
 
 type JourneyUC interface {
-	ListPhases(ctx context.Context) ([]domain.JourneyPhase, error)
-	GetHistory(ctx context.Context, userID string) ([]domain.UserPhaseHistory, error)
-	ListUserBadges(ctx context.Context, userID string) ([]domain.UserBadge, error)
-	GetCreditScoreHistory(ctx context.Context, userID string) ([]domain.PointLedger, error)
-	GetPointsLedger(ctx context.Context, userID string) ([]domain.PointLedger, error)
+	ListPhases(ctx context.Context) ([]gamificationdomain.JourneyPhase, error)
+	GetHistory(ctx context.Context, userID string) ([]gamificationdomain.UserPhaseHistory, error)
+	ListUserBadges(ctx context.Context, userID string) ([]gamificationdomain.UserBadge, error)
+	GetCreditScoreHistory(ctx context.Context, userID string) ([]gamificationdomain.PointLedger, error)
+	GetPointsLedger(ctx context.Context, userID string) ([]gamificationdomain.PointLedger, error)
 }
 
 type AdvancePhaseUC interface {

@@ -1,21 +1,21 @@
 package dto
 
 import (
-	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/usecase"
+	userdomain "github.com/j1hub/backend/internal/user/domain"
 )
 
 type GetProfileResponse struct {
-	User        *domain.User    `json:"user"`
-	Profile     *domain.Profile `json:"profile"`
-	UserID      string          `json:"user_id,omitempty"`
-	Email       string          `json:"email,omitempty"`
-	FirstName   string          `json:"first_name,omitempty"`
-	LastName    string          `json:"last_name,omitempty"`
-	Points      int             `json:"points"`
-	Bio         string          `json:"bio,omitempty"`
-	AvatarURL   string          `json:"avatar_url,omitempty"`
-	CreditScore int             `json:"credit_score"`
+	User        *userdomain.User    `json:"user"`
+	Profile     *userdomain.Profile `json:"profile"`
+	UserID      string              `json:"user_id,omitempty"`
+	Email       string              `json:"email,omitempty"`
+	FirstName   string              `json:"first_name,omitempty"`
+	LastName    string              `json:"last_name,omitempty"`
+	Points      int                 `json:"points"`
+	Bio         string              `json:"bio,omitempty"`
+	AvatarURL   string              `json:"avatar_url,omitempty"`
+	CreditScore int                 `json:"credit_score"`
 }
 
 type GetPublicProfileResponse struct {
@@ -25,7 +25,7 @@ type GetPublicProfileResponse struct {
 	AvatarURL string `json:"avatar_url,omitempty"`
 }
 
-func NewGetPublicProfileResponse(user *domain.User, profile *domain.Profile) *GetPublicProfileResponse {
+func NewGetPublicProfileResponse(user *userdomain.User, profile *userdomain.Profile) *GetPublicProfileResponse {
 	resp := &GetPublicProfileResponse{
 		UserID:    user.UserID,
 		FirstName: user.FirstName,

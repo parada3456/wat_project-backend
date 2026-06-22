@@ -6,6 +6,9 @@ import (
 	"log"
 	"time"
 
+	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	userdomain "github.com/j1hub/backend/internal/user/domain"
+
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
 	"github.com/jackc/pgx/v5"
@@ -66,7 +69,7 @@ func (r *adminRepo) GetStats(ctx context.Context) (*port.AdminStats, error) {
 	return stats, nil
 }
 
-func (r *adminRepo) ListPendingVerifications(ctx context.Context) ([]domain.UserMission, error) {
+func (r *adminRepo) ListPendingVerifications(ctx context.Context) ([]missiondomain.UserMission, error) {
 	log.Println("debugprint: entering (*adminRepo).ListPendingVerifications")
 	query := `
 		SELECT 
@@ -85,9 +88,9 @@ func (r *adminRepo) ListPendingVerifications(ctx context.Context) ([]domain.User
 	}
 	defer rows.Close()
 
-	var ums []domain.UserMission
+	var ums []missiondomain.UserMission
 	for rows.Next() {
-		var um domain.UserMission
+		var um missiondomain.UserMission
 		var proofURL *string
 		var verifiedBy *string
 		err := rows.Scan(
@@ -112,7 +115,7 @@ func (r *adminRepo) ListPendingVerifications(ctx context.Context) ([]domain.User
 	return ums, nil
 }
 
-func (r *adminRepo) SearchUsers(ctx context.Context, query string) ([]domain.User, error) {
+func (r *adminRepo) SearchUsers(ctx context.Context, query string) ([]userdomain.User, error) {
 	log.Println("debugprint: entering (*adminRepo).SearchUsers")
 	var rows pgx.Rows
 	var err error
@@ -143,9 +146,9 @@ func (r *adminRepo) SearchUsers(ctx context.Context, query string) ([]domain.Use
 	}
 	defer rows.Close()
 
-	var users []domain.User
+	var users []userdomain.User
 	for rows.Next() {
-		var u domain.User
+		var u userdomain.User
 		var currentPhaseID *string
 		var arrivalDate *timeToNullWrapper
 		var jobStartDate *timeToNullWrapper

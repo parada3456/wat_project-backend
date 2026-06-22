@@ -2,24 +2,26 @@ package dto
 
 import (
 	"time"
-	"github.com/j1hub/backend/internal/domain"
+
+	userdomain "github.com/j1hub/backend/internal/user/domain"
+
 	"github.com/j1hub/backend/internal/port"
 )
 
 type RegisterResponse struct {
-	UserID         string     `json:"user_id"`
-	Email          string     `json:"email"`
-	FirstName      string     `json:"first_name"`
-	LastName       string     `json:"last_name"`
-	CurrentPhaseID string     `json:"current_phase_id"`
-	CreatedAt      time.Time  `json:"created_at"`
-	AccessToken    string     `json:"access_token"`
-	RefreshToken   string     `json:"refresh_token"`
-	ExpiresAt      time.Time  `json:"expires_at"`
-	TokenType      string     `json:"token_type"`
+	UserID         string    `json:"user_id"`
+	Email          string    `json:"email"`
+	FirstName      string    `json:"first_name"`
+	LastName       string    `json:"last_name"`
+	CurrentPhaseID string    `json:"current_phase_id"`
+	CreatedAt      time.Time `json:"created_at"`
+	AccessToken    string    `json:"access_token"`
+	RefreshToken   string    `json:"refresh_token"`
+	ExpiresAt      time.Time `json:"expires_at"`
+	TokenType      string    `json:"token_type"`
 }
 
-func NewRegisterResponse(user *domain.User, tokens *port.TokenPair) *RegisterResponse {
+func NewRegisterResponse(user *userdomain.User, tokens *port.TokenPair) *RegisterResponse {
 	return &RegisterResponse{
 		UserID:         user.UserID,
 		Email:          user.Email,
@@ -35,14 +37,14 @@ func NewRegisterResponse(user *domain.User, tokens *port.TokenPair) *RegisterRes
 }
 
 type LoginResponse struct {
-	UserID       string `json:"user_id"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	UserID       string    `json:"user_id"`
+	AccessToken  string    `json:"access_token"`
+	RefreshToken string    `json:"refresh_token"`
 	ExpiresAt    time.Time `json:"expires_at"`
-	TokenType    string `json:"token_type"`
+	TokenType    string    `json:"token_type"`
 }
 
-func NewLoginResponse(user *domain.User, tokens *port.TokenPair) *LoginResponse {
+func NewLoginResponse(user *userdomain.User, tokens *port.TokenPair) *LoginResponse {
 	return &LoginResponse{
 		UserID:       user.UserID,
 		AccessToken:  tokens.AccessToken,
@@ -53,9 +55,9 @@ func NewLoginResponse(user *domain.User, tokens *port.TokenPair) *LoginResponse 
 }
 
 type RefreshResponse struct {
-	AccessToken string `json:"access_token"`
+	AccessToken string    `json:"access_token"`
 	ExpiresAt   time.Time `json:"expires_at"`
-	TokenType   string `json:"token_type"`
+	TokenType   string    `json:"token_type"`
 }
 
 func NewRefreshResponse(tokens *port.TokenPair) *RefreshResponse {

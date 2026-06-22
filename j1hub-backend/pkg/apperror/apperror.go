@@ -157,4 +157,3 @@ func RespondList(w http.ResponseWriter, items interface{}, page, pageSize, total
 		},
 	})
 }
-

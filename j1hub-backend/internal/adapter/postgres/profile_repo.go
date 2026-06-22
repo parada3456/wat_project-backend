@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	userdomain "github.com/j1hub/backend/internal/user/domain"
+
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
 	"github.com/jackc/pgx/v5"
@@ -21,7 +23,7 @@ func NewProfileRepository(pool *pgxpool.Pool) port.ProfileRepository {
 	return &profileRepo{pool: pool}
 }
 
-func (r *profileRepo) Create(ctx context.Context, p *domain.Profile) error {
+func (r *profileRepo) Create(ctx context.Context, p *userdomain.Profile) error {
 	log.Println("debugprint: entering (*profileRepo).Create")
 	query := `
 		INSERT INTO profiles (
@@ -39,7 +41,7 @@ func (r *profileRepo) Create(ctx context.Context, p *domain.Profile) error {
 	return nil
 }
 
-func (r *profileRepo) FindByUserID(ctx context.Context, userID string) (*domain.Profile, error) {
+func (r *profileRepo) FindByUserID(ctx context.Context, userID string) (*userdomain.Profile, error) {
 	log.Println("debugprint: entering (*profileRepo).FindByUserID")
 	query := `
 		SELECT 
@@ -49,7 +51,7 @@ func (r *profileRepo) FindByUserID(ctx context.Context, userID string) (*domain.
 		FROM profiles WHERE user_id = $1`
 
 	row := r.pool.QueryRow(ctx, query, userID)
-	var p domain.Profile
+	var p userdomain.Profile
 	var locUpdated *time.Time
 	err := row.Scan(
 		&p.ProfileID, &p.UserID, &p.PhoneNumber, &p.Bio, &p.AvatarURL,
@@ -67,7 +69,7 @@ func (r *profileRepo) FindByUserID(ctx context.Context, userID string) (*domain.
 	return &p, nil
 }
 
-func (r *profileRepo) Update(ctx context.Context, p *domain.Profile) error {
+func (r *profileRepo) Update(ctx context.Context, p *userdomain.Profile) error {
 	log.Println("debugprint: entering (*profileRepo).Update")
 	query := `
 		UPDATE profiles SET 

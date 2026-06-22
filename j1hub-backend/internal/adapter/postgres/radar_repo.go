@@ -4,7 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/j1hub/backend/internal/domain"
+	userdomain "github.com/j1hub/backend/internal/user/domain"
+
 	"github.com/j1hub/backend/internal/port"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -18,7 +19,7 @@ func NewRadarRepository(pool *pgxpool.Pool) port.RadarRepository {
 	return &radarRepo{pool: pool}
 }
 
-func (r *radarRepo) FindNearby(ctx context.Context, lat, lng, radius float64, staleMinutes int) ([]domain.Profile, error) {
+func (r *radarRepo) FindNearby(ctx context.Context, lat, lng, radius float64, staleMinutes int) ([]userdomain.Profile, error) {
 	log.Println("debugprint: entering (*radarRepo).FindNearby")
 	query := `
 		SELECT 
@@ -38,9 +39,9 @@ func (r *radarRepo) FindNearby(ctx context.Context, lat, lng, radius float64, st
 		return nil, err
 	}
 	defer rows.Close()
-	var profiles []domain.Profile
+	var profiles []userdomain.Profile
 	for rows.Next() {
-		var p domain.Profile
+		var p userdomain.Profile
 		if err := rows.Scan(&p.ProfileID, &p.UserID, &p.PhoneNumber, &p.Bio, &p.AvatarURL, &p.RadarVisibility, &p.Lng, &p.Lat, &p.LocationUpdatedAt, &p.UpdatedAt); err != nil {
 			return nil, err
 		}

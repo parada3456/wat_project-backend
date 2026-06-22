@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/j1hub/backend/internal/adapter/http/handler/dto"
+	frienddomain "github.com/j1hub/backend/internal/friend/domain"
 
 	"context"
 	"encoding/json"
@@ -10,16 +11,15 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
-	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/usecase"
 	"github.com/j1hub/backend/pkg/apperror"
 )
 
 type FriendshipUC interface {
 	SendRequest(ctx context.Context, senderID, targetID string) error
-	ListPendingRequests(ctx context.Context, userID string) ([]domain.Friendship, error)
+	ListPendingRequests(ctx context.Context, userID string) ([]frienddomain.Friendship, error)
 	RespondToRequest(ctx context.Context, userID, friendshipID string, accept bool) error
-	ListFriends(ctx context.Context, userID string) ([]domain.Friendship, error)
+	ListFriends(ctx context.Context, userID string) ([]frienddomain.Friendship, error)
 	RemoveFriend(ctx context.Context, userID, friendID string) error
 }
 
@@ -36,8 +36,6 @@ func NewFriendHandler(friendshipUC FriendshipUC, radarUC RadarUC) *FriendHandler
 	log.Println("debugprint: entering NewFriendHandler")
 	return &FriendHandler{friendshipUC: friendshipUC, radarUC: radarUC}
 }
-
-
 
 func (h *FriendHandler) SendRequest(w http.ResponseWriter, r *http.Request) {
 	log.Println("debugprint: entering (*FriendHandler).SendRequest")
@@ -79,8 +77,6 @@ func (h *FriendHandler) ListPendingRequests(w http.ResponseWriter, r *http.Reque
 	page, pageSize := parsePagination(r)
 	apperror.RespondList(w, requests, page, pageSize, len(requests))
 }
-
-
 
 func (h *FriendHandler) RespondToRequest(w http.ResponseWriter, r *http.Request) {
 	log.Println("debugprint: entering (*FriendHandler).RespondToRequest")

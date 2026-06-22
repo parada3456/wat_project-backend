@@ -1,8 +1,9 @@
 package dto
 
 import (
-	"github.com/j1hub/backend/internal/domain"
 	"time"
+
+	missiondomain "github.com/j1hub/backend/internal/mission/domain"
 )
 
 type DashboardStatsResponse struct {
@@ -16,7 +17,7 @@ type VerifyMissionResponse struct {
 	VerifiedBy    string     `json:"verifiedBy"`
 }
 
-func NewVerifyMissionResponse(um *domain.UserMission) *VerifyMissionResponse {
+func NewVerifyMissionResponse(um *missiondomain.UserMission) *VerifyMissionResponse {
 	return &VerifyMissionResponse{
 		UserMissionID: um.UserMissionID,
 		Status:        string(um.Status),

@@ -1,4 +1,5 @@
 package handler_test
+
 import (
 	"bytes"
 	"context"
@@ -8,10 +9,12 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/j1hub/backend/internal/adapter/http/handler"
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
-	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
 	"github.com/j1hub/backend/internal/usecase"
 	"github.com/stretchr/testify/assert"
@@ -29,7 +32,7 @@ func TestMissionHandler_ListUserMissions(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	missionUC.On("ListAvailableMissions", mock.Anything, "usr_1").Return([]domain.UserMission{}, nil).Once()
+	missionUC.On("ListAvailableMissions", mock.Anything, "usr_1").Return([]missiondomain.UserMission{}, nil).Once()
 	req = httptest.NewRequest("GET", "/user-missions", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -45,7 +48,6 @@ func TestMissionHandler_ListUserMissions(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
-
 func TestMissionHandler_ListMissions(t *testing.T) {
 	missionUC := new(MockMissionUC)
 	h := handler.NewMissionHandler(missionUC, nil)
@@ -57,7 +59,7 @@ func TestMissionHandler_ListMissions(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	missionUC.On("ListStaticMissions", mock.Anything, "usr_1").Return([]domain.Mission{}, nil).Once()
+	missionUC.On("ListStaticMissions", mock.Anything, "usr_1").Return([]missiondomain.Mission{}, nil).Once()
 	req = httptest.NewRequest("GET", "/missions", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -72,7 +74,6 @@ func TestMissionHandler_ListMissions(t *testing.T) {
 	h.ListMissions(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
-
 
 func TestMissionHandler_GetMissionDetail(t *testing.T) {
 	missionUC := new(MockMissionUC)
@@ -104,7 +105,6 @@ func TestMissionHandler_GetMissionDetail(t *testing.T) {
 	h.GetMissionDetail(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
-
 
 func TestMissionHandler_SubmitProof(t *testing.T) {
 	completeUC := new(MockCompleteMissionUC)
@@ -157,7 +157,6 @@ func TestMissionHandler_SubmitProof(t *testing.T) {
 	h.SubmitProof(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
-
 
 func TestMissionHandler_ToggleTask(t *testing.T) {
 	missionUC := new(MockMissionUC)

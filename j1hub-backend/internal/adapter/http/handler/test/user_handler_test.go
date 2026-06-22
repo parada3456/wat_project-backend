@@ -8,10 +8,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	userdomain "github.com/j1hub/backend/internal/user/domain"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/j1hub/backend/internal/adapter/http/handler"
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
-	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
 	"github.com/j1hub/backend/internal/usecase"
 	"github.com/stretchr/testify/assert"
@@ -31,15 +32,15 @@ func (m *MockUserUC) GetProfile(ctx context.Context, userID string) (*usecase.Us
 	return args.Get(0).(*usecase.UserProfileResponse), args.Error(1)
 }
 
-func (m *MockUserUC) GetPublicProfile(ctx context.Context, currentUserID, targetUserID string) (*domain.User, *domain.Profile, error) {
+func (m *MockUserUC) GetPublicProfile(ctx context.Context, currentUserID, targetUserID string) (*userdomain.User, *userdomain.Profile, error) {
 	args := m.Called(ctx, currentUserID, targetUserID)
-	var u *domain.User
+	var u *userdomain.User
 	if args.Get(0) != nil {
-		u = args.Get(0).(*domain.User)
+		u = args.Get(0).(*userdomain.User)
 	}
-	var p *domain.Profile
+	var p *userdomain.Profile
 	if args.Get(1) != nil {
-		p = args.Get(1).(*domain.Profile)
+		p = args.Get(1).(*userdomain.Profile)
 	}
 	return u, p, args.Error(2)
 }
@@ -66,8 +67,8 @@ func TestUserHandler_GetProfile_Success(t *testing.T) {
 
 	userID := "usr_123"
 	profileResp := &usecase.UserProfileResponse{
-		User:    &domain.User{UserID: userID, Email: "john@example.com"},
-		Profile: &domain.Profile{UserID: userID, Bio: "Hello world"},
+		User:    &userdomain.User{UserID: userID, Email: "john@example.com"},
+		Profile: &userdomain.Profile{UserID: userID, Bio: "Hello world"},
 	}
 
 	userUC.On("GetProfile", mock.Anything, userID).Return(profileResp, nil)
@@ -75,13 +76,13 @@ func TestUserHandler_GetProfile_Success(t *testing.T) {
 	req := httptest.NewRequest("GET", "/api/v1/user/profile", nil)
 	ctx := middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: userID})
 	req = req.WithContext(ctx)
-	
+
 	w := httptest.NewRecorder()
 
 	h.GetProfile(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	
+
 	var resp usecase.UserProfileResponse
 	err := json.Unmarshal(w.Body.Bytes(), &resp)
 	assert.NoError(t, err)
@@ -120,7 +121,7 @@ func TestUserHandler_UpdateProfile_Success(t *testing.T) {
 	req := httptest.NewRequest("PATCH", "/api/v1/user/profile", bytes.NewBufferString(body))
 	ctx := middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: userID})
 	req = req.WithContext(ctx)
-	
+
 	w := httptest.NewRecorder()
 
 	h.UpdateProfile(w, req)
@@ -133,18 +134,18 @@ func TestUserHandler_GetPublicProfile_Success(t *testing.T) {
 	h := handler.NewUserHandler(userUC)
 
 	userUC.On("GetPublicProfile", mock.Anything, "usr_1", "usr_2").Return(
-		&domain.User{UserID: "usr_2", FirstName: "Somchai", LastName: "Deejai"},
-		&domain.Profile{UserID: "usr_2", AvatarURL: "somchai.png"},
+		&userdomain.User{UserID: "usr_2", FirstName: "Somchai", LastName: "Deejai"},
+		&userdomain.Profile{UserID: "usr_2", AvatarURL: "somchai.png"},
 		nil,
 	)
 
 	req := httptest.NewRequest("GET", "/api/v1/users/usr_2", nil)
 	ctx := middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"})
-	
+
 	rctx := chi.NewRouteContext()
 	rctx.URLParams.Add("id", "usr_2")
 	ctx = context.WithValue(ctx, chi.RouteCtxKey, rctx)
-	
+
 	req = req.WithContext(ctx)
 
 	w := httptest.NewRecorder()

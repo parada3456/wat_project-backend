@@ -4,7 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/j1hub/backend/internal/domain"
+	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+
 	"github.com/j1hub/backend/internal/port"
 )
 
@@ -36,7 +37,7 @@ func NewJourneyUseCase(
 	}
 }
 
-func (uc *JourneyUseCase) ListPhases(ctx context.Context) ([]domain.JourneyPhase, error) {
+func (uc *JourneyUseCase) ListPhases(ctx context.Context) ([]gamificationdomain.JourneyPhase, error) {
 	log.
 		// Need ListAll in repo
 		Println("debugprint: entering (*JourneyUseCase).ListPhases")
@@ -44,7 +45,7 @@ func (uc *JourneyUseCase) ListPhases(ctx context.Context) ([]domain.JourneyPhase
 	return nil, nil
 }
 
-func (uc *JourneyUseCase) GetHistory(ctx context.Context, userID string) ([]domain.UserPhaseHistory, error) {
+func (uc *JourneyUseCase) GetHistory(ctx context.Context, userID string) ([]gamificationdomain.UserPhaseHistory, error) {
 	log.
 		// Need FindByUser in repo
 		Println("debugprint: entering (*JourneyUseCase).GetHistory")
@@ -52,17 +53,17 @@ func (uc *JourneyUseCase) GetHistory(ctx context.Context, userID string) ([]doma
 	return nil, nil
 }
 
-func (uc *JourneyUseCase) ListUserBadges(ctx context.Context, userID string) ([]domain.UserBadge, error) {
+func (uc *JourneyUseCase) ListUserBadges(ctx context.Context, userID string) ([]gamificationdomain.UserBadge, error) {
 	log.Println("debugprint: entering (*JourneyUseCase).ListUserBadges")
 	return uc.ubRepo.FindByUser(ctx, userID)
 }
 
-func (uc *JourneyUseCase) GetCreditScoreHistory(ctx context.Context, userID string) ([]domain.PointLedger, error) {
+func (uc *JourneyUseCase) GetCreditScoreHistory(ctx context.Context, userID string) ([]gamificationdomain.PointLedger, error) {
 	log.Println("debugprint: entering (*JourneyUseCase).GetCreditScoreHistory")
 	return nil, nil
 }
 
-func (uc *JourneyUseCase) GetPointsLedger(ctx context.Context, userID string) ([]domain.PointLedger, error) {
+func (uc *JourneyUseCase) GetPointsLedger(ctx context.Context, userID string) ([]gamificationdomain.PointLedger, error) {
 	log.Println("debugprint: entering (*JourneyUseCase).GetPointsLedger")
 	return uc.ledgerRepo.FindByUser(ctx, userID)
 }

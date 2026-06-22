@@ -1,14 +1,16 @@
 package dto
 
-import "github.com/j1hub/backend/internal/domain"
+import (
+	jobdomain "github.com/j1hub/backend/internal/job/domain"
+)
 
 type JobDetailResponse struct {
-	Job     *domain.JobPosting        `json:"job"`
-	Housing []domain.JobHousing       `json:"housing"`
-	Rating  *domain.JobOverallRating  `json:"rating"`
+	Job     *jobdomain.JobPosting       `json:"job"`
+	Housing []jobdomain.JobHousing      `json:"housing"`
+	Rating  *jobdomain.JobOverallRating `json:"rating"`
 }
 
-func NewJobDetailResponse(job *domain.JobPosting, housing []domain.JobHousing, rating *domain.JobOverallRating) *JobDetailResponse {
+func NewJobDetailResponse(job *jobdomain.JobPosting, housing []jobdomain.JobHousing, rating *jobdomain.JobOverallRating) *JobDetailResponse {
 	return &JobDetailResponse{
 		Job:     job,
 		Housing: housing,

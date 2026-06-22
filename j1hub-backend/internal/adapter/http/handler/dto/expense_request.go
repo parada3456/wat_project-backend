@@ -13,4 +13,3 @@ type CreateExpenseReq struct {
 		OweAmount float64 `json:"owe_amount" validate:"required,gt=0"`
 	} `json:"splits" validate:"required,dive"`
 }
-

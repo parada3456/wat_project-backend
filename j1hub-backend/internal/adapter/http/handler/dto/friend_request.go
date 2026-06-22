@@ -8,4 +8,3 @@ type RespondFriendReq struct {
 	Accept *bool  `json:"accept"`
 	Status string `json:"status"`
 }
-

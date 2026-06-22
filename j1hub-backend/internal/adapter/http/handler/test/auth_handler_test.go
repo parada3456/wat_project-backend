@@ -10,8 +10,9 @@ import (
 	"testing"
 	"time"
 
+	userdomain "github.com/j1hub/backend/internal/user/domain"
+
 	"github.com/j1hub/backend/internal/adapter/http/handler"
-	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
 	"github.com/j1hub/backend/internal/usecase"
 	"github.com/stretchr/testify/assert"
@@ -23,12 +24,12 @@ type MockRegisterUserUC struct {
 	mock.Mock
 }
 
-func (m *MockRegisterUserUC) Register(ctx context.Context, cmd usecase.RegisterCommand) (*domain.User, *port.TokenPair, error) {
+func (m *MockRegisterUserUC) Register(ctx context.Context, cmd usecase.RegisterCommand) (*userdomain.User, *port.TokenPair, error) {
 	args := m.Called(ctx, cmd)
 	if args.Get(0) == nil {
 		return nil, nil, args.Error(2)
 	}
-	return args.Get(0).(*domain.User), args.Get(1).(*port.TokenPair), args.Error(2)
+	return args.Get(0).(*userdomain.User), args.Get(1).(*port.TokenPair), args.Error(2)
 }
 
 // MockLoginUC
@@ -36,12 +37,12 @@ type MockLoginUC struct {
 	mock.Mock
 }
 
-func (m *MockLoginUC) Login(ctx context.Context, cmd usecase.LoginCommand) (*domain.User, *port.TokenPair, error) {
+func (m *MockLoginUC) Login(ctx context.Context, cmd usecase.LoginCommand) (*userdomain.User, *port.TokenPair, error) {
 	args := m.Called(ctx, cmd)
 	if args.Get(0) == nil {
 		return nil, nil, args.Error(2)
 	}
-	return args.Get(0).(*domain.User), args.Get(1).(*port.TokenPair), args.Error(2)
+	return args.Get(0).(*userdomain.User), args.Get(1).(*port.TokenPair), args.Error(2)
 }
 
 func (m *MockLoginUC) Refresh(ctx context.Context, refreshToken string) (*port.TokenPair, error) {
@@ -57,7 +58,7 @@ func TestAuthHandler_Register_Success(t *testing.T) {
 	logUC := new(MockLoginUC)
 	h := handler.NewAuthHandler(regUC, logUC)
 
-	user := &domain.User{
+	user := &userdomain.User{
 		UserID:    "usr_123",
 		Email:     "john@example.com",
 		FirstName: "John",
@@ -84,7 +85,7 @@ func TestAuthHandler_Register_Success(t *testing.T) {
 	h.Register(w, req)
 
 	assert.Equal(t, http.StatusCreated, w.Code)
-	
+
 	var resp map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &resp)
 	assert.NoError(t, err)
@@ -113,7 +114,7 @@ func TestAuthHandler_Login_Success(t *testing.T) {
 	logUC := new(MockLoginUC)
 	h := handler.NewAuthHandler(regUC, logUC)
 
-	user := &domain.User{
+	user := &userdomain.User{
 		UserID: "usr_123",
 		Email:  "john@example.com",
 	}
@@ -144,7 +145,7 @@ func TestAuthHandler_Login_Failure(t *testing.T) {
 	logUC.On("Login", mock.Anything, usecase.LoginCommand{
 		Email:    "john@example.com",
 		Password: "wrong_password",
-	}).Return((*domain.User)(nil), (*port.TokenPair)(nil), errors.New("invalid credentials"))
+	}).Return((*userdomain.User)(nil), (*port.TokenPair)(nil), errors.New("invalid credentials"))
 
 	body := `{"email":"john@example.com","password":"wrong_password"}`
 	req := httptest.NewRequest("POST", "/api/v1/auth/login", bytes.NewBufferString(body))

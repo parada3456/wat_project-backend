@@ -5,7 +5,8 @@ import (
 	"io"
 	"time"
 
-	"github.com/j1hub/backend/internal/domain"
+	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	userdomain "github.com/j1hub/backend/internal/user/domain"
 )
 
 type PasswordHasher interface {
@@ -56,10 +57,9 @@ type PointsAdjustmentResult struct {
 
 type AdminUseCase interface {
 	GetDashboardStats(ctx context.Context) (*AdminStats, error)
-	ListPendingVerifications(ctx context.Context) ([]domain.UserMission, error)
-	VerifyMission(ctx context.Context, adminID, userMissionID string, approved bool, rejectionReason *string) (*domain.UserMission, error)
-	ListUsers(ctx context.Context, search string) ([]domain.User, error)
-	GetUserDetail(ctx context.Context, id string) (*domain.User, error)
+	ListPendingVerifications(ctx context.Context) ([]missiondomain.UserMission, error)
+	VerifyMission(ctx context.Context, adminID, userMissionID string, approved bool, rejectionReason *string) (*missiondomain.UserMission, error)
+	ListUsers(ctx context.Context, search string) ([]userdomain.User, error)
+	GetUserDetail(ctx context.Context, id string) (*userdomain.User, error)
 	AdjustPoints(ctx context.Context, userID string, delta int, reason string) (*PointsAdjustmentResult, error)
 }
-

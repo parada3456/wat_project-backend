@@ -4,7 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/j1hub/backend/internal/domain"
+	notificationdomain "github.com/j1hub/backend/internal/notification/domain"
+
 	"github.com/j1hub/backend/internal/port"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -18,7 +19,7 @@ func NewNotificationRepository(pool *pgxpool.Pool) port.NotificationRepository {
 	return &notificationRepository{pool: pool}
 }
 
-func (r *notificationRepository) Insert(ctx context.Context, n *domain.Notification) error {
+func (r *notificationRepository) Insert(ctx context.Context, n *notificationdomain.Notification) error {
 	log.
 		// Implementation
 		Println("debugprint: entering (*notificationRepository).Insert")
@@ -26,7 +27,7 @@ func (r *notificationRepository) Insert(ctx context.Context, n *domain.Notificat
 	return nil
 }
 
-func (r *notificationRepository) FindByUser(ctx context.Context, userID string) ([]domain.Notification, error) {
+func (r *notificationRepository) FindByUser(ctx context.Context, userID string) ([]notificationdomain.Notification, error) {
 	log.
 		// Implementation
 		Println("debugprint: entering (*notificationRepository).FindByUser")

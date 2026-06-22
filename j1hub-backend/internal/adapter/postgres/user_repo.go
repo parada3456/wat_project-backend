@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	userdomain "github.com/j1hub/backend/internal/user/domain"
+
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
 	"github.com/jackc/pgx/v5"
@@ -37,9 +39,9 @@ func timeToNull(t time.Time) interface{} {
 	return t
 }
 
-func scanUser(row pgx.Row) (*domain.User, error) {
+func scanUser(row pgx.Row) (*userdomain.User, error) {
 	log.Println("debugprint: entering scanUser")
-	var u domain.User
+	var u userdomain.User
 	var currentPhaseID *string
 	var arrivalDate *time.Time
 	var jobStartDate *time.Time
@@ -66,7 +68,7 @@ func scanUser(row pgx.Row) (*domain.User, error) {
 	return &u, nil
 }
 
-func (r *userRepo) Create(ctx context.Context, u *domain.User) error {
+func (r *userRepo) Create(ctx context.Context, u *userdomain.User) error {
 	log.Println("debugprint: entering (*userRepo).Create")
 	query := `
 		INSERT INTO users (
@@ -86,7 +88,7 @@ func (r *userRepo) Create(ctx context.Context, u *domain.User) error {
 	return nil
 }
 
-func (r *userRepo) FindByID(ctx context.Context, id string) (*domain.User, error) {
+func (r *userRepo) FindByID(ctx context.Context, id string) (*userdomain.User, error) {
 	log.Println("debugprint: entering (*userRepo).FindByID")
 	query := `
 		SELECT 
@@ -106,7 +108,7 @@ func (r *userRepo) FindByID(ctx context.Context, id string) (*domain.User, error
 	return u, nil
 }
 
-func (r *userRepo) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
+func (r *userRepo) FindByEmail(ctx context.Context, email string) (*userdomain.User, error) {
 	log.Println("debugprint: entering (*userRepo).FindByEmail")
 	query := `
 		SELECT 
@@ -126,7 +128,7 @@ func (r *userRepo) FindByEmail(ctx context.Context, email string) (*domain.User,
 	return u, nil
 }
 
-func (r *userRepo) Update(ctx context.Context, u *domain.User) error {
+func (r *userRepo) Update(ctx context.Context, u *userdomain.User) error {
 	log.Println("debugprint: entering (*userRepo).Update")
 	query := `
 		UPDATE users SET 

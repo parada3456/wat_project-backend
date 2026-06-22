@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/j1hub/backend/internal/adapter/http/handler/dto"
+	missiondomain "github.com/j1hub/backend/internal/mission/domain"
 
 	"context"
 	"encoding/json"
@@ -11,14 +12,13 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
-	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/usecase"
 	"github.com/j1hub/backend/pkg/apperror"
 )
 
 type MissionUC interface {
-	ListAvailableMissions(ctx context.Context, userID string) ([]domain.UserMission, error)
-	ListStaticMissions(ctx context.Context, userID string) ([]domain.Mission, error)
+	ListAvailableMissions(ctx context.Context, userID string) ([]missiondomain.UserMission, error)
+	ListStaticMissions(ctx context.Context, userID string) ([]missiondomain.Mission, error)
 	GetMissionDetail(ctx context.Context, userID, userMissionID string) (*usecase.MissionDetailResponse, error)
 	ToggleTask(ctx context.Context, userID, userTaskID string, completed bool) error
 }
@@ -123,8 +123,6 @@ func (h *MissionHandler) SubmitProof(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
-
-
 
 func (h *MissionHandler) ToggleTask(w http.ResponseWriter, r *http.Request) {
 	log.Println("debugprint: entering (*MissionHandler).ToggleTask")

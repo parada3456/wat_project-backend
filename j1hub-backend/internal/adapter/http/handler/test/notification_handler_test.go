@@ -1,14 +1,17 @@
 package handler_test
+
 import (
 	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	notificationdomain "github.com/j1hub/backend/internal/notification/domain"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/j1hub/backend/internal/adapter/http/handler"
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
-	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -25,7 +28,7 @@ func TestNotificationHandler_ListNotifications(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	notifUC.On("ListNotifications", mock.Anything, "usr_1").Return([]domain.Notification{}, nil).Once()
+	notifUC.On("ListNotifications", mock.Anything, "usr_1").Return([]notificationdomain.Notification{}, nil).Once()
 	req = httptest.NewRequest("GET", "/notifications", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -40,7 +43,6 @@ func TestNotificationHandler_ListNotifications(t *testing.T) {
 	h.ListNotifications(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
-
 
 func TestNotificationHandler_MarkRead(t *testing.T) {
 	notifUC := new(MockNotificationUC)
@@ -64,7 +66,6 @@ func TestNotificationHandler_MarkRead(t *testing.T) {
 	h.MarkRead(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
-
 
 func TestNotificationHandler_MarkAllRead(t *testing.T) {
 	notifUC := new(MockNotificationUC)
@@ -92,7 +93,6 @@ func TestNotificationHandler_MarkAllRead(t *testing.T) {
 	h.MarkAllRead(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
-
 
 func TestNotificationHandler_DeleteNotification(t *testing.T) {
 	notifUC := new(MockNotificationUC)

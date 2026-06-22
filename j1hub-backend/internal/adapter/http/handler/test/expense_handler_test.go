@@ -1,4 +1,5 @@
 package handler_test
+
 import (
 	"bytes"
 	"context"
@@ -8,10 +9,11 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/j1hub/backend/internal/adapter/http/handler"
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
-	"github.com/j1hub/backend/internal/domain"
+	expensedomain "github.com/j1hub/backend/internal/expense/domain"
 	"github.com/j1hub/backend/internal/port"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -28,7 +30,7 @@ func TestExpenseHandler_ListExpenses(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	expenseUC.On("ListExpenses", mock.Anything, "usr_1").Return([]domain.ExpenseTransaction{}, nil).Once()
+	expenseUC.On("ListExpenses", mock.Anything, "usr_1").Return([]expensedomain.ExpenseTransaction{}, nil).Once()
 	req = httptest.NewRequest("GET", "/expenses", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -43,7 +45,6 @@ func TestExpenseHandler_ListExpenses(t *testing.T) {
 	h.ListExpenses(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
-
 
 func TestExpenseHandler_CreateExpense(t *testing.T) {
 	expenseUC := new(MockManageExpenseUC)
@@ -87,7 +88,6 @@ func TestExpenseHandler_CreateExpense(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
-
 func TestExpenseHandler_GetExpenseDetail(t *testing.T) {
 	expenseUC := new(MockManageExpenseUC)
 	h := handler.NewExpenseHandler(expenseUC)
@@ -99,7 +99,7 @@ func TestExpenseHandler_GetExpenseDetail(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	expenseUC.On("GetExpenseDetail", mock.Anything, "usr_1", "exp_1").Return(&domain.ExpenseTransaction{}, []domain.ExpenseSplit{}, nil).Once()
+	expenseUC.On("GetExpenseDetail", mock.Anything, "usr_1", "exp_1").Return(&expensedomain.ExpenseTransaction{}, []expensedomain.ExpenseSplit{}, nil).Once()
 	req = httptest.NewRequest("GET", "/expenses/exp_1", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 
@@ -120,7 +120,6 @@ func TestExpenseHandler_GetExpenseDetail(t *testing.T) {
 	h.GetExpenseDetail(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
-
 
 func TestExpenseHandler_DeleteExpense(t *testing.T) {
 	expenseUC := new(MockManageExpenseUC)
@@ -153,7 +152,6 @@ func TestExpenseHandler_DeleteExpense(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
-
 func TestExpenseHandler_ListPending(t *testing.T) {
 	expenseUC := new(MockManageExpenseUC)
 	h := handler.NewExpenseHandler(expenseUC)
@@ -165,7 +163,7 @@ func TestExpenseHandler_ListPending(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	expenseUC.On("ListPendingExpenses", mock.Anything, "usr_1").Return([]domain.ExpenseSplit{}, nil).Once()
+	expenseUC.On("ListPendingExpenses", mock.Anything, "usr_1").Return([]expensedomain.ExpenseSplit{}, nil).Once()
 	req = httptest.NewRequest("GET", "/expenses/pending", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -180,7 +178,6 @@ func TestExpenseHandler_ListPending(t *testing.T) {
 	h.ListPending(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
-
 
 func TestExpenseHandler_PaySplit(t *testing.T) {
 	expenseUC := new(MockManageExpenseUC)
@@ -235,7 +232,6 @@ func TestExpenseHandler_PaySplit(t *testing.T) {
 	h.PaySplit(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
-
 
 func TestExpenseHandler_ApproveSplit(t *testing.T) {
 	expenseUC := new(MockManageExpenseUC)

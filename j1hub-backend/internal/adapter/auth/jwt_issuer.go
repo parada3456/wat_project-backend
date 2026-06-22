@@ -80,7 +80,7 @@ func (i *jwtIssuer) Verify(tokenString string) (*port.Claims, error) {
 			log.Printf("debugprint: (*jwtIssuer).Verify invalid token type: expected 'access', got %q", claims["type"])
 			return nil, fmt.Errorf("invalid token type")
 		}
-		
+
 		userID, _ := claims["sub"].(string)
 		isAdmin, _ := claims["is_admin"].(bool)
 		return &port.Claims{
@@ -92,7 +92,6 @@ func (i *jwtIssuer) Verify(tokenString string) (*port.Claims, error) {
 	log.Println("debugprint: (*jwtIssuer).Verify - token parsed but claims are invalid or token not Valid")
 	return nil, fmt.Errorf("invalid token")
 }
-
 
 func (i *jwtIssuer) Refresh(refreshTokenString string) (*port.TokenPair, error) {
 	log.Println("debugprint: entering (*jwtIssuer).Refresh")

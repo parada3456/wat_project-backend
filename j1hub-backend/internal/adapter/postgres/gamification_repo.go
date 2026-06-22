@@ -4,6 +4,9 @@ import (
 	"context"
 	"log"
 
+	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+	userdomain "github.com/j1hub/backend/internal/user/domain"
+
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
 	"github.com/jackc/pgx/v5"
@@ -19,14 +22,14 @@ func NewPointLedgerRepository(pool *pgxpool.Pool) port.PointLedgerRepository {
 	return &pointLedgerRepo{pool: pool}
 }
 
-func (r *pointLedgerRepo) Insert(ctx context.Context, l *domain.PointLedger) error {
+func (r *pointLedgerRepo) Insert(ctx context.Context, l *gamificationdomain.PointLedger) error {
 	log.Println("debugprint: entering (*pointLedgerRepo).Insert")
 	query := `INSERT INTO point_ledger (ledger_id, user_id, source_type, source_id, delta, lifetime_balance_after, phase_balance_after, note, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 	_, err := r.pool.Exec(ctx, query, l.LedgerID, l.UserID, l.SourceType, l.SourceID, l.Delta, l.LifetimeBalanceAfter, l.PhaseBalanceAfter, l.Note, l.CreatedAt)
 	return err
 }
 
-func (r *pointLedgerRepo) InsertBatch(ctx context.Context, ledgers []domain.PointLedger) error {
+func (r *pointLedgerRepo) InsertBatch(ctx context.Context, ledgers []gamificationdomain.PointLedger) error {
 	log.Println("debugprint: entering (*pointLedgerRepo).InsertBatch")
 	batch := &pgx.Batch{}
 	for _, l := range ledgers {
@@ -36,7 +39,7 @@ func (r *pointLedgerRepo) InsertBatch(ctx context.Context, ledgers []domain.Poin
 	return r.pool.SendBatch(ctx, batch).Close()
 }
 
-func (r *pointLedgerRepo) FindByUser(ctx context.Context, userID string) ([]domain.PointLedger, error) {
+func (r *pointLedgerRepo) FindByUser(ctx context.Context, userID string) ([]gamificationdomain.PointLedger, error) {
 	log.Println("debugprint: entering (*pointLedgerRepo).FindByUser")
 	query := `SELECT ledger_id, user_id, source_type, source_id, delta, lifetime_balance_after, phase_balance_after, note, created_at FROM point_ledger WHERE user_id = $1 ORDER BY created_at DESC`
 	rows, err := r.pool.Query(ctx, query, userID)
@@ -44,9 +47,9 @@ func (r *pointLedgerRepo) FindByUser(ctx context.Context, userID string) ([]doma
 		return nil, err
 	}
 	defer rows.Close()
-	var ledgers []domain.PointLedger
+	var ledgers []gamificationdomain.PointLedger
 	for rows.Next() {
-		var l domain.PointLedger
+		var l gamificationdomain.PointLedger
 		if err := rows.Scan(&l.LedgerID, &l.UserID, &l.SourceType, &l.SourceID, &l.Delta, &l.LifetimeBalanceAfter, &l.PhaseBalanceAfter, &l.Note, &l.CreatedAt); err != nil {
 			return nil, err
 		}
@@ -64,16 +67,16 @@ func NewBadgeRepository(pool *pgxpool.Pool) port.BadgeRepository {
 	return &badgeRepo{pool: pool}
 }
 
-func (r *badgeRepo) FindByTriggerType(ctx context.Context, triggerType domain.TriggerType) ([]domain.Badge, error) {
+func (r *badgeRepo) FindByTriggerType(ctx context.Context, triggerType gamificationdomain.TriggerType) ([]gamificationdomain.Badge, error) {
 	log.Println("debugprint: entering (*badgeRepo).FindByTriggerType")
 	rows, err := r.pool.Query(ctx, `SELECT badge_id, title, description, trigger_type, icon_url, created_at FROM badges WHERE trigger_type = $1`, triggerType)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var badges []domain.Badge
+	var badges []gamificationdomain.Badge
 	for rows.Next() {
-		var b domain.Badge
+		var b gamificationdomain.Badge
 		if err := rows.Scan(&b.BadgeID, &b.Title, &b.Description, &b.TriggerType, &b.IconURL, &b.CreatedAt); err != nil {
 			return nil, err
 		}
@@ -82,7 +85,7 @@ func (r *badgeRepo) FindByTriggerType(ctx context.Context, triggerType domain.Tr
 	return badges, nil
 }
 
-func (r *badgeRepo) FindEligible(ctx context.Context, userID string, triggerType domain.TriggerType) ([]domain.Badge, error) {
+func (r *badgeRepo) FindEligible(ctx context.Context, userID string, triggerType gamificationdomain.TriggerType) ([]gamificationdomain.Badge, error) {
 	log.
 		// Simple implementation: find all badges of this trigger type that the user doesn't have yet
 		Println("debugprint: entering (*badgeRepo).FindEligible")
@@ -97,9 +100,9 @@ func (r *badgeRepo) FindEligible(ctx context.Context, userID string, triggerType
 		return nil, err
 	}
 	defer rows.Close()
-	var badges []domain.Badge
+	var badges []gamificationdomain.Badge
 	for rows.Next() {
-		var b domain.Badge
+		var b gamificationdomain.Badge
 		if err := rows.Scan(&b.BadgeID, &b.Title, &b.Description, &b.TriggerType, &b.IconURL, &b.CreatedAt); err != nil {
 			return nil, err
 		}
@@ -117,23 +120,23 @@ func NewUserBadgeRepository(pool *pgxpool.Pool) port.UserBadgeRepository {
 	return &userBadgeRepo{pool: pool}
 }
 
-func (r *userBadgeRepo) Insert(ctx context.Context, ub *domain.UserBadge) error {
+func (r *userBadgeRepo) Insert(ctx context.Context, ub *gamificationdomain.UserBadge) error {
 	log.Println("debugprint: entering (*userBadgeRepo).Insert")
 	_, err := r.pool.Exec(ctx, `INSERT INTO user_badges (user_badge_id, user_id, badge_id, source_id, earned_at) VALUES ($1, $2, $3, $4, $5)`,
 		ub.UserBadgeID, ub.UserID, ub.BadgeID, ub.SourceID, ub.EarnedAt)
 	return err
 }
 
-func (r *userBadgeRepo) FindByUser(ctx context.Context, userID string) ([]domain.UserBadge, error) {
+func (r *userBadgeRepo) FindByUser(ctx context.Context, userID string) ([]gamificationdomain.UserBadge, error) {
 	log.Println("debugprint: entering (*userBadgeRepo).FindByUser")
 	rows, err := r.pool.Query(ctx, `SELECT user_badge_id, user_id, badge_id, source_id, earned_at FROM user_badges WHERE user_id = $1`, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var ubs []domain.UserBadge
+	var ubs []gamificationdomain.UserBadge
 	for rows.Next() {
-		var ub domain.UserBadge
+		var ub gamificationdomain.UserBadge
 		if err := rows.Scan(&ub.UserBadgeID, &ub.UserID, &ub.BadgeID, &ub.SourceID, &ub.EarnedAt); err != nil {
 			return nil, err
 		}
@@ -151,16 +154,16 @@ func NewCreditScoreRepository(pool *pgxpool.Pool) port.CreditScoreRepository {
 	return &creditScoreRepo{pool: pool}
 }
 
-func (r *creditScoreRepo) Create(ctx context.Context, c *domain.CreditScore) error {
+func (r *creditScoreRepo) Create(ctx context.Context, c *userdomain.CreditScore) error {
 	log.Println("debugprint: entering (*creditScoreRepo).Create")
 	_, err := r.pool.Exec(ctx, `INSERT INTO credit_scores (credit_id, user_id, current_score, last_updated) VALUES ($1, $2, $3, $4)`,
 		c.CreditID, c.UserID, c.CurrentScore, c.LastUpdated)
 	return err
 }
 
-func (r *creditScoreRepo) FindByUserID(ctx context.Context, userID string) (*domain.CreditScore, error) {
+func (r *creditScoreRepo) FindByUserID(ctx context.Context, userID string) (*userdomain.CreditScore, error) {
 	log.Println("debugprint: entering (*creditScoreRepo).FindByUserID")
-	var c domain.CreditScore
+	var c userdomain.CreditScore
 	err := r.pool.QueryRow(ctx, `SELECT credit_id, user_id, current_score, last_updated FROM credit_scores WHERE user_id = $1`, userID).Scan(&c.CreditID, &c.UserID, &c.CurrentScore, &c.LastUpdated)
 	if err == pgx.ErrNoRows {
 		return nil, domain.ErrNotFound

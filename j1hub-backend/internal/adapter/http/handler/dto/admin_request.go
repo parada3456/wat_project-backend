@@ -9,4 +9,3 @@ type AdjustPointsRequest struct {
 	PointsDelta int    `json:"pointsDelta"`
 	Reason      string `json:"reason" validate:"required"`
 }
-

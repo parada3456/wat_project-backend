@@ -10,19 +10,19 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
-	"github.com/j1hub/backend/internal/domain"
+	jobdomain "github.com/j1hub/backend/internal/job/domain"
 	"github.com/j1hub/backend/pkg/apperror"
 )
 
 type JobUC interface {
-	ListJobs(ctx context.Context, filters map[string]interface{}) ([]domain.JobPosting, error)
-	GetJobDetail(ctx context.Context, id string) (*domain.JobPosting, []domain.JobHousing, *domain.JobOverallRating, error)
+	ListJobs(ctx context.Context, filters map[string]interface{}) ([]jobdomain.JobPosting, error)
+	GetJobDetail(ctx context.Context, id string) (*jobdomain.JobPosting, []jobdomain.JobHousing, *jobdomain.JobOverallRating, error)
 	AddToCart(ctx context.Context, userID, jobID string) error
-	ListCart(ctx context.Context, userID string) ([]domain.UserCart, error)
+	ListCart(ctx context.Context, userID string) ([]jobdomain.UserCart, error)
 	RemoveFromCart(ctx context.Context, userID, id string) error
-	WriteReview(ctx context.Context, userID, jobID string, rev *domain.JobReview) error
-	ListReviews(ctx context.Context, jobID string) ([]domain.JobReview, error)
-	UpdateCartStatus(ctx context.Context, userID, cartID string, status domain.CartStatus) error
+	WriteReview(ctx context.Context, userID, jobID string, rev *jobdomain.JobReview) error
+	ListReviews(ctx context.Context, jobID string) ([]jobdomain.JobReview, error)
+	UpdateCartStatus(ctx context.Context, userID, cartID string, status jobdomain.CartStatus) error
 }
 
 type JobHandler struct {
@@ -65,8 +65,6 @@ func (h *JobHandler) GetJobDetail(w http.ResponseWriter, r *http.Request) {
 	respDTO := dto.NewJobDetailResponse(job, housing, rating)
 	json.NewEncoder(w).Encode(respDTO)
 }
-
-
 
 func (h *JobHandler) AddToCart(w http.ResponseWriter, r *http.Request) {
 	log.Println("debugprint: entering (*JobHandler).AddToCart")
@@ -140,7 +138,7 @@ func (h *JobHandler) UpdateCartStatus(w http.ResponseWriter, r *http.Request) {
 		cartID = chi.URLParam(r, "id")
 	}
 	var req struct {
-		Status domain.CartStatus `json:"status"`
+		Status jobdomain.CartStatus `json:"status"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body"})
@@ -175,7 +173,7 @@ func (h *JobHandler) GetAllReviews(w http.ResponseWriter, r *http.Request) {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Missing job_id query parameter"})
 		return
 	}
-	
+
 	reviews, err := h.jobUC.ListReviews(r.Context(), jobID)
 	if err != nil {
 		apperror.RespondError(w, err)
@@ -208,7 +206,7 @@ func (h *JobHandler) CreateReview(w http.ResponseWriter, r *http.Request) {
 		jobID = req.JobID
 	}
 
-	err := h.jobUC.WriteReview(r.Context(), claims.UserID, jobID, &domain.JobReview{
+	err := h.jobUC.WriteReview(r.Context(), claims.UserID, jobID, &jobdomain.JobReview{
 		RatingStars: req.RatingStars,
 		ReviewText:  req.ReviewText,
 	})

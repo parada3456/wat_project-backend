@@ -5,9 +5,12 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/j1hub/backend/internal/domain"
+	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+
+	expensedomain "github.com/j1hub/backend/internal/expense/domain"
 	"github.com/j1hub/backend/internal/infrastructure/config"
 	"github.com/j1hub/backend/internal/infrastructure/scheduler"
+	jobdomain "github.com/j1hub/backend/internal/job/domain"
 	"github.com/j1hub/backend/internal/port"
 	"github.com/j1hub/backend/internal/usecase"
 	"github.com/stretchr/testify/assert"
@@ -19,12 +22,12 @@ type MockSplitRepo struct {
 	port.ExpenseSplitRepository
 }
 
-func (m *MockSplitRepo) FindOverdue(ctx context.Context) ([]domain.ExpenseSplit, error) {
+func (m *MockSplitRepo) FindOverdue(ctx context.Context) ([]expensedomain.ExpenseSplit, error) {
 	args := m.Called(ctx)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).([]domain.ExpenseSplit), args.Error(1)
+	return args.Get(0).([]expensedomain.ExpenseSplit), args.Error(1)
 }
 
 type MockUserMissionRepo struct {
@@ -32,12 +35,12 @@ type MockUserMissionRepo struct {
 	port.UserMissionRepository
 }
 
-func (m *MockUserMissionRepo) FindOverdue(ctx context.Context) ([]domain.UserMission, error) {
+func (m *MockUserMissionRepo) FindOverdue(ctx context.Context) ([]missiondomain.UserMission, error) {
 	args := m.Called(ctx)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).([]domain.UserMission), args.Error(1)
+	return args.Get(0).([]missiondomain.UserMission), args.Error(1)
 }
 
 type MockJobPostingRepo struct {
@@ -45,7 +48,7 @@ type MockJobPostingRepo struct {
 	port.JobPostingRepository
 }
 
-func (m *MockJobPostingRepo) Upsert(ctx context.Context, job *domain.JobPosting) error {
+func (m *MockJobPostingRepo) Upsert(ctx context.Context, job *jobdomain.JobPosting) error {
 	return m.Called(ctx, job).Error(0)
 }
 
@@ -54,7 +57,7 @@ type MockJobHousingRepo struct {
 	port.JobHousingRepository
 }
 
-func (m *MockJobHousingRepo) Upsert(ctx context.Context, housing *domain.JobHousing) error {
+func (m *MockJobHousingRepo) Upsert(ctx context.Context, housing *jobdomain.JobHousing) error {
 	return m.Called(ctx, housing).Error(0)
 }
 

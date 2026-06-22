@@ -12,17 +12,17 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
-	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/usecase"
+	expensedomain "github.com/j1hub/backend/internal/expense/domain"
+	expenseusecase "github.com/j1hub/backend/internal/expense/usecase"
 	"github.com/j1hub/backend/pkg/apperror"
 )
 
 type ManageExpenseUC interface {
-	ListExpenses(ctx context.Context, userID string) ([]domain.ExpenseTransaction, error)
-	CreateExpense(ctx context.Context, userID string, cmd usecase.CreateExpenseCmd) error
-	GetExpenseDetail(ctx context.Context, userID string, id string) (*domain.ExpenseTransaction, []domain.ExpenseSplit, error)
+	ListExpenses(ctx context.Context, userID string) ([]expensedomain.ExpenseTransaction, error)
+	CreateExpense(ctx context.Context, userID string, cmd expenseusecase.CreateExpenseCmd) error
+	GetExpenseDetail(ctx context.Context, userID string, id string) (*expensedomain.ExpenseTransaction, []expensedomain.ExpenseSplit, error)
 	DeleteExpense(ctx context.Context, userID string, id string) error
-	ListPendingExpenses(ctx context.Context, userID string) ([]domain.ExpenseSplit, error)
+	ListPendingExpenses(ctx context.Context, userID string) ([]expensedomain.ExpenseSplit, error)
 	SubmitSlip(ctx context.Context, debtorID, splitID string, file io.Reader, contentType string) error
 	ApproveSplit(ctx context.Context, userID string, id string) error
 }
@@ -73,7 +73,7 @@ func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cmd := usecase.CreateExpenseCmd{
+	cmd := expenseusecase.CreateExpenseCmd{
 		Title:       req.Title,
 		TotalAmount: req.TotalAmount,
 		Currency:    req.Currency,

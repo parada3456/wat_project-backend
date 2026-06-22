@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/j1hub/backend/internal/adapter/http/handler/dto"
+	userdomain "github.com/j1hub/backend/internal/user/domain"
 
 	"context"
 	"encoding/json"
@@ -11,14 +12,13 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
-	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/usecase"
 	"github.com/j1hub/backend/pkg/apperror"
 )
 
 type UserUC interface {
 	GetProfile(ctx context.Context, userID string) (*usecase.UserProfileResponse, error)
-	GetPublicProfile(ctx context.Context, currentUserID, targetUserID string) (*domain.User, *domain.Profile, error)
+	GetPublicProfile(ctx context.Context, currentUserID, targetUserID string) (*userdomain.User, *userdomain.Profile, error)
 	UpdateProfile(ctx context.Context, userID string, cmd usecase.UpdateProfileCommand) error
 	UpdateLocation(ctx context.Context, userID string, lat, lng float64) error
 	UpdateSettings(ctx context.Context, userID string, settings map[string]interface{}) error

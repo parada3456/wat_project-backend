@@ -5,6 +5,9 @@ import (
 	"log"
 	"time"
 
+	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
 	"github.com/jackc/pgx/v5"
@@ -20,7 +23,7 @@ func NewMissionRepository(pool *pgxpool.Pool) port.MissionRepository {
 	return &missionRepo{pool: pool}
 }
 
-func (r *missionRepo) FindByPhase(ctx context.Context, phaseID string) ([]domain.Mission, error) {
+func (r *missionRepo) FindByPhase(ctx context.Context, phaseID string) ([]missiondomain.Mission, error) {
 	log.Println("debugprint: entering (*missionRepo).FindByPhase")
 	query := `SELECT mission_id, phase_id, title, description, location, base_points, is_mandatory, verification_type, due_date_type, fixed_due_date, relative_trigger_event, relative_days_offset, created_at, updated_at FROM missions WHERE phase_id = $1`
 	rows, err := r.pool.Query(ctx, query, phaseID)
@@ -28,9 +31,9 @@ func (r *missionRepo) FindByPhase(ctx context.Context, phaseID string) ([]domain
 		return nil, err
 	}
 	defer rows.Close()
-	var missions []domain.Mission
+	var missions []missiondomain.Mission
 	for rows.Next() {
-		var m domain.Mission
+		var m missiondomain.Mission
 		var desc *string
 		var loc *string
 		var triggerEvent *string
@@ -55,10 +58,10 @@ func (r *missionRepo) FindByPhase(ctx context.Context, phaseID string) ([]domain
 	return missions, nil
 }
 
-func (r *missionRepo) FindByID(ctx context.Context, id string) (*domain.Mission, error) {
+func (r *missionRepo) FindByID(ctx context.Context, id string) (*missiondomain.Mission, error) {
 	log.Println("debugprint: entering (*missionRepo).FindByID")
 	query := `SELECT mission_id, phase_id, title, description, location, base_points, is_mandatory, verification_type, due_date_type, fixed_due_date, relative_trigger_event, relative_days_offset, created_at, updated_at FROM missions WHERE mission_id = $1`
-	var m domain.Mission
+	var m missiondomain.Mission
 	var desc *string
 	var loc *string
 	var triggerEvent *string
@@ -93,7 +96,7 @@ func NewUserMissionRepository(pool *pgxpool.Pool) port.UserMissionRepository {
 	return &userMissionRepo{pool: pool}
 }
 
-func (r *userMissionRepo) BulkInsert(ctx context.Context, ums []domain.UserMission) error {
+func (r *userMissionRepo) BulkInsert(ctx context.Context, ums []missiondomain.UserMission) error {
 	log.Println("debugprint: entering (*userMissionRepo).BulkInsert")
 	batch := &pgx.Batch{}
 	for _, um := range ums {
@@ -103,7 +106,7 @@ func (r *userMissionRepo) BulkInsert(ctx context.Context, ums []domain.UserMissi
 	return r.pool.SendBatch(ctx, batch).Close()
 }
 
-func (r *userMissionRepo) FindByUserAndPhase(ctx context.Context, userID, phaseID string) ([]domain.UserMission, error) {
+func (r *userMissionRepo) FindByUserAndPhase(ctx context.Context, userID, phaseID string) ([]missiondomain.UserMission, error) {
 	log.Println("debugprint: entering (*userMissionRepo).FindByUserAndPhase")
 	query := `SELECT um.user_mission_id, um.user_id, um.mission_id, um.status, um.calculated_due_date, um.proof_url, um.proof_submitted_at, um.verified_at, um.verified_by, um.base_points_earned, um.speed_bonus_points, um.streak_bonus_points, um.first_completer_bonus_points, um.total_points_earned, um.rewarded_at, um.created_at, um.updated_at 
 	FROM user_missions um JOIN missions m ON um.mission_id = m.mission_id WHERE um.user_id = $1 AND m.phase_id = $2`
@@ -112,9 +115,9 @@ func (r *userMissionRepo) FindByUserAndPhase(ctx context.Context, userID, phaseI
 		return nil, err
 	}
 	defer rows.Close()
-	var ums []domain.UserMission
+	var ums []missiondomain.UserMission
 	for rows.Next() {
-		var um domain.UserMission
+		var um missiondomain.UserMission
 		var proofURL *string
 		var verifiedBy *string
 		if err := rows.Scan(&um.UserMissionID, &um.UserID, &um.MissionID, &um.Status, &um.CalculatedDueDate, &proofURL, &um.ProofSubmittedAt, &um.VerifiedAt, &verifiedBy, &um.BasePointsEarned, &um.SpeedBonusPoints, &um.StreakBonusPoints, &um.FirstCompleterBonusPoints, &um.TotalPointsEarned, &um.RewardedAt, &um.CreatedAt, &um.UpdatedAt); err != nil {
@@ -131,10 +134,10 @@ func (r *userMissionRepo) FindByUserAndPhase(ctx context.Context, userID, phaseI
 	return ums, nil
 }
 
-func (r *userMissionRepo) FindByID(ctx context.Context, id string) (*domain.UserMission, error) {
+func (r *userMissionRepo) FindByID(ctx context.Context, id string) (*missiondomain.UserMission, error) {
 	log.Println("debugprint: entering (*userMissionRepo).FindByID")
 	query := `SELECT user_mission_id, user_id, mission_id, status, calculated_due_date, proof_url, proof_submitted_at, verified_at, verified_by, base_points_earned, speed_bonus_points, streak_bonus_points, first_completer_bonus_points, total_points_earned, rewarded_at, created_at, updated_at FROM user_missions WHERE user_mission_id = $1`
-	var um domain.UserMission
+	var um missiondomain.UserMission
 	var proofURL *string
 	var verifiedBy *string
 	err := r.pool.QueryRow(ctx, query, id).Scan(&um.UserMissionID, &um.UserID, &um.MissionID, &um.Status, &um.CalculatedDueDate, &proofURL, &um.ProofSubmittedAt, &um.VerifiedAt, &verifiedBy, &um.BasePointsEarned, &um.SpeedBonusPoints, &um.StreakBonusPoints, &um.FirstCompleterBonusPoints, &um.TotalPointsEarned, &um.RewardedAt, &um.CreatedAt, &um.UpdatedAt)
@@ -152,7 +155,7 @@ func (r *userMissionRepo) FindByID(ctx context.Context, id string) (*domain.User
 	return &um, err
 }
 
-func (r *userMissionRepo) UpdateStatus(ctx context.Context, id string, status domain.UserMissionStatus) error {
+func (r *userMissionRepo) UpdateStatus(ctx context.Context, id string, status missiondomain.UserMissionStatus) error {
 	log.Println("debugprint: entering (*userMissionRepo).UpdateStatus")
 	_, err := r.pool.Exec(ctx, `UPDATE user_missions SET status = $1, updated_at = NOW() WHERE user_mission_id = $2`, status, id)
 	return err
@@ -164,14 +167,14 @@ func (r *userMissionRepo) UpdateVerification(ctx context.Context, id string, ver
 	return err
 }
 
-func (r *userMissionRepo) UpdateReward(ctx context.Context, id string, reward *domain.PointReward, rewardedAt time.Time) error {
+func (r *userMissionRepo) UpdateReward(ctx context.Context, id string, reward *missiondomain.PointReward, rewardedAt time.Time) error {
 	log.Println("debugprint: entering (*userMissionRepo).UpdateReward")
 	_, err := r.pool.Exec(ctx, `UPDATE user_missions SET base_points_earned = $1, speed_bonus_points = $2, streak_bonus_points = $3, first_completer_bonus_points = $4, total_points_earned = $5, rewarded_at = $6, updated_at = NOW() WHERE user_mission_id = $7`,
 		reward.Base, reward.SpeedBonus, reward.StreakBonus, reward.FirstCompleterBonus, reward.Total, rewardedAt, id)
 	return err
 }
 
-func (r *userMissionRepo) FindOverdue(ctx context.Context) ([]domain.UserMission, error) {
+func (r *userMissionRepo) FindOverdue(ctx context.Context) ([]missiondomain.UserMission, error) {
 	log.Println("debugprint: entering (*userMissionRepo).FindOverdue")
 	query := `SELECT user_mission_id, user_id, mission_id, status, calculated_due_date, created_at, updated_at FROM user_missions WHERE status IN ('Not_Started', 'In_Progress', 'Pending_Verification') AND calculated_due_date < NOW()`
 	rows, err := r.pool.Query(ctx, query)
@@ -179,9 +182,9 @@ func (r *userMissionRepo) FindOverdue(ctx context.Context) ([]domain.UserMission
 		return nil, err
 	}
 	defer rows.Close()
-	var ums []domain.UserMission
+	var ums []missiondomain.UserMission
 	for rows.Next() {
-		var um domain.UserMission
+		var um missiondomain.UserMission
 		if err := rows.Scan(&um.UserMissionID, &um.UserID, &um.MissionID, &um.Status, &um.CalculatedDueDate, &um.CreatedAt, &um.UpdatedAt); err != nil {
 			return nil, err
 		}
@@ -199,16 +202,16 @@ func NewTaskRepository(pool *pgxpool.Pool) port.TaskRepository {
 	return &taskRepo{pool: pool}
 }
 
-func (r *taskRepo) FindByMission(ctx context.Context, missionID string) ([]domain.Task, error) {
+func (r *taskRepo) FindByMission(ctx context.Context, missionID string) ([]missiondomain.Task, error) {
 	log.Println("debugprint: entering (*taskRepo).FindByMission")
 	rows, err := r.pool.Query(ctx, `SELECT task_id, mission_id, title, description, created_at, updated_at FROM tasks WHERE mission_id = $1`, missionID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var tasks []domain.Task
+	var tasks []missiondomain.Task
 	for rows.Next() {
-		var t domain.Task
+		var t missiondomain.Task
 		var desc *string
 		if err := rows.Scan(&t.TaskID, &t.MissionID, &t.Title, &desc, &t.CreatedAt, &t.UpdatedAt); err != nil {
 			return nil, err
@@ -230,7 +233,7 @@ func NewUserTaskRepository(pool *pgxpool.Pool) port.UserTaskRepository {
 	return &userTaskRepo{pool: pool}
 }
 
-func (r *userTaskRepo) Upsert(ctx context.Context, ut *domain.UserTask) error {
+func (r *userTaskRepo) Upsert(ctx context.Context, ut *missiondomain.UserTask) error {
 	log.Println("debugprint: entering (*userTaskRepo).Upsert")
 	query := `
 		INSERT INTO user_tasks (user_task_id, user_id, task_id, user_mission_id, is_completed, completed_at, updated_at)
@@ -243,16 +246,16 @@ func (r *userTaskRepo) Upsert(ctx context.Context, ut *domain.UserTask) error {
 	return err
 }
 
-func (r *userTaskRepo) FindByUserMission(ctx context.Context, userMissionID string) ([]domain.UserTask, error) {
+func (r *userTaskRepo) FindByUserMission(ctx context.Context, userMissionID string) ([]missiondomain.UserTask, error) {
 	log.Println("debugprint: entering (*userTaskRepo).FindByUserMission")
 	rows, err := r.pool.Query(ctx, `SELECT user_task_id, user_id, task_id, user_mission_id, is_completed, completed_at, updated_at FROM user_tasks WHERE user_mission_id = $1`, userMissionID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var uts []domain.UserTask
+	var uts []missiondomain.UserTask
 	for rows.Next() {
-		var ut domain.UserTask
+		var ut missiondomain.UserTask
 		if err := rows.Scan(&ut.UserTaskID, &ut.UserID, &ut.TaskID, &ut.UserMissionID, &ut.IsCompleted, &ut.CompletedAt, &ut.UpdatedAt); err != nil {
 			return nil, err
 		}
@@ -270,9 +273,9 @@ func NewJourneyPhaseRepository(pool *pgxpool.Pool) port.JourneyPhaseRepository {
 	return &journeyPhaseRepo{pool: pool}
 }
 
-func (r *journeyPhaseRepo) FindByNumber(ctx context.Context, number int) (*domain.JourneyPhase, error) {
+func (r *journeyPhaseRepo) FindByNumber(ctx context.Context, number int) (*gamificationdomain.JourneyPhase, error) {
 	log.Println("debugprint: entering (*journeyPhaseRepo).FindByNumber")
-	var jp domain.JourneyPhase
+	var jp gamificationdomain.JourneyPhase
 	var desc *string
 	err := r.pool.QueryRow(ctx, `SELECT phase_id, phase_number, title, description, created_at, updated_at FROM journey_phases WHERE phase_number = $1`, number).Scan(&jp.PhaseID, &jp.PhaseNumber, &jp.Title, &desc, &jp.CreatedAt, &jp.UpdatedAt)
 	if err == pgx.ErrNoRows {
@@ -284,9 +287,9 @@ func (r *journeyPhaseRepo) FindByNumber(ctx context.Context, number int) (*domai
 	return &jp, err
 }
 
-func (r *journeyPhaseRepo) FindByID(ctx context.Context, id string) (*domain.JourneyPhase, error) {
+func (r *journeyPhaseRepo) FindByID(ctx context.Context, id string) (*gamificationdomain.JourneyPhase, error) {
 	log.Println("debugprint: entering (*journeyPhaseRepo).FindByID")
-	var jp domain.JourneyPhase
+	var jp gamificationdomain.JourneyPhase
 	var desc *string
 	err := r.pool.QueryRow(ctx, `SELECT phase_id, phase_number, title, description, created_at, updated_at FROM journey_phases WHERE phase_id = $1`, id).Scan(&jp.PhaseID, &jp.PhaseNumber, &jp.Title, &desc, &jp.CreatedAt, &jp.UpdatedAt)
 	if err == pgx.ErrNoRows {
@@ -307,7 +310,7 @@ func NewUserPhaseHistoryRepository(pool *pgxpool.Pool) port.UserPhaseHistoryRepo
 	return &userPhaseHistoryRepo{pool: pool}
 }
 
-func (r *userPhaseHistoryRepo) Insert(ctx context.Context, h *domain.UserPhaseHistory) error {
+func (r *userPhaseHistoryRepo) Insert(ctx context.Context, h *gamificationdomain.UserPhaseHistory) error {
 	log.Println("debugprint: entering (*userPhaseHistoryRepo).Insert")
 	_, err := r.pool.Exec(ctx, `INSERT INTO user_phase_history (history_id, user_id, phase_id, phase_points_earned, entered_at, completed_at) VALUES ($1, $2, $3, $4, $5, $6)`,
 		h.HistoryID, h.UserID, h.PhaseID, h.PhasePointsEarned, h.EnteredAt, h.CompletedAt)
@@ -320,9 +323,9 @@ func (r *userPhaseHistoryRepo) CompleteCurrentPhase(ctx context.Context, userID 
 	return err
 }
 
-func (r *userPhaseHistoryRepo) FindByUserAndPhase(ctx context.Context, userID, phaseID string) (*domain.UserPhaseHistory, error) {
+func (r *userPhaseHistoryRepo) FindByUserAndPhase(ctx context.Context, userID, phaseID string) (*gamificationdomain.UserPhaseHistory, error) {
 	log.Println("debugprint: entering (*userPhaseHistoryRepo).FindByUserAndPhase")
-	var h domain.UserPhaseHistory
+	var h gamificationdomain.UserPhaseHistory
 	err := r.pool.QueryRow(ctx, `SELECT history_id, user_id, phase_id, phase_points_earned, entered_at, completed_at FROM user_phase_history WHERE user_id = $1 AND phase_id = $2`, userID, phaseID).Scan(&h.HistoryID, &h.UserID, &h.PhaseID, &h.PhasePointsEarned, &h.EnteredAt, &h.CompletedAt)
 	if err == pgx.ErrNoRows {
 		return nil, domain.ErrNotFound

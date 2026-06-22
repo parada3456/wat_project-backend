@@ -5,7 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/j1hub/backend/internal/domain"
+	userdomain "github.com/j1hub/backend/internal/user/domain"
+
 	"github.com/j1hub/backend/internal/infrastructure/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -15,21 +16,21 @@ type MockUserRepo struct {
 	mock.Mock
 }
 
-func (m *MockUserRepo) Create(ctx context.Context, u *domain.User) error {
+func (m *MockUserRepo) Create(ctx context.Context, u *userdomain.User) error {
 	return m.Called(ctx, u).Error(0)
 }
-func (m *MockUserRepo) FindByID(ctx context.Context, id string) (*domain.User, error) {
+func (m *MockUserRepo) FindByID(ctx context.Context, id string) (*userdomain.User, error) {
 	args := m.Called(ctx, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*domain.User), args.Error(1)
+	return args.Get(0).(*userdomain.User), args.Error(1)
 }
-func (m *MockUserRepo) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
+func (m *MockUserRepo) FindByEmail(ctx context.Context, email string) (*userdomain.User, error) {
 	args := m.Called(ctx, email)
-	return args.Get(0).(*domain.User), args.Error(1)
+	return args.Get(0).(*userdomain.User), args.Error(1)
 }
-func (m *MockUserRepo) Update(ctx context.Context, u *domain.User) error {
+func (m *MockUserRepo) Update(ctx context.Context, u *userdomain.User) error {
 	return m.Called(ctx, u).Error(0)
 }
 func (m *MockUserRepo) IncrementPoints(ctx context.Context, userID string, lifetimeDelta, phaseDelta int) error {
@@ -70,12 +71,12 @@ func TestFCMNotifier_Send(t *testing.T) {
 	assert.Error(t, err)
 
 	// User found, but ID empty
-	userRepo.On("FindByID", mock.Anything, "usr_empty").Return(&domain.User{UserID: ""}, nil).Once()
+	userRepo.On("FindByID", mock.Anything, "usr_empty").Return(&userdomain.User{UserID: ""}, nil).Once()
 	err = notifier.Send(context.Background(), "usr_empty", "Title", "Body")
 	assert.NoError(t, err)
 
 	// User found successfully
-	userRepo.On("FindByID", mock.Anything, "usr_1").Return(&domain.User{UserID: "usr_1"}, nil).Once()
+	userRepo.On("FindByID", mock.Anything, "usr_1").Return(&userdomain.User{UserID: "usr_1"}, nil).Once()
 	err = notifier.Send(context.Background(), "usr_1", "Title", "Body")
 	assert.NoError(t, err)
 }

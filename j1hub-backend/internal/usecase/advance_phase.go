@@ -5,6 +5,8 @@ import (
 	"log"
 	"time"
 
+	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
 	"github.com/j1hub/backend/pkg/timeutil"
@@ -94,13 +96,13 @@ func (uc *AdvancePhaseUseCase) TryAdvancePhase(ctx context.Context, userID strin
 		return nil, err
 	}
 
-	var newUMs []domain.UserMission
+	var newUMs []missiondomain.UserMission
 	for _, m := range missions {
 		triggerDate := user.ArrivalDate
 		if m.RelativeTriggerEvent == "job_start_date" {
 			triggerDate = user.JobStartDate
 		}
-		newUMs = append(newUMs, domain.UserMission{
+		newUMs = append(newUMs, missiondomain.UserMission{
 			UserMissionID:     uid.New("ums_"),
 			UserID:            userID,
 			MissionID:         m.MissionID,

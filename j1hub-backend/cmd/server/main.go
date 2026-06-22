@@ -14,9 +14,11 @@ import (
 	"github.com/j1hub/backend/internal/adapter/notification"
 	"github.com/j1hub/backend/internal/adapter/postgres"
 	"github.com/j1hub/backend/internal/adapter/storage"
+	expenseusecase "github.com/j1hub/backend/internal/expense/usecase"
 	"github.com/j1hub/backend/internal/infrastructure/config"
 	"github.com/j1hub/backend/internal/infrastructure/db"
 	"github.com/j1hub/backend/internal/infrastructure/scheduler"
+	jobusecase "github.com/j1hub/backend/internal/job/usecase"
 	"github.com/j1hub/backend/internal/usecase"
 	"github.com/j1hub/backend/pkg/timeutil"
 )
@@ -58,7 +60,7 @@ func main() {
 
 	// Usecases
 	rewardEngine := usecase.NewRewardEngine(cfg, userRepo, umRepo)
-	registerUC := usecase.NewRegisterUserUseCase(pool, userRepo, profileRepo, creditRepo, phaseRepo, historyRepo, missionRepo, umRepo, hasher, issuer, clock)
+	registerUC := authauthusecase.NewRegisterUserUseCase(pool, userRepo, profileRepo, creditRepo, phaseRepo, historyRepo, missionRepo, umRepo, hasher, issuer, clock)
 	loginUC := usecase.NewLoginUseCase(userRepo, hasher, issuer)
 	userUC := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo, friendRepo, hasher)
 
@@ -70,18 +72,18 @@ func main() {
 	leaderRepo := postgres.NewLeaderboardRepository(pool)
 
 	missionUC := usecase.NewMissionUseCase(missionRepo, umRepo, taskRepo, utRepo, userRepo)
-	completeUC := usecase.NewCompleteMissionUseCase(umRepo, missionRepo, taskRepo, utRepo, userRepo, ledgerRepo, badgeRepo, ubRepo, storage, notifier, rewardEngine, clock)
+	completeUC := missionmissionusecase.NewCompleteMissionUseCase(umRepo, missionRepo, taskRepo, utRepo, userRepo, ledgerRepo, badgeRepo, ubRepo, storage, notifier, rewardEngine, clock)
 	journeyUC := usecase.NewJourneyUseCase(phaseRepo, historyRepo, badgeRepo, ubRepo, creditRepo, ledgerRepo)
 	advanceUC := usecase.NewAdvancePhaseUseCase(userRepo, umRepo, phaseRepo, historyRepo, missionRepo, notifier, clock)
-	leaderboardUC := usecase.NewLeaderboardUseCase(leaderRepo, profileRepo, ubRepo)
+	leaderboardUC := gamificationgamificationusecase.NewLeaderboardUseCase(leaderRepo, profileRepo, ubRepo)
 
 	radarRepo := postgres.NewRadarRepository(pool)
 
-	friendshipUC := usecase.NewManageFriendshipUseCase(friendRepo, userRepo, notifier, clock)
-	radarUC := usecase.NewRadarUseCase(cfg, profileRepo, radarRepo, friendRepo)
+	friendshipUC := friendfriendusecase.NewManageFriendshipUseCase(friendRepo, userRepo, notifier, clock)
+	radarUC := gamificationgamificationusecase.NewRadarUseCase(cfg, profileRepo, radarRepo, friendRepo)
 
 	txnRepo := postgres.NewExpenseRepository(pool)
-	expenseUC := usecase.NewManageExpenseUseCase(txnRepo, splitRepo, storage, notifier, clock)
+	expenseUC := expenseusecase.NewManageExpenseUseCase(txnRepo, splitRepo, storage, notifier, clock)
 
 	notifRepo := postgres.NewNotificationRepository(pool)
 	notifUC := usecase.NewNotificationUseCase(notifRepo)
@@ -93,7 +95,7 @@ func main() {
 	reviewRepo := postgres.NewJobReviewRepository(pool)
 	cartRepo := postgres.NewUserCartRepository(pool)
 
-	jobUC := usecase.NewManageJobUseCase(jobRepo, housingRepo, ratingRepo, reviewRepo, cartRepo, clock)
+	jobUC := jobusecase.NewManageJobUseCase(jobRepo, housingRepo, ratingRepo, reviewRepo, cartRepo, clock)
 	scrapeJobsUC := usecase.NewScrapeJobsUseCase(jobRepo, housingRepo)
 
 	// Handlers

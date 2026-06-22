@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/j1hub/backend/internal/adapter/http/handler/dto"
+	userdomain "github.com/j1hub/backend/internal/user/domain"
 
 	"context"
 	"encoding/json"
@@ -9,18 +10,17 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
 	"github.com/j1hub/backend/internal/usecase"
 	"github.com/j1hub/backend/pkg/apperror"
 )
 
 type RegisterUserUC interface {
-	Register(ctx context.Context, cmd usecase.RegisterCommand) (*domain.User, *port.TokenPair, error)
+	Register(ctx context.Context, cmd usecase.RegisterCommand) (*userdomain.User, *port.TokenPair, error)
 }
 
 type LoginUC interface {
-	Login(ctx context.Context, cmd usecase.LoginCommand) (*domain.User, *port.TokenPair, error)
+	Login(ctx context.Context, cmd usecase.LoginCommand) (*userdomain.User, *port.TokenPair, error)
 	Refresh(ctx context.Context, refreshToken string) (*port.TokenPair, error)
 }
 

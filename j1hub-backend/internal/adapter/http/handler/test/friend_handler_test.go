@@ -1,4 +1,5 @@
 package handler_test
+
 import (
 	"context"
 	"errors"
@@ -6,10 +7,12 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	frienddomain "github.com/j1hub/backend/internal/friend/domain"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/j1hub/backend/internal/adapter/http/handler"
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
-	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
 	"github.com/j1hub/backend/internal/usecase"
 	"github.com/stretchr/testify/assert"
@@ -50,7 +53,6 @@ func TestFriendHandler_SendRequest(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
-
 func TestFriendHandler_ListPendingRequests(t *testing.T) {
 	friendshipUC := new(MockFriendshipUC)
 	h := handler.NewFriendHandler(friendshipUC, nil)
@@ -62,7 +64,7 @@ func TestFriendHandler_ListPendingRequests(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	friendshipUC.On("ListPendingRequests", mock.Anything, "usr_1").Return([]domain.Friendship{}, nil).Once()
+	friendshipUC.On("ListPendingRequests", mock.Anything, "usr_1").Return([]frienddomain.Friendship{}, nil).Once()
 	req = httptest.NewRequest("GET", "/friends/requests/pending", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -77,7 +79,6 @@ func TestFriendHandler_ListPendingRequests(t *testing.T) {
 	h.ListPendingRequests(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
-
 
 func TestFriendHandler_RespondToRequest(t *testing.T) {
 	friendshipUC := new(MockFriendshipUC)
@@ -117,7 +118,6 @@ func TestFriendHandler_RespondToRequest(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
-
 func TestFriendHandler_ListFriends(t *testing.T) {
 	friendshipUC := new(MockFriendshipUC)
 	h := handler.NewFriendHandler(friendshipUC, nil)
@@ -129,7 +129,7 @@ func TestFriendHandler_ListFriends(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	friendshipUC.On("ListFriends", mock.Anything, "usr_1").Return([]domain.Friendship{}, nil).Once()
+	friendshipUC.On("ListFriends", mock.Anything, "usr_1").Return([]frienddomain.Friendship{}, nil).Once()
 	req = httptest.NewRequest("GET", "/friends", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -144,7 +144,6 @@ func TestFriendHandler_ListFriends(t *testing.T) {
 	h.ListFriends(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
-
 
 func TestFriendHandler_RemoveFriend(t *testing.T) {
 	friendshipUC := new(MockFriendshipUC)
@@ -176,7 +175,6 @@ func TestFriendHandler_RemoveFriend(t *testing.T) {
 	h.RemoveFriend(w, req)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
-
 
 func TestFriendHandler_GetRadar(t *testing.T) {
 	radarUC := new(MockRadarUC)

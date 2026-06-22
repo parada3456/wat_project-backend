@@ -1,8 +1,10 @@
 package handler_test
+
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
 	"github.com/j1hub/backend/internal/adapter/http/handler"
 	"github.com/stretchr/testify/assert"
 )

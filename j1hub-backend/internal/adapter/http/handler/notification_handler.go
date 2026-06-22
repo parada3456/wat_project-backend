@@ -6,14 +6,15 @@ import (
 	"net/http"
 	"strconv"
 
+	notificationdomain "github.com/j1hub/backend/internal/notification/domain"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
-	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/pkg/apperror"
 )
 
 type NotificationUC interface {
-	ListNotifications(ctx context.Context, userID string) ([]domain.Notification, error)
+	ListNotifications(ctx context.Context, userID string) ([]notificationdomain.Notification, error)
 	MarkRead(ctx context.Context, id string) error
 	MarkAllRead(ctx context.Context, userID string) error
 	Delete(ctx context.Context, id string) error
@@ -48,7 +49,7 @@ func (h *NotificationHandler) ListNotifications(w http.ResponseWriter, r *http.R
 	}
 	if isReadStr != "" {
 		if isRead, err := strconv.ParseBool(isReadStr); err == nil {
-			var filtered []domain.Notification
+			var filtered []notificationdomain.Notification
 			for _, n := range notifs {
 				if n.IsRead == isRead {
 					filtered = append(filtered, n)

@@ -4,7 +4,10 @@ import (
 	"context"
 	"log"
 
+	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+
 	"github.com/j1hub/backend/internal/domain"
+	expensedomain "github.com/j1hub/backend/internal/expense/domain"
 	"github.com/j1hub/backend/internal/port"
 	"github.com/j1hub/backend/pkg/uid"
 )
@@ -30,7 +33,7 @@ func (j *OverdueExpenseJob) Run(ctx context.Context) error {
 
 	count := 0
 	for _, s := range splits {
-		if err := j.splitRepo.UpdatePaymentStatus(ctx, s.SplitID, domain.PaymentOverdue, s.PayslipURL); err != nil {
+		if err := j.splitRepo.UpdatePaymentStatus(ctx, s.SplitID, expensedomain.PaymentOverdue, s.PayslipURL); err != nil {
 			log.Printf("failed to update split %s: %v", s.SplitID, err)
 			continue
 		}
@@ -40,7 +43,7 @@ func (j *OverdueExpenseJob) Run(ctx context.Context) error {
 		}
 
 		// Point ledger for audit
-		ledger := domain.PointLedger{
+		ledger := gamificationdomain.PointLedger{
 			LedgerID:   uid.New("ldg_"),
 			UserID:     s.UserID,
 			SourceType: domain.SourceExpensePenalty,

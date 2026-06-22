@@ -1,13 +1,15 @@
 package dto
 
-import "github.com/j1hub/backend/internal/domain"
+import (
+	expensedomain "github.com/j1hub/backend/internal/expense/domain"
+)
 
 type ExpenseDetailResponse struct {
-	Transaction *domain.ExpenseTransaction `json:"transaction"`
-	Splits      []domain.ExpenseSplit      `json:"splits"`
+	Transaction *expensedomain.ExpenseTransaction `json:"transaction"`
+	Splits      []expensedomain.ExpenseSplit      `json:"splits"`
 }
 
-func NewExpenseDetailResponse(txn *domain.ExpenseTransaction, splits []domain.ExpenseSplit) *ExpenseDetailResponse {
+func NewExpenseDetailResponse(txn *expensedomain.ExpenseTransaction, splits []expensedomain.ExpenseSplit) *ExpenseDetailResponse {
 	return &ExpenseDetailResponse{
 		Transaction: txn,
 		Splits:      splits,

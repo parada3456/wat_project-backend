@@ -10,11 +10,19 @@ import (
 	"testing"
 	"time"
 
+	frienddomain "github.com/j1hub/backend/internal/friend/domain"
+	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	notificationdomain "github.com/j1hub/backend/internal/notification/domain"
+	userdomain "github.com/j1hub/backend/internal/user/domain"
+
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/j1hub/backend/internal/adapter/postgres"
 	"github.com/j1hub/backend/internal/domain"
+	expensedomain "github.com/j1hub/backend/internal/expense/domain"
+	jobdomain "github.com/j1hub/backend/internal/job/domain"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
@@ -93,12 +101,12 @@ func setupTestDB(t *testing.T) (*pgxpool.Pool, func()) {
 	// golang-migrate requires database driver configuration
 	m, err := migrate.New("file://"+migPath, dbURL)
 	require.NoError(t, err)
-	
+
 	err = m.Up()
 	if err != nil && err != migrate.ErrNoChange {
 		require.NoError(t, err)
 	}
-	
+
 	dbErr1, dbErr2 := m.Close()
 	require.NoError(t, dbErr1)
 	require.NoError(t, dbErr2)
@@ -138,7 +146,7 @@ func TestUserRepository(t *testing.T) {
 	_, err := pool.Exec(ctx, `INSERT INTO journey_phases (phase_id, phase_number, title) VALUES ('phase_1', 1, 'Phase 1'), ('phase_2', 2, 'Phase 2')`)
 	require.NoError(t, err)
 
-	u := &domain.User{
+	u := &userdomain.User{
 		UserID:              "usr_1",
 		Email:               "user1@test.com",
 		PasswordHash:        "hash1",
@@ -219,7 +227,7 @@ func TestProfileRepository(t *testing.T) {
 	require.NoError(t, err)
 
 	// Need a user first
-	u := &domain.User{
+	u := &userdomain.User{
 		UserID:         "usr_1",
 		Email:          "user1@test.com",
 		PasswordHash:   "hash",
@@ -230,7 +238,7 @@ func TestProfileRepository(t *testing.T) {
 	err = userRepo.Create(ctx, u)
 	require.NoError(t, err)
 
-	p := &domain.Profile{
+	p := &userdomain.Profile{
 		ProfileID:         "prof_1",
 		UserID:            "usr_1",
 		PhoneNumber:       "123456",
@@ -287,12 +295,12 @@ func TestFriendshipRepository(t *testing.T) {
 	_, err := pool.Exec(ctx, `INSERT INTO journey_phases (phase_id, phase_number, title) VALUES ('phase_1', 1, 'Phase 1')`)
 	require.NoError(t, err)
 
-	u1 := &domain.User{UserID: "usr_1", Email: "u1@t.com", CurrentPhaseID: "phase_1"}
-	u2 := &domain.User{UserID: "usr_2", Email: "u2@t.com", CurrentPhaseID: "phase_1"}
+	u1 := &userdomain.User{UserID: "usr_1", Email: "u1@t.com", CurrentPhaseID: "phase_1"}
+	u2 := &userdomain.User{UserID: "usr_2", Email: "u2@t.com", CurrentPhaseID: "phase_1"}
 	require.NoError(t, userRepo.Create(ctx, u1))
 	require.NoError(t, userRepo.Create(ctx, u2))
 
-	f := &domain.Friendship{
+	f := &frienddomain.Friendship{
 		FriendshipID: "fr_1",
 		UserID1:      "usr_1",
 		UserID2:      "usr_2",
@@ -326,7 +334,7 @@ func TestNotificationRepository(t *testing.T) {
 	repo := postgres.NewNotificationRepository(pool)
 	ctx := context.Background()
 
-	err := repo.Insert(ctx, &domain.Notification{})
+	err := repo.Insert(ctx, &notificationdomain.Notification{})
 	assert.NoError(t, err)
 
 	list, err := repo.FindByUser(ctx, "user")
@@ -355,11 +363,11 @@ func TestRadarRepository(t *testing.T) {
 	_, err := pool.Exec(ctx, `INSERT INTO journey_phases (phase_id, phase_number, title) VALUES ('phase_1', 1, 'Phase 1')`)
 	require.NoError(t, err)
 
-	u1 := &domain.User{UserID: "usr_1", Email: "u1@t.com", CurrentPhaseID: "phase_1"}
+	u1 := &userdomain.User{UserID: "usr_1", Email: "u1@t.com", CurrentPhaseID: "phase_1"}
 	err = userRepo.Create(ctx, u1)
 	require.NoError(t, err)
 
-	p1 := &domain.Profile{
+	p1 := &userdomain.Profile{
 		ProfileID:       "prof_1",
 		UserID:          "usr_1",
 		RadarVisibility: domain.VisibilityShowFriends,
@@ -389,8 +397,8 @@ func TestLeaderboardRepository(t *testing.T) {
 	_, err := pool.Exec(ctx, `INSERT INTO journey_phases (phase_id, phase_number, title) VALUES ('phase_1', 1, 'Phase 1')`)
 	require.NoError(t, err)
 
-	u1 := &domain.User{UserID: "usr_1", Email: "u1@t.com", CurrentPhaseID: "phase_1", CurrentPhasePoints: 100}
-	u2 := &domain.User{UserID: "usr_2", Email: "u2@t.com", CurrentPhaseID: "phase_1", CurrentPhasePoints: 200}
+	u1 := &userdomain.User{UserID: "usr_1", Email: "u1@t.com", CurrentPhaseID: "phase_1", CurrentPhasePoints: 100}
+	u2 := &userdomain.User{UserID: "usr_2", Email: "u2@t.com", CurrentPhaseID: "phase_1", CurrentPhasePoints: 200}
 	require.NoError(t, userRepo.Create(ctx, u1))
 	require.NoError(t, userRepo.Create(ctx, u2))
 
@@ -413,12 +421,12 @@ func TestExpenseRepository(t *testing.T) {
 	_, err := pool.Exec(ctx, `INSERT INTO journey_phases (phase_id, phase_number, title) VALUES ('phase_1', 1, 'Phase 1')`)
 	require.NoError(t, err)
 
-	u1 := &domain.User{UserID: "usr_1", Email: "u1@t.com", CurrentPhaseID: "phase_1"}
-	u2 := &domain.User{UserID: "usr_2", Email: "u2@t.com", CurrentPhaseID: "phase_1"}
+	u1 := &userdomain.User{UserID: "usr_1", Email: "u1@t.com", CurrentPhaseID: "phase_1"}
+	u2 := &userdomain.User{UserID: "usr_2", Email: "u2@t.com", CurrentPhaseID: "phase_1"}
 	require.NoError(t, userRepo.Create(ctx, u1))
 	require.NoError(t, userRepo.Create(ctx, u2))
 
-	tx := &domain.ExpenseTransaction{
+	tx := &expensedomain.ExpenseTransaction{
 		TransactionID:   "tx_1",
 		PaidByUserID:    "usr_1",
 		Title:           "Dinner",
@@ -441,14 +449,14 @@ func TestExpenseRepository(t *testing.T) {
 	err = expenseRepo.MarkSettled(ctx, "tx_1")
 	assert.NoError(t, err)
 
-	splits := []domain.ExpenseSplit{
+	splits := []expensedomain.ExpenseSplit{
 		{
 			SplitID:        "sp_1",
 			TransactionID:  "tx_1",
 			UserID:         "usr_2",
 			OweAmount:      50.0,
-			PaymentStatus:  domain.PaymentPending,
-			ApprovalStatus: domain.ApprovalPending,
+			PaymentStatus:  expensedomain.PaymentPending,
+			ApprovalStatus: expensedomain.ApprovalPending,
 			UpdatedAt:      time.Now().Truncate(time.Second),
 		},
 	}
@@ -460,18 +468,18 @@ func TestExpenseRepository(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 50.0, foundSplit.OweAmount)
 
-	err = splitRepo.UpdatePaymentStatus(ctx, "sp_1", domain.PaymentSubmitted, "http://slip.png")
+	err = splitRepo.UpdatePaymentStatus(ctx, "sp_1", expensedomain.PaymentSubmitted, "http://slip.png")
 	assert.NoError(t, err)
 
 	now := time.Now().Truncate(time.Second)
-	err = splitRepo.UpdateApproval(ctx, "sp_1", domain.ApprovalApproved, &now)
+	err = splitRepo.UpdateApproval(ctx, "sp_1", expensedomain.ApprovalApproved, &now)
 	assert.NoError(t, err)
 
 	count, err := splitRepo.CountUnsettled(ctx, "tx_1")
 	assert.NoError(t, err)
 	assert.Equal(t, 0, count)
 
-	tx2 := &domain.ExpenseTransaction{
+	tx2 := &expensedomain.ExpenseTransaction{
 		TransactionID:   "tx_2",
 		PaidByUserID:    "usr_1",
 		Title:           "Lunch",
@@ -484,14 +492,14 @@ func TestExpenseRepository(t *testing.T) {
 	}
 	require.NoError(t, expenseRepo.Insert(ctx, tx2))
 
-	splits2 := []domain.ExpenseSplit{
+	splits2 := []expensedomain.ExpenseSplit{
 		{
 			SplitID:        "sp_2",
 			TransactionID:  "tx_2",
 			UserID:         "usr_2",
 			OweAmount:      20.0,
-			PaymentStatus:  domain.PaymentPending,
-			ApprovalStatus: domain.ApprovalPending,
+			PaymentStatus:  expensedomain.PaymentPending,
+			ApprovalStatus: expensedomain.ApprovalPending,
 			UpdatedAt:      time.Now().Truncate(time.Second),
 		},
 	}
@@ -517,7 +525,7 @@ func TestJobRepository(t *testing.T) {
 
 	_, err := pool.Exec(ctx, `INSERT INTO journey_phases (phase_id, phase_number, title) VALUES ('phase_1', 1, 'Phase 1')`)
 	require.NoError(t, err)
-	u1 := &domain.User{UserID: "usr_1", Email: "u1@t.com", CurrentPhaseID: "phase_1"}
+	u1 := &userdomain.User{UserID: "usr_1", Email: "u1@t.com", CurrentPhaseID: "phase_1"}
 	require.NoError(t, userRepo.Create(ctx, u1))
 
 	_, err = pool.Exec(ctx, `
@@ -551,7 +559,7 @@ func TestJobRepository(t *testing.T) {
 	assert.Len(t, housings, 1)
 	assert.Equal(t, "h_1", housings[0].HousingID)
 
-	rv := &domain.JobReview{
+	rv := &jobdomain.JobReview{
 		ReviewID:                  "rev_1",
 		JobID:                     "job_1",
 		UserID:                    "usr_1",
@@ -583,11 +591,11 @@ func TestJobRepository(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 4.5, rating.OverallRate)
 
-	cartItem := &domain.UserCart{
+	cartItem := &jobdomain.UserCart{
 		CartID:    "cart_1",
 		UserID:    "usr_1",
 		JobID:     "job_1",
-		Status:    domain.CartSaved,
+		Status:    jobdomain.CartSaved,
 		AddedAt:   time.Now(),
 		UpdatedAt: time.Now(),
 	}
@@ -602,7 +610,7 @@ func TestJobRepository(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "cart_1", foundCartByID.CartID)
 
-	err = cartRepo.UpdateStatus(ctx, "cart_1", domain.CartApplied)
+	err = cartRepo.UpdateStatus(ctx, "cart_1", jobdomain.CartApplied)
 	assert.NoError(t, err)
 }
 
@@ -622,7 +630,7 @@ func TestMissionRepository(t *testing.T) {
 	_, err := pool.Exec(ctx, `INSERT INTO journey_phases (phase_id, phase_number, title) VALUES ('phase_1', 1, 'Phase 1'), ('phase_2', 2, 'Phase 2')`)
 	require.NoError(t, err)
 
-	u1 := &domain.User{UserID: "usr_1", Email: "u1@t.com", CurrentPhaseID: "phase_1"}
+	u1 := &userdomain.User{UserID: "usr_1", Email: "u1@t.com", CurrentPhaseID: "phase_1"}
 	require.NoError(t, userRepo.Create(ctx, u1))
 
 	ph, err := phaseRepo.FindByID(ctx, "phase_1")
@@ -633,7 +641,7 @@ func TestMissionRepository(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "phase_2", phNum.PhaseID)
 
-	hist := &domain.UserPhaseHistory{
+	hist := &gamificationdomain.UserPhaseHistory{
 		HistoryID:         "hist_1",
 		UserID:            "usr_1",
 		PhaseID:           "phase_1",
@@ -661,7 +669,7 @@ func TestMissionRepository(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "M1", m.Title)
 
-	ums := []domain.UserMission{
+	ums := []missiondomain.UserMission{
 		{
 			UserMissionID:     "um_1",
 			UserID:            "usr_1",
@@ -689,7 +697,7 @@ func TestMissionRepository(t *testing.T) {
 	err = umRepo.UpdateVerification(ctx, "um_1", time.Now().Truncate(time.Second), "admin")
 	assert.NoError(t, err)
 
-	reward := &domain.PointReward{Base: 100, SpeedBonus: 10, StreakBonus: 5, Total: 115}
+	reward := &missiondomain.PointReward{Base: 100, SpeedBonus: 10, StreakBonus: 5, Total: 115}
 	err = umRepo.UpdateReward(ctx, "um_1", reward, time.Now().Truncate(time.Second))
 	assert.NoError(t, err)
 
@@ -704,7 +712,7 @@ func TestMissionRepository(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, tasks, 1)
 
-	ut := &domain.UserTask{
+	ut := &missiondomain.UserTask{
 		UserTaskID:    "ut_1",
 		UserID:        "usr_1",
 		TaskID:        "t_1",
@@ -732,11 +740,11 @@ func TestGamificationRepository(t *testing.T) {
 	userRepo := postgres.NewUserRepository(pool)
 	ctx := context.Background()
 
-	u1 := &domain.User{UserID: "usr_1", Email: "u1@t.com"}
+	u1 := &userdomain.User{UserID: "usr_1", Email: "u1@t.com"}
 	require.NoError(t, userRepo.Create(ctx, u1))
 
 	// Test PointLedgerRepository
-	l1 := &domain.PointLedger{
+	l1 := &gamificationdomain.PointLedger{
 		LedgerID:             "led_1",
 		UserID:               "usr_1",
 		SourceType:           domain.SourceMissionBase,
@@ -748,7 +756,7 @@ func TestGamificationRepository(t *testing.T) {
 	}
 	assert.NoError(t, ledgerRepo.Insert(ctx, l1))
 
-	l2 := &domain.PointLedger{
+	l2 := &gamificationdomain.PointLedger{
 		LedgerID:             "led_2",
 		UserID:               "usr_1",
 		SourceType:           domain.SourceMissionBase,
@@ -758,7 +766,7 @@ func TestGamificationRepository(t *testing.T) {
 		PhaseBalanceAfter:    150,
 		CreatedAt:            time.Now().Truncate(time.Second),
 	}
-	assert.NoError(t, ledgerRepo.InsertBatch(ctx, []domain.PointLedger{*l2}))
+	assert.NoError(t, ledgerRepo.InsertBatch(ctx, []gamificationdomain.PointLedger{*l2}))
 
 	// Test BadgeRepository and UserBadgeRepository
 	_, err := pool.Exec(ctx, `INSERT INTO badges (badge_id, title, description, trigger_type, icon_url) VALUES ('badge_1', 'Badge 1', 'Desc', 'Speed', 'icon_1')`)
@@ -772,7 +780,7 @@ func TestGamificationRepository(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, eligibles, 1)
 
-	ub := &domain.UserBadge{
+	ub := &gamificationdomain.UserBadge{
 		UserBadgeID: "ub_1",
 		UserID:      "usr_1",
 		BadgeID:     "badge_1",
@@ -790,7 +798,7 @@ func TestGamificationRepository(t *testing.T) {
 	assert.Len(t, ubs, 1)
 
 	// Test CreditScoreRepository
-	c1 := &domain.CreditScore{
+	c1 := &userdomain.CreditScore{
 		CreditID:     "cred_1",
 		UserID:       "usr_1",
 		CurrentScore: 800,
