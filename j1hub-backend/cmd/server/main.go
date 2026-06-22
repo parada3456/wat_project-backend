@@ -48,6 +48,7 @@ func main() {
 	ledgerRepo := postgres.NewPointLedgerRepository(pool)
 	splitRepo := postgres.NewExpenseSplitRepository(pool)
 	adminRepo := postgres.NewAdminRepository(pool)
+	friendRepo := postgres.NewFriendshipRepository(pool)
 
 	// Adapters
 	hasher := auth.NewArgon2Hasher()
@@ -59,7 +60,7 @@ func main() {
 	rewardEngine := usecase.NewRewardEngine(cfg, userRepo, umRepo)
 	registerUC := usecase.NewRegisterUserUseCase(pool, userRepo, profileRepo, creditRepo, phaseRepo, historyRepo, missionRepo, umRepo, hasher, issuer, clock)
 	loginUC := usecase.NewLoginUseCase(userRepo, hasher, issuer)
-	userUC := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo, hasher)
+	userUC := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo, friendRepo, hasher)
 
 	taskRepo := postgres.NewTaskRepository(pool)
 	utRepo := postgres.NewUserTaskRepository(pool)
@@ -70,11 +71,10 @@ func main() {
 
 	missionUC := usecase.NewMissionUseCase(missionRepo, umRepo, taskRepo, utRepo, userRepo)
 	completeUC := usecase.NewCompleteMissionUseCase(umRepo, missionRepo, taskRepo, utRepo, userRepo, ledgerRepo, badgeRepo, ubRepo, storage, notifier, rewardEngine, clock)
-	journeyUC := usecase.NewJourneyUseCase(phaseRepo, historyRepo, badgeRepo, ubRepo, creditRepo)
+	journeyUC := usecase.NewJourneyUseCase(phaseRepo, historyRepo, badgeRepo, ubRepo, creditRepo, ledgerRepo)
 	advanceUC := usecase.NewAdvancePhaseUseCase(userRepo, umRepo, phaseRepo, historyRepo, missionRepo, notifier, clock)
 	leaderboardUC := usecase.NewLeaderboardUseCase(leaderRepo, profileRepo, ubRepo)
 
-	friendRepo := postgres.NewFriendshipRepository(pool)
 	radarRepo := postgres.NewRadarRepository(pool)
 
 	friendshipUC := usecase.NewManageFriendshipUseCase(friendRepo, userRepo, notifier, clock)

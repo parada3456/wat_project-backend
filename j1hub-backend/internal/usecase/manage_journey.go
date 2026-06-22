@@ -14,6 +14,7 @@ type JourneyUseCase struct {
 	badgeRepo   port.BadgeRepository
 	ubRepo      port.UserBadgeRepository
 	creditRepo  port.CreditScoreRepository
+	ledgerRepo  port.PointLedgerRepository
 }
 
 func NewJourneyUseCase(
@@ -22,6 +23,7 @@ func NewJourneyUseCase(
 	badgeRepo port.BadgeRepository,
 	ubRepo port.UserBadgeRepository,
 	creditRepo port.CreditScoreRepository,
+	ledgerRepo port.PointLedgerRepository,
 ) *JourneyUseCase {
 	log.Println("debugprint: entering NewJourneyUseCase")
 	return &JourneyUseCase{
@@ -30,6 +32,7 @@ func NewJourneyUseCase(
 		badgeRepo:   badgeRepo,
 		ubRepo:      ubRepo,
 		creditRepo:  creditRepo,
+		ledgerRepo:  ledgerRepo,
 	}
 }
 
@@ -55,9 +58,11 @@ func (uc *JourneyUseCase) ListUserBadges(ctx context.Context, userID string) ([]
 }
 
 func (uc *JourneyUseCase) GetCreditScoreHistory(ctx context.Context, userID string) ([]domain.PointLedger, error) {
-	log.
-		// Use point ledger repo
-		Println("debugprint: entering (*JourneyUseCase).GetCreditScoreHistory")
-
+	log.Println("debugprint: entering (*JourneyUseCase).GetCreditScoreHistory")
 	return nil, nil
+}
+
+func (uc *JourneyUseCase) GetPointsLedger(ctx context.Context, userID string) ([]domain.PointLedger, error) {
+	log.Println("debugprint: entering (*JourneyUseCase).GetPointsLedger")
+	return uc.ledgerRepo.FindByUser(ctx, userID)
 }

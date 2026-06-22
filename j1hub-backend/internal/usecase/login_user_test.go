@@ -141,7 +141,7 @@ func TestLoginUseCase_Login_WrongPassword(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, user)
 	assert.Nil(t, tokens)
-	assert.Contains(t, err.Error(), "invalid credentials")
+	assert.Contains(t, err.Error(), "Invalid credentials")
 }
 
 func TestLoginUseCase_Refresh_Success(t *testing.T) {

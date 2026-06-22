@@ -46,33 +46,36 @@ func NewRouter(
 			r.Post("/auth/logout", authH.Logout)
 
 			// User routes
-			r.Get("/user/profile", userH.GetProfile)
-			r.Patch("/user/profile", userH.UpdateProfile)
-			r.Post("/user/location", userH.UpdateLocation)
-			r.Patch("/user/settings", userH.UpdateSettings)
-			r.Delete("/user/account", userH.DeleteAccount)
+			r.Get("/users/me", userH.GetProfile)
+			r.Patch("/users/me", userH.UpdateProfile)
+			r.Get("/users/{id}", userH.GetPublicProfile)
+			r.Patch("/users/me/settings", userH.UpdateSettings)
+			r.Delete("/users/me", userH.DeleteAccount)
+			r.Patch("/profile/location", userH.UpdateLocation)
 
 			// Mission routes
 			r.Get("/missions", missionH.ListMissions)
-			r.Get("/missions/{id}", missionH.GetMissionDetail)
-			r.Post("/missions/{id}/verify", missionH.SubmitProof)
-			r.Patch("/tasks/{id}", missionH.ToggleTask)
+			r.Get("/user-missions", missionH.ListUserMissions)
+			r.Get("/user-missions/{id}", missionH.GetMissionDetail)
+			r.Post("/user-missions/{id}/proof", missionH.SubmitProof)
+			r.Patch("/user-missions/{id}/tasks/{taskId}", missionH.ToggleTask)
 
 			// Journey routes
 			r.Get("/journey/phases", journeyH.ListPhases)
-			r.Post("/journey/phase/transition", journeyH.AdvancePhase)
+			r.Post("/journey/phase-transitions", journeyH.AdvancePhase)
 			r.Get("/journey/history", journeyH.GetHistory)
 			r.Get("/leaderboard", journeyH.GetLeaderboard)
 			r.Get("/user/badges", journeyH.ListBadges)
+			r.Get("/user/points/ledger", journeyH.GetPointsLedger)
 			r.Get("/user/credit-score/history", journeyH.GetCreditHistory)
 			r.Get("/user/credit-history", journeyH.GetCreditHistory)
 
 			// Friend routes
-			r.Post("/friends/request", friendH.SendRequest)
-			r.Get("/friends/requests/pending", friendH.ListPendingRequests)
-			r.Patch("/friends/respond", friendH.RespondToRequest)
+			r.Post("/friend-requests", friendH.SendRequest)
+			r.Get("/friend-requests", friendH.ListPendingRequests)
+			r.Patch("/friend-requests/{id}", friendH.RespondToRequest)
 			r.Get("/friends", friendH.ListFriends)
-			r.Delete("/friends/{id}", friendH.RemoveFriend)
+			r.Delete("/friends/{friendshipId}", friendH.RemoveFriend)
 			r.Get("/radar", friendH.GetRadar)
 
 			// Expense routes
@@ -80,22 +83,24 @@ func NewRouter(
 			r.Post("/expenses", expenseH.CreateExpense)
 			r.Get("/expenses/{id}", expenseH.GetExpenseDetail)
 			r.Delete("/expenses/{id}", expenseH.DeleteExpense)
-			r.Get("/expenses/pending", expenseH.ListPending)
-			r.Post("/expenses/splits/{id}/pay", expenseH.PaySplit)
-			r.Patch("/expenses/splits/{id}/approve", expenseH.ApproveSplit)
+			r.Get("/expense-splits", expenseH.ListPending)
+			r.Patch("/expenses/{id}/splits/{splitId}", expenseH.UpdateSplit)
 
 			// Notification routes
 			r.Get("/notifications", notifH.ListNotifications)
-			r.Patch("/notifications/{id}/read", notifH.MarkRead)
-			r.Patch("/notifications/read-all", notifH.MarkAllRead)
+			r.Patch("/notifications/{id}", notifH.MarkRead)
+			r.Patch("/notifications", notifH.MarkAllRead)
 			r.Delete("/notifications/{id}", notifH.DeleteNotification)
 
 			// Job routes
 			r.Get("/jobs", jobH.ListJobs)
 			r.Get("/jobs/{id}", jobH.GetJobDetail)
-			r.Post("/cart", jobH.AddToCart)
+			r.Get("/jobs/{id}/reviews", jobH.GetJobReviews)
+			r.Post("/jobs/{id}/reviews", jobH.CreateReview)
 			r.Get("/cart", jobH.ListCart)
-			r.Delete("/cart/{id}", jobH.RemoveFromCart)
+			r.Post("/cart", jobH.AddToCart)
+			r.Patch("/cart/{cartId}", jobH.UpdateCartStatus)
+			r.Delete("/cart/{cartId}", jobH.RemoveFromCart)
 			r.Post("/reviews", jobH.CreateReview)
 		})
 

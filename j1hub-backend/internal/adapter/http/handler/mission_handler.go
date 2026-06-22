@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"github.com/j1hub/backend/internal/adapter/http/handler/dto"
+
 	"context"
 	"encoding/json"
 	"io"
@@ -16,6 +18,7 @@ import (
 
 type MissionUC interface {
 	ListAvailableMissions(ctx context.Context, userID string) ([]domain.UserMission, error)
+	ListStaticMissions(ctx context.Context, userID string) ([]domain.Mission, error)
 	GetMissionDetail(ctx context.Context, userID, userMissionID string) (*usecase.MissionDetailResponse, error)
 	ToggleTask(ctx context.Context, userID, userTaskID string, completed bool) error
 }
@@ -45,13 +48,32 @@ func (h *MissionHandler) ListMissions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	missions, err := h.missionUC.ListStaticMissions(r.Context(), claims.UserID)
+	if err != nil {
+		apperror.RespondError(w, err)
+		return
+	}
+
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, missions, page, pageSize, len(missions))
+}
+
+func (h *MissionHandler) ListUserMissions(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*MissionHandler).ListUserMissions")
+	claims := middleware.GetClaims(r.Context())
+	if claims == nil {
+		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
+		return
+	}
+
 	missions, err := h.missionUC.ListAvailableMissions(r.Context(), claims.UserID)
 	if err != nil {
 		apperror.RespondError(w, err)
 		return
 	}
 
-	json.NewEncoder(w).Encode(missions)
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, missions, page, pageSize, len(missions))
 }
 
 func (h *MissionHandler) GetMissionDetail(w http.ResponseWriter, r *http.Request) {
@@ -69,7 +91,10 @@ func (h *MissionHandler) GetMissionDetail(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	json.NewEncoder(w).Encode(detail)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	respDTO := dto.NewMissionDetailResponse(detail)
+	json.NewEncoder(w).Encode(respDTO)
 }
 
 func (h *MissionHandler) SubmitProof(w http.ResponseWriter, r *http.Request) {
@@ -82,8 +107,6 @@ func (h *MissionHandler) SubmitProof(w http.ResponseWriter, r *http.Request) {
 
 	id := chi.URLParam(r, "id")
 
-	// Need to handle multipart form for file upload
-	// For simplicity, let's assume JSON for now or handle multipart
 	r.ParseMultipartForm(10 << 20) // 10MB max
 	file, header, err := r.FormFile("proof")
 	if err != nil {
@@ -101,9 +124,7 @@ func (h *MissionHandler) SubmitProof(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-type toggleTaskReq struct {
-	Completed bool `json:"completed"`
-}
+
 
 func (h *MissionHandler) ToggleTask(w http.ResponseWriter, r *http.Request) {
 	log.Println("debugprint: entering (*MissionHandler).ToggleTask")
@@ -114,13 +135,25 @@ func (h *MissionHandler) ToggleTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := chi.URLParam(r, "id")
-	var req toggleTaskReq
+	taskID := chi.URLParam(r, "taskId")
+	if taskID == "" {
+		taskID = id
+	}
+
+	var req dto.ToggleTaskReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body", Err: err})
 		return
 	}
 
-	err := h.missionUC.ToggleTask(r.Context(), claims.UserID, id, req.Completed)
+	completed := false
+	if req.Completed != nil {
+		completed = *req.Completed
+	} else if req.IsCompleted != nil {
+		completed = *req.IsCompleted
+	}
+
+	err := h.missionUC.ToggleTask(r.Context(), claims.UserID, taskID, completed)
 	if err != nil {
 		apperror.RespondError(w, err)
 		return

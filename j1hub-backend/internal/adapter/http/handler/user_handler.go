@@ -1,19 +1,24 @@
 package handler
 
 import (
+	"github.com/j1hub/backend/internal/adapter/http/handler/dto"
+
 	"context"
 	"encoding/json"
 	"log"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
+	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/usecase"
 	"github.com/j1hub/backend/pkg/apperror"
 )
 
 type UserUC interface {
 	GetProfile(ctx context.Context, userID string) (*usecase.UserProfileResponse, error)
+	GetPublicProfile(ctx context.Context, currentUserID, targetUserID string) (*domain.User, *domain.Profile, error)
 	UpdateProfile(ctx context.Context, userID string, cmd usecase.UpdateProfileCommand) error
 	UpdateLocation(ctx context.Context, userID string, lat, lng float64) error
 	UpdateSettings(ctx context.Context, userID string, settings map[string]interface{}) error
@@ -44,14 +49,29 @@ func (h *UserHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(resp)
-}
+	// respDTO := dto.GetProfileResponse{
+	// 	User:    resp.User,
+	// 	Profile: resp.Profile,
+	// }
+	// if resp.User != nil {
+	// 	respDTO.UserID = resp.User.UserID
+	// 	respDTO.Email = resp.User.Email
+	// 	respDTO.FirstName = resp.User.FirstName
+	// 	respDTO.LastName = resp.User.LastName
+	// 	respDTO.Points = resp.User.TotalLifetimePoints
+	// }
+	// if resp.Profile != nil {
+	// 	respDTO.Bio = resp.Profile.Bio
+	// 	respDTO.AvatarURL = resp.Profile.AvatarURL
+	// }
+	// if resp.CreditScore != nil {
+	// 	respDTO.CreditScore = resp.CreditScore.CurrentScore
+	// }
+	respDTO := dto.NewGetProfileResponse(resp)
 
-type updateProfileReq struct {
-	FirstName string `json:"first_name" validate:"required"`
-	LastName  string `json:"last_name" validate:"required"`
-	Bio       string `json:"bio"`
-	AvatarURL string `json:"avatar_url"`
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(respDTO)
 }
 
 func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +82,7 @@ func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req updateProfileReq
+	var req dto.UpdateProfileReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body", Err: err})
 		return
@@ -87,11 +107,6 @@ func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-type updateLocationReq struct {
-	Latitude  float64 `json:"latitude" validate:"required"`
-	Longitude float64 `json:"longitude" validate:"required"`
-}
-
 func (h *UserHandler) UpdateLocation(w http.ResponseWriter, r *http.Request) {
 	log.Println("debugprint: entering (*UserHandler).UpdateLocation")
 	claims := middleware.GetClaims(r.Context())
@@ -100,7 +115,7 @@ func (h *UserHandler) UpdateLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req updateLocationReq
+	var req dto.UpdateLocationReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body", Err: err})
 		return
@@ -143,10 +158,6 @@ func (h *UserHandler) UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-type deleteAccountReq struct {
-	CurrentPassword string `json:"current_password" validate:"required"`
-}
-
 func (h *UserHandler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	log.Println("debugprint: entering (*UserHandler).DeleteAccount")
 	claims := middleware.GetClaims(r.Context())
@@ -155,7 +166,7 @@ func (h *UserHandler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req deleteAccountReq
+	var req dto.DeleteAccountReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body", Err: err})
 		return
@@ -173,4 +184,33 @@ func (h *UserHandler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *UserHandler) GetPublicProfile(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*UserHandler).GetPublicProfile")
+	claims := middleware.GetClaims(r.Context())
+	if claims == nil {
+		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
+		return
+	}
+
+	targetID := chi.URLParam(r, "id")
+	user, profile, err := h.userUC.GetPublicProfile(r.Context(), claims.UserID, targetID)
+	if err != nil {
+		apperror.RespondError(w, err)
+		return
+	}
+
+	respDTO := dto.GetPublicProfileResponse{
+		UserID:    user.UserID,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+	}
+	if profile != nil {
+		respDTO.AvatarURL = profile.AvatarURL
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(respDTO)
 }

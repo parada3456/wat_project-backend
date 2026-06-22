@@ -15,8 +15,9 @@ func TestUserUseCase_GetProfile_Success(t *testing.T) {
 	userRepo := new(MockUserRepository)
 	profileRepo := new(MockProfileRepository)
 	creditRepo := new(MockCreditScoreRepository)
+	friendRepo := new(MockFriendshipRepository)
 	hasher := new(MockHasher)
-	uc := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo, hasher)
+	uc := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo, friendRepo, hasher)
 
 	ctx := context.Background()
 	userID := "usr_123"
@@ -46,8 +47,9 @@ func TestUserUseCase_GetProfile_UserNotFound(t *testing.T) {
 	userRepo := new(MockUserRepository)
 	profileRepo := new(MockProfileRepository)
 	creditRepo := new(MockCreditScoreRepository)
+	friendRepo := new(MockFriendshipRepository)
 	hasher := new(MockHasher)
-	uc := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo, hasher)
+	uc := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo, friendRepo, hasher)
 
 	ctx := context.Background()
 	userID := "usr_nonexistent"
@@ -65,8 +67,9 @@ func TestUserUseCase_UpdateProfile_Success(t *testing.T) {
 	userRepo := new(MockUserRepository)
 	profileRepo := new(MockProfileRepository)
 	creditRepo := new(MockCreditScoreRepository)
+	friendRepo := new(MockFriendshipRepository)
 	hasher := new(MockHasher)
-	uc := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo, hasher)
+	uc := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo, friendRepo, hasher)
 
 	ctx := context.Background()
 	userID := "usr_123"
@@ -100,3 +103,33 @@ func TestUserUseCase_UpdateProfile_Success(t *testing.T) {
 	userRepo.AssertExpectations(t)
 	profileRepo.AssertExpectations(t)
 }
+
+func TestUserUseCase_GetPublicProfile_Success(t *testing.T) {
+	userRepo := new(MockUserRepository)
+	profileRepo := new(MockProfileRepository)
+	creditRepo := new(MockCreditScoreRepository)
+	friendRepo := new(MockFriendshipRepository)
+	hasher := new(MockHasher)
+	uc := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo, friendRepo, hasher)
+
+	ctx := context.Background()
+	user1 := &domain.User{UserID: "usr_1", FirstName: "John"}
+	profile1 := &domain.Profile{UserID: "usr_1", RadarVisibility: domain.VisibilityShowFriends}
+
+	userRepo.On("FindByID", ctx, "usr_1").Return(user1, nil)
+	profileRepo.On("FindByUserID", ctx, "usr_1").Return(profile1, nil)
+
+	// Friend mock: they are friends
+	friendship := &domain.Friendship{
+		UserID1: "usr_1",
+		UserID2: "usr_2",
+		Status:  domain.FriendshipAccepted,
+	}
+	friendRepo.On("FindByCanonicalPair", ctx, "usr_1", "usr_2").Return(friendship, nil)
+
+	u, p, err := uc.GetPublicProfile(ctx, "usr_2", "usr_1")
+	assert.NoError(t, err)
+	assert.Equal(t, user1, u)
+	assert.Equal(t, profile1, p)
+}
+

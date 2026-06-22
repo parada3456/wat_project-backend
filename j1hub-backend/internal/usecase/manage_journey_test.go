@@ -15,8 +15,9 @@ func TestJourneyUseCase_ListUserBadges_Success(t *testing.T) {
 	badgeRepo := new(MockBadgeRepository)
 	ubRepo := new(MockUserBadgeRepository)
 	creditRepo := new(MockCreditScoreRepository)
+	ledgerRepo := new(MockPointLedgerRepository)
 
-	uc := usecase.NewJourneyUseCase(phaseRepo, historyRepo, badgeRepo, ubRepo, creditRepo)
+	uc := usecase.NewJourneyUseCase(phaseRepo, historyRepo, badgeRepo, ubRepo, creditRepo, ledgerRepo)
 
 	ctx := context.Background()
 	userID := "usr_123"
@@ -34,22 +35,46 @@ func TestJourneyUseCase_ListUserBadges_Success(t *testing.T) {
 }
 
 func TestJourneyUseCase_ListPhases_Stub(t *testing.T) {
-	uc := usecase.NewJourneyUseCase(nil, nil, nil, nil, nil)
+	uc := usecase.NewJourneyUseCase(nil, nil, nil, nil, nil, nil)
 	res, err := uc.ListPhases(context.Background())
 	assert.Nil(t, res)
 	assert.NoError(t, err)
 }
 
 func TestJourneyUseCase_GetHistory_Stub(t *testing.T) {
-	uc := usecase.NewJourneyUseCase(nil, nil, nil, nil, nil)
+	uc := usecase.NewJourneyUseCase(nil, nil, nil, nil, nil, nil)
 	res, err := uc.GetHistory(context.Background(), "usr_1")
 	assert.Nil(t, res)
 	assert.NoError(t, err)
 }
 
 func TestJourneyUseCase_GetCreditScoreHistory_Stub(t *testing.T) {
-	uc := usecase.NewJourneyUseCase(nil, nil, nil, nil, nil)
+	uc := usecase.NewJourneyUseCase(nil, nil, nil, nil, nil, nil)
 	res, err := uc.GetCreditScoreHistory(context.Background(), "usr_1")
 	assert.Nil(t, res)
 	assert.NoError(t, err)
+}
+
+func TestJourneyUseCase_GetPointsLedger_Success(t *testing.T) {
+	phaseRepo := new(MockJourneyPhaseRepository)
+	historyRepo := new(MockUserPhaseHistoryRepository)
+	badgeRepo := new(MockBadgeRepository)
+	ubRepo := new(MockUserBadgeRepository)
+	creditRepo := new(MockCreditScoreRepository)
+	ledgerRepo := new(MockPointLedgerRepository)
+
+	uc := usecase.NewJourneyUseCase(phaseRepo, historyRepo, badgeRepo, ubRepo, creditRepo, ledgerRepo)
+
+	ctx := context.Background()
+	userID := "usr_123"
+	mockLedger := []domain.PointLedger{
+		{LedgerID: "ldg_1", UserID: userID, Delta: 100},
+	}
+
+	ledgerRepo.On("FindByUser", ctx, userID).Return(mockLedger, nil)
+
+	res, err := uc.GetPointsLedger(ctx, userID)
+
+	assert.NoError(t, err)
+	assert.Equal(t, mockLedger, res)
 }

@@ -2,11 +2,12 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
+	"github.com/j1hub/backend/pkg/apperror"
+	"net/http"
 )
 
 type LoginUseCase struct {
@@ -37,11 +38,21 @@ func (uc *LoginUseCase) Login(ctx context.Context, cmd LoginCommand) (*domain.Us
 	log.Println("debugprint: entering (*LoginUseCase).Login")
 	user, err := uc.userRepo.FindByEmail(ctx, cmd.Email)
 	if err != nil {
-		return nil, nil, fmt.Errorf("invalid credentials")
+		return nil, nil, &apperror.ProblemDetails{
+			Type:   "https://example.com/probs/invalid-credentials",
+			Title:  "Invalid credentials",
+			Status: http.StatusUnauthorized,
+			Detail: "The email or password provided is incorrect.",
+		}
 	}
 
 	if !uc.hasher.Verify(cmd.Password, user.PasswordHash) {
-		return nil, nil, fmt.Errorf("invalid credentials")
+		return nil, nil, &apperror.ProblemDetails{
+			Type:   "https://example.com/probs/invalid-credentials",
+			Title:  "Invalid credentials",
+			Status: http.StatusUnauthorized,
+			Detail: "The email or password provided is incorrect.",
+		}
 	}
 
 	tokens, err := uc.tokenIssuer.Issue(user.UserID, false)

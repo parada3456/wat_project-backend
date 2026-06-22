@@ -77,10 +77,11 @@ func TestAdvancePhaseUseCase_TryAdvancePhase_Success(t *testing.T) {
 
 	notifier.On("Send", ctx, userID, "Phase unlocked!", "New missions await!").Return(nil)
 
-	success, err := uc.TryAdvancePhase(ctx, userID)
+	resp, err := uc.TryAdvancePhase(ctx, userID)
 
 	assert.NoError(t, err)
-	assert.True(t, success)
+	assert.NotNil(t, resp)
+	assert.True(t, resp.Transitioned)
 }
 
 func TestAdvancePhaseUseCase_TryAdvancePhase_IncompleteMissions(t *testing.T) {
@@ -111,10 +112,10 @@ func TestAdvancePhaseUseCase_TryAdvancePhase_IncompleteMissions(t *testing.T) {
 	userRepo.On("FindByID", ctx, userID).Return(mockUser, nil)
 	umRepo.On("FindByUserAndPhase", ctx, userID, "phase_1").Return(mockUserMissions, nil)
 
-	success, err := uc.TryAdvancePhase(ctx, userID)
+	resp, err := uc.TryAdvancePhase(ctx, userID)
 
 	assert.Error(t, err)
-	assert.False(t, success)
+	assert.Nil(t, resp)
 	assert.Equal(t, domain.ErrPhaseNotComplete, err)
 }
 
@@ -125,9 +126,9 @@ func TestAdvancePhaseUseCase_TryAdvancePhase_UserRepoError(t *testing.T) {
 	ctx := context.Background()
 	userRepo.On("FindByID", ctx, "usr_1").Return((*domain.User)(nil), errors.New("db error"))
 
-	success, err := uc.TryAdvancePhase(ctx, "usr_1")
+	resp, err := uc.TryAdvancePhase(ctx, "usr_1")
 	assert.Error(t, err)
-	assert.False(t, success)
+	assert.Nil(t, resp)
 }
 
 func TestAdvancePhaseUseCase_TryAdvancePhase_UserMissionsRepoError(t *testing.T) {
@@ -139,9 +140,9 @@ func TestAdvancePhaseUseCase_TryAdvancePhase_UserMissionsRepoError(t *testing.T)
 	userRepo.On("FindByID", ctx, "usr_1").Return(&domain.User{CurrentPhaseID: "phase_1"}, nil)
 	umRepo.On("FindByUserAndPhase", ctx, "usr_1", "phase_1").Return([]domain.UserMission{}, errors.New("db error"))
 
-	success, err := uc.TryAdvancePhase(ctx, "usr_1")
+	resp, err := uc.TryAdvancePhase(ctx, "usr_1")
 	assert.Error(t, err)
-	assert.False(t, success)
+	assert.Nil(t, resp)
 }
 
 func TestAdvancePhaseUseCase_TryAdvancePhase_CurrentPhaseRepoError(t *testing.T) {
@@ -155,9 +156,9 @@ func TestAdvancePhaseUseCase_TryAdvancePhase_CurrentPhaseRepoError(t *testing.T)
 	umRepo.On("FindByUserAndPhase", ctx, "usr_1", "phase_1").Return([]domain.UserMission{{Status: domain.StatusCompleted}}, nil)
 	phaseRepo.On("FindByID", ctx, "phase_1").Return((*domain.JourneyPhase)(nil), errors.New("db error"))
 
-	success, err := uc.TryAdvancePhase(ctx, "usr_1")
+	resp, err := uc.TryAdvancePhase(ctx, "usr_1")
 	assert.Error(t, err)
-	assert.False(t, success)
+	assert.Nil(t, resp)
 }
 
 func TestAdvancePhaseUseCase_TryAdvancePhase_NextPhaseRepoError(t *testing.T) {
@@ -172,9 +173,9 @@ func TestAdvancePhaseUseCase_TryAdvancePhase_NextPhaseRepoError(t *testing.T) {
 	phaseRepo.On("FindByID", ctx, "phase_1").Return(&domain.JourneyPhase{PhaseNumber: 1}, nil)
 	phaseRepo.On("FindByNumber", ctx, 2).Return((*domain.JourneyPhase)(nil), errors.New("db error"))
 
-	success, err := uc.TryAdvancePhase(ctx, "usr_1")
+	resp, err := uc.TryAdvancePhase(ctx, "usr_1")
 	assert.Error(t, err)
-	assert.False(t, success)
+	assert.Nil(t, resp)
 }
 
 func TestAdvancePhaseUseCase_TryAdvancePhase_CompletePhaseError(t *testing.T) {
@@ -193,9 +194,9 @@ func TestAdvancePhaseUseCase_TryAdvancePhase_CompletePhaseError(t *testing.T) {
 	phaseRepo.On("FindByNumber", ctx, 2).Return(&domain.JourneyPhase{PhaseID: "phase_2"}, nil)
 	historyRepo.On("CompleteCurrentPhase", ctx, "usr_1", 100, nowTime).Return(errors.New("db error"))
 
-	success, err := uc.TryAdvancePhase(ctx, "usr_1")
+	resp, err := uc.TryAdvancePhase(ctx, "usr_1")
 	assert.Error(t, err)
-	assert.False(t, success)
+	assert.Nil(t, resp)
 }
 
 func TestAdvancePhaseUseCase_TryAdvancePhase_SetPhaseError(t *testing.T) {
@@ -215,9 +216,9 @@ func TestAdvancePhaseUseCase_TryAdvancePhase_SetPhaseError(t *testing.T) {
 	historyRepo.On("CompleteCurrentPhase", ctx, "usr_1", 100, nowTime).Return(nil)
 	userRepo.On("SetPhase", ctx, "usr_1", "phase_2").Return(errors.New("db error"))
 
-	success, err := uc.TryAdvancePhase(ctx, "usr_1")
+	resp, err := uc.TryAdvancePhase(ctx, "usr_1")
 	assert.Error(t, err)
-	assert.False(t, success)
+	assert.Nil(t, resp)
 }
 
 func TestAdvancePhaseUseCase_TryAdvancePhase_FindByPhaseError(t *testing.T) {
@@ -239,9 +240,9 @@ func TestAdvancePhaseUseCase_TryAdvancePhase_FindByPhaseError(t *testing.T) {
 	userRepo.On("SetPhase", ctx, "usr_1", "phase_2").Return(nil)
 	missionRepo.On("FindByPhase", ctx, "phase_2").Return([]domain.Mission{}, errors.New("db error"))
 
-	success, err := uc.TryAdvancePhase(ctx, "usr_1")
+	resp, err := uc.TryAdvancePhase(ctx, "usr_1")
 	assert.Error(t, err)
-	assert.False(t, success)
+	assert.Nil(t, resp)
 }
 
 func TestAdvancePhaseUseCase_TryAdvancePhase_BulkInsertError(t *testing.T) {
@@ -266,8 +267,7 @@ func TestAdvancePhaseUseCase_TryAdvancePhase_BulkInsertError(t *testing.T) {
 	}, nil)
 	umRepo.On("BulkInsert", ctx, mock.Anything).Return(errors.New("db error"))
 
-	success, err := uc.TryAdvancePhase(ctx, "usr_1")
+	resp, err := uc.TryAdvancePhase(ctx, "usr_1")
 	assert.Error(t, err)
-	assert.False(t, success)
+	assert.Nil(t, resp)
 }
-

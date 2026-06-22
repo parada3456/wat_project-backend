@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
@@ -41,50 +42,56 @@ func NewAdvancePhaseUseCase(
 	}
 }
 
-func (uc *AdvancePhaseUseCase) TryAdvancePhase(ctx context.Context, userID string) (bool, error) {
+type PhaseTransitionResponse struct {
+	Transitioned    bool      `json:"transitioned"`
+	PreviousPhaseID string    `json:"previousPhaseId"`
+	NewPhaseID      string    `json:"newPhaseId"`
+	PointsRewarded  int       `json:"pointsRewarded"`
+	CompletedAt     time.Time `json:"completedAt"`
+}
+
+func (uc *AdvancePhaseUseCase) TryAdvancePhase(ctx context.Context, userID string) (*PhaseTransitionResponse, error) {
 	log.Println("debugprint: entering (*AdvancePhaseUseCase).TryAdvancePhase")
 	user, err := uc.userRepo.FindByID(ctx, userID)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
 	ums, err := uc.umRepo.FindByUserAndPhase(ctx, userID, user.CurrentPhaseID)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
 	if !domain.CanAdvancePhase(ums) {
-		return false, domain.ErrPhaseNotComplete
+		return nil, domain.ErrPhaseNotComplete
 	}
 
 	currentPhase, err := uc.phaseRepo.FindByID(ctx, user.CurrentPhaseID)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
 	nextPhase, err := uc.phaseRepo.FindByNumber(ctx, currentPhase.PhaseNumber+1)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
 	now := uc.clock.Now()
 
 	// Snapshot history
 	if err := uc.historyRepo.CompleteCurrentPhase(ctx, userID, user.CurrentPhasePoints, now); err != nil {
-		return false, err
+		return nil, err
 	}
 
 	// Update user
 	if err := uc.userRepo.SetPhase(ctx, userID, nextPhase.PhaseID); err != nil {
-		return false, err
+		return nil, err
 	}
-	// Also reset phase points to 0
-	// ...
 
 	// Insert new missions
 	missions, err := uc.missionRepo.FindByPhase(ctx, nextPhase.PhaseID)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
 	var newUMs []domain.UserMission
@@ -104,10 +111,16 @@ func (uc *AdvancePhaseUseCase) TryAdvancePhase(ctx context.Context, userID strin
 		})
 	}
 	if err := uc.umRepo.BulkInsert(ctx, newUMs); err != nil {
-		return false, err
+		return nil, err
 	}
 
 	uc.notifier.Send(ctx, userID, "Phase unlocked!", "New missions await!")
 
-	return true, nil
+	return &PhaseTransitionResponse{
+		Transitioned:    true,
+		PreviousPhaseID: currentPhase.PhaseID,
+		NewPhaseID:      nextPhase.PhaseID,
+		PointsRewarded:  200,
+		CompletedAt:     now,
+	}, nil
 }

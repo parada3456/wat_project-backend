@@ -140,15 +140,30 @@ func TestManageJobUseCase_GetJobDetail_Success(t *testing.T) {
 	assert.Equal(t, mockRating, rating)
 }
 
-func TestManageJobUseCase_ListCart_Stub(t *testing.T) {
-	uc := usecase.NewManageJobUseCase(nil, nil, nil, nil, nil, &MockClock{})
-	res, err := uc.ListCart(context.Background(), "usr_1")
-	assert.Nil(t, res)
+func TestManageJobUseCase_ListCart_Success(t *testing.T) {
+	cartRepo := new(MockUserCartRepository)
+	uc := usecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
+	ctx := context.Background()
+	userID := "usr_1"
+	mockCart := []domain.UserCart{{CartID: "crt_1", UserID: userID}}
+	
+	cartRepo.On("FindByUser", ctx, userID).Return(mockCart, nil)
+	
+	res, err := uc.ListCart(ctx, userID)
 	assert.NoError(t, err)
+	assert.Equal(t, mockCart, res)
 }
 
-func TestManageJobUseCase_RemoveFromCart_Stub(t *testing.T) {
-	uc := usecase.NewManageJobUseCase(nil, nil, nil, nil, nil, &MockClock{})
-	err := uc.RemoveFromCart(context.Background(), "usr_1", "crt_1")
+func TestManageJobUseCase_RemoveFromCart_Success(t *testing.T) {
+	cartRepo := new(MockUserCartRepository)
+	uc := usecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
+	ctx := context.Background()
+	userID := "usr_1"
+	cartID := "crt_1"
+	
+	cartRepo.On("FindByID", ctx, cartID).Return(&domain.UserCart{CartID: cartID, UserID: userID}, nil)
+	cartRepo.On("Delete", ctx, cartID).Return(nil)
+	
+	err := uc.RemoveFromCart(ctx, userID, cartID)
 	assert.NoError(t, err)
 }

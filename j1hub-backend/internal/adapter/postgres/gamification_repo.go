@@ -36,6 +36,25 @@ func (r *pointLedgerRepo) InsertBatch(ctx context.Context, ledgers []domain.Poin
 	return r.pool.SendBatch(ctx, batch).Close()
 }
 
+func (r *pointLedgerRepo) FindByUser(ctx context.Context, userID string) ([]domain.PointLedger, error) {
+	log.Println("debugprint: entering (*pointLedgerRepo).FindByUser")
+	query := `SELECT ledger_id, user_id, source_type, source_id, delta, lifetime_balance_after, phase_balance_after, note, created_at FROM point_ledger WHERE user_id = $1 ORDER BY created_at DESC`
+	rows, err := r.pool.Query(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var ledgers []domain.PointLedger
+	for rows.Next() {
+		var l domain.PointLedger
+		if err := rows.Scan(&l.LedgerID, &l.UserID, &l.SourceType, &l.SourceID, &l.Delta, &l.LifetimeBalanceAfter, &l.PhaseBalanceAfter, &l.Note, &l.CreatedAt); err != nil {
+			return nil, err
+		}
+		ledgers = append(ledgers, l)
+	}
+	return ledgers, nil
+}
+
 type badgeRepo struct {
 	pool *pgxpool.Pool
 }

@@ -50,6 +50,16 @@ func (uc *MissionUseCase) ListAvailableMissions(ctx context.Context, userID stri
 	return uc.umRepo.FindByUserAndPhase(ctx, userID, user.CurrentPhaseID)
 }
 
+func (uc *MissionUseCase) ListStaticMissions(ctx context.Context, userID string) ([]domain.Mission, error) {
+	log.Println("debugprint: entering (*MissionUseCase).ListStaticMissions")
+	user, err := uc.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return uc.missionRepo.FindByPhase(ctx, user.CurrentPhaseID)
+}
+
 func (uc *MissionUseCase) GetMissionDetail(ctx context.Context, userID, userMissionID string) (*MissionDetailResponse, error) {
 	log.Println("debugprint: entering (*MissionUseCase).GetMissionDetail")
 	um, err := uc.umRepo.FindByID(ctx, userMissionID)

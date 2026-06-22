@@ -12,6 +12,7 @@ type UserUseCase struct {
 	userRepo    port.UserRepository
 	profileRepo port.ProfileRepository
 	creditRepo  port.CreditScoreRepository
+	friendRepo  port.FriendshipRepository
 	hasher      port.PasswordHasher
 }
 
@@ -19,6 +20,7 @@ func NewUserUseCase(
 	userRepo port.UserRepository,
 	profileRepo port.ProfileRepository,
 	creditRepo port.CreditScoreRepository,
+	friendRepo port.FriendshipRepository,
 	hasher port.PasswordHasher,
 ) *UserUseCase {
 	log.Println("debugprint: entering NewUserUseCase")
@@ -26,6 +28,7 @@ func NewUserUseCase(
 		userRepo:    userRepo,
 		profileRepo: profileRepo,
 		creditRepo:  creditRepo,
+		friendRepo:  friendRepo,
 		hasher:      hasher,
 	}
 }
@@ -33,8 +36,9 @@ func NewUserUseCase(
 type UserProfileResponse struct {
 	User        *domain.User        `json:"user"`
 	Profile     *domain.Profile     `json:"profile"`
-	CreditScore *domain.CreditScore `json:"credit_score"`
+	CreditScore *domain.CreditScore `json:"credit_score_detail,omitempty"`
 }
+
 
 func (uc *UserUseCase) GetProfile(ctx context.Context, userID string) (*UserProfileResponse, error) {
 	log.Println("debugprint: entering (*UserUseCase).GetProfile")
@@ -126,4 +130,37 @@ func (uc *UserUseCase) DeleteAccount(ctx context.Context, userID string, passwor
 	}
 
 	return uc.userRepo.Delete(ctx, userID)
+}
+
+func (uc *UserUseCase) GetPublicProfile(ctx context.Context, currentUserID, targetUserID string) (*domain.User, *domain.Profile, error) {
+	log.Println("debugprint: entering (*UserUseCase).GetPublicProfile")
+	
+	targetUser, err := uc.userRepo.FindByID(ctx, targetUserID)
+	if err != nil {
+		return nil, nil, err
+	}
+	
+	targetProfile, err := uc.profileRepo.FindByUserID(ctx, targetUserID)
+	if err != nil {
+		return nil, nil, err
+	}
+	
+	if currentUserID == targetUserID {
+		return targetUser, targetProfile, nil
+	}
+	
+	switch targetProfile.RadarVisibility {
+	case domain.VisibilityHidden:
+		return nil, nil, domain.ErrNotFound
+	case domain.VisibilityShowFriends:
+		u1, u2 := domain.CanonicalOrder(currentUserID, targetUserID)
+		f, err := uc.friendRepo.FindByCanonicalPair(ctx, u1, u2)
+		if err != nil || f.Status != domain.FriendshipAccepted {
+			return nil, nil, domain.ErrNotFound
+		}
+	case domain.VisibilityShowAnonymous:
+		// allowed
+	}
+	
+	return targetUser, targetProfile, nil
 }

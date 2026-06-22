@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
 	"github.com/j1hub/backend/internal/domain"
@@ -17,10 +18,11 @@ type JourneyUC interface {
 	GetHistory(ctx context.Context, userID string) ([]domain.UserPhaseHistory, error)
 	ListUserBadges(ctx context.Context, userID string) ([]domain.UserBadge, error)
 	GetCreditScoreHistory(ctx context.Context, userID string) ([]domain.PointLedger, error)
+	GetPointsLedger(ctx context.Context, userID string) ([]domain.PointLedger, error)
 }
 
 type AdvancePhaseUC interface {
-	TryAdvancePhase(ctx context.Context, userID string) (bool, error)
+	TryAdvancePhase(ctx context.Context, userID string) (*usecase.PhaseTransitionResponse, error)
 }
 
 type LeaderboardUC interface {
@@ -46,6 +48,12 @@ func NewJourneyHandler(
 	}
 }
 
+func parsePagination(r *http.Request) (int, int) {
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	pageSize, _ := strconv.Atoi(r.URL.Query().Get("pageSize"))
+	return page, pageSize
+}
+
 func (h *JourneyHandler) ListPhases(w http.ResponseWriter, r *http.Request) {
 	log.Println("debugprint: entering (*JourneyHandler).ListPhases")
 	phases, err := h.journeyUC.ListPhases(r.Context())
@@ -53,7 +61,8 @@ func (h *JourneyHandler) ListPhases(w http.ResponseWriter, r *http.Request) {
 		apperror.RespondError(w, err)
 		return
 	}
-	json.NewEncoder(w).Encode(phases)
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, phases, page, pageSize, len(phases))
 }
 
 func (h *JourneyHandler) AdvancePhase(w http.ResponseWriter, r *http.Request) {
@@ -64,13 +73,15 @@ func (h *JourneyHandler) AdvancePhase(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	success, err := h.advanceUC.TryAdvancePhase(r.Context(), claims.UserID)
+	resp, err := h.advanceUC.TryAdvancePhase(r.Context(), claims.UserID)
 	if err != nil {
 		apperror.RespondError(w, err)
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]bool{"success": success})
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(resp)
 }
 
 func (h *JourneyHandler) GetHistory(w http.ResponseWriter, r *http.Request) {
@@ -86,7 +97,8 @@ func (h *JourneyHandler) GetHistory(w http.ResponseWriter, r *http.Request) {
 		apperror.RespondError(w, err)
 		return
 	}
-	json.NewEncoder(w).Encode(history)
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, history, page, pageSize, len(history))
 }
 
 func (h *JourneyHandler) GetLeaderboard(w http.ResponseWriter, r *http.Request) {
@@ -99,7 +111,8 @@ func (h *JourneyHandler) GetLeaderboard(w http.ResponseWriter, r *http.Request) 
 		apperror.RespondError(w, err)
 		return
 	}
-	json.NewEncoder(w).Encode(entries)
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, entries, page, pageSize, len(entries))
 }
 
 func (h *JourneyHandler) ListBadges(w http.ResponseWriter, r *http.Request) {
@@ -115,7 +128,8 @@ func (h *JourneyHandler) ListBadges(w http.ResponseWriter, r *http.Request) {
 		apperror.RespondError(w, err)
 		return
 	}
-	json.NewEncoder(w).Encode(badges)
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, badges, page, pageSize, len(badges))
 }
 
 func (h *JourneyHandler) GetCreditHistory(w http.ResponseWriter, r *http.Request) {
@@ -131,5 +145,23 @@ func (h *JourneyHandler) GetCreditHistory(w http.ResponseWriter, r *http.Request
 		apperror.RespondError(w, err)
 		return
 	}
-	json.NewEncoder(w).Encode(history)
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, history, page, pageSize, len(history))
+}
+
+func (h *JourneyHandler) GetPointsLedger(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*JourneyHandler).GetPointsLedger")
+	claims := middleware.GetClaims(r.Context())
+	if claims == nil {
+		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
+		return
+	}
+
+	ledger, err := h.journeyUC.GetPointsLedger(r.Context(), claims.UserID)
+	if err != nil {
+		apperror.RespondError(w, err)
+		return
+	}
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, ledger, page, pageSize, len(ledger))
 }

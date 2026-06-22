@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/j1hub/backend/internal/adapter/http/handler"
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
 	"github.com/j1hub/backend/internal/domain"
@@ -28,6 +29,19 @@ func (m *MockUserUC) GetProfile(ctx context.Context, userID string) (*usecase.Us
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*usecase.UserProfileResponse), args.Error(1)
+}
+
+func (m *MockUserUC) GetPublicProfile(ctx context.Context, currentUserID, targetUserID string) (*domain.User, *domain.Profile, error) {
+	args := m.Called(ctx, currentUserID, targetUserID)
+	var u *domain.User
+	if args.Get(0) != nil {
+		u = args.Get(0).(*domain.User)
+	}
+	var p *domain.Profile
+	if args.Get(1) != nil {
+		p = args.Get(1).(*domain.Profile)
+	}
+	return u, p, args.Error(2)
 }
 
 func (m *MockUserUC) UpdateProfile(ctx context.Context, userID string, cmd usecase.UpdateProfileCommand) error {
@@ -112,4 +126,36 @@ func TestUserHandler_UpdateProfile_Success(t *testing.T) {
 	h.UpdateProfile(w, req)
 
 	assert.Equal(t, http.StatusNoContent, w.Code)
+}
+
+func TestUserHandler_GetPublicProfile_Success(t *testing.T) {
+	userUC := new(MockUserUC)
+	h := handler.NewUserHandler(userUC)
+
+	userUC.On("GetPublicProfile", mock.Anything, "usr_1", "usr_2").Return(
+		&domain.User{UserID: "usr_2", FirstName: "Somchai", LastName: "Deejai"},
+		&domain.Profile{UserID: "usr_2", AvatarURL: "somchai.png"},
+		nil,
+	)
+
+	req := httptest.NewRequest("GET", "/api/v1/users/usr_2", nil)
+	ctx := middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"})
+	
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("id", "usr_2")
+	ctx = context.WithValue(ctx, chi.RouteCtxKey, rctx)
+	
+	req = req.WithContext(ctx)
+
+	w := httptest.NewRecorder()
+	h.GetPublicProfile(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	var resp map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &resp)
+	assert.NoError(t, err)
+	assert.Equal(t, "usr_2", resp["user_id"])
+	assert.Equal(t, "Somchai", resp["first_name"])
+	assert.Equal(t, "Deejai", resp["last_name"])
+	assert.Equal(t, "somchai.png", resp["avatar_url"])
 }

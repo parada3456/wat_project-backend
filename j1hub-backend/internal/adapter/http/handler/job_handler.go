@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"github.com/j1hub/backend/internal/adapter/http/handler/dto"
+
 	"context"
 	"encoding/json"
 	"log"
@@ -19,6 +21,8 @@ type JobUC interface {
 	ListCart(ctx context.Context, userID string) ([]domain.UserCart, error)
 	RemoveFromCart(ctx context.Context, userID, id string) error
 	WriteReview(ctx context.Context, userID, jobID string, rev *domain.JobReview) error
+	ListReviews(ctx context.Context, jobID string) ([]domain.JobReview, error)
+	UpdateCartStatus(ctx context.Context, userID, cartID string, status domain.CartStatus) error
 }
 
 type JobHandler struct {
@@ -31,9 +35,7 @@ func NewJobHandler(jobUC JobUC) *JobHandler {
 }
 
 func (h *JobHandler) ListJobs(w http.ResponseWriter, r *http.Request) {
-	log.
-		// Simple filters from query params
-		Println("debugprint: entering (*JobHandler).ListJobs")
+	log.Println("debugprint: entering (*JobHandler).ListJobs")
 
 	filters := make(map[string]interface{})
 	if agency := r.URL.Query().Get("agency"); agency != "" {
@@ -45,7 +47,8 @@ func (h *JobHandler) ListJobs(w http.ResponseWriter, r *http.Request) {
 		apperror.RespondError(w, err)
 		return
 	}
-	json.NewEncoder(w).Encode(jobs)
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, jobs, page, pageSize, len(jobs))
 }
 
 func (h *JobHandler) GetJobDetail(w http.ResponseWriter, r *http.Request) {
@@ -57,16 +60,13 @@ func (h *JobHandler) GetJobDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"job":     job,
-		"housing": housing,
-		"rating":  rating,
-	})
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	respDTO := dto.NewJobDetailResponse(job, housing, rating)
+	json.NewEncoder(w).Encode(respDTO)
 }
 
-type cartReq struct {
-	JobID string `json:"job_id" validate:"required"`
-}
+
 
 func (h *JobHandler) AddToCart(w http.ResponseWriter, r *http.Request) {
 	log.Println("debugprint: entering (*JobHandler).AddToCart")
@@ -76,7 +76,7 @@ func (h *JobHandler) AddToCart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req cartReq
+	var req dto.CartReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body"})
 		return
@@ -103,7 +103,8 @@ func (h *JobHandler) ListCart(w http.ResponseWriter, r *http.Request) {
 		apperror.RespondError(w, err)
 		return
 	}
-	json.NewEncoder(w).Encode(cart)
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, cart, page, pageSize, len(cart))
 }
 
 func (h *JobHandler) RemoveFromCart(w http.ResponseWriter, r *http.Request) {
@@ -114,7 +115,10 @@ func (h *JobHandler) RemoveFromCart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := chi.URLParam(r, "id")
+	id := chi.URLParam(r, "cartId")
+	if id == "" {
+		id = chi.URLParam(r, "id")
+	}
 	err := h.jobUC.RemoveFromCart(r.Context(), claims.UserID, id)
 	if err != nil {
 		apperror.RespondError(w, err)
@@ -123,17 +127,62 @@ func (h *JobHandler) RemoveFromCart(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+func (h *JobHandler) UpdateCartStatus(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*JobHandler).UpdateCartStatus")
+	claims := middleware.GetClaims(r.Context())
+	if claims == nil {
+		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
+		return
+	}
+
+	cartID := chi.URLParam(r, "cartId")
+	if cartID == "" {
+		cartID = chi.URLParam(r, "id")
+	}
+	var req struct {
+		Status domain.CartStatus `json:"status"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body"})
+		return
+	}
+
+	err := h.jobUC.UpdateCartStatus(r.Context(), claims.UserID, cartID, req.Status)
+	if err != nil {
+		apperror.RespondError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *JobHandler) GetJobReviews(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*JobHandler).GetJobReviews")
+	id := chi.URLParam(r, "id")
+	reviews, err := h.jobUC.ListReviews(r.Context(), id)
+	if err != nil {
+		apperror.RespondError(w, err)
+		return
+	}
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, reviews, page, pageSize, len(reviews))
+}
+
 func (h *JobHandler) GetAllReviews(w http.ResponseWriter, r *http.Request) {
-	log.
-		// Simplified: list reviews for a job if job_id is provided, else all
-		Println("debugprint: entering (*JobHandler).GetAllReviews")
+	log.Println("debugprint: entering (*JobHandler).GetAllReviews")
 
 	jobID := r.URL.Query().Get("job_id")
 	if jobID == "" {
-		// Mock implementation from before
+		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Missing job_id query parameter"})
 		return
 	}
-	// ... implementation
+	
+	reviews, err := h.jobUC.ListReviews(r.Context(), jobID)
+	if err != nil {
+		apperror.RespondError(w, err)
+		return
+	}
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, reviews, page, pageSize, len(reviews))
 }
 
 func (h *JobHandler) CreateReview(w http.ResponseWriter, r *http.Request) {
@@ -154,7 +203,12 @@ func (h *JobHandler) CreateReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.jobUC.WriteReview(r.Context(), claims.UserID, req.JobID, &domain.JobReview{
+	jobID := chi.URLParam(r, "id")
+	if jobID == "" {
+		jobID = req.JobID
+	}
+
+	err := h.jobUC.WriteReview(r.Context(), claims.UserID, jobID, &domain.JobReview{
 		RatingStars: req.RatingStars,
 		ReviewText:  req.ReviewText,
 	})

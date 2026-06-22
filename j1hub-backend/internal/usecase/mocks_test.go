@@ -211,6 +211,13 @@ func (m *MockPointLedgerRepository) Insert(ctx context.Context, l *domain.PointL
 func (m *MockPointLedgerRepository) InsertBatch(ctx context.Context, ledgers []domain.PointLedger) error {
 	return m.Called(ctx, ledgers).Error(0)
 }
+func (m *MockPointLedgerRepository) FindByUser(ctx context.Context, userID string) ([]domain.PointLedger, error) {
+	args := m.Called(ctx, userID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]domain.PointLedger), args.Error(1)
+}
 
 // MockBadgeRepository
 type MockBadgeRepository struct{ mock.Mock }
@@ -408,6 +415,16 @@ func (m *MockUserCartRepository) FindByID(ctx context.Context, id string) (*doma
 }
 func (m *MockUserCartRepository) UpdateStatus(ctx context.Context, id string, status domain.CartStatus) error {
 	return m.Called(ctx, id, status).Error(0)
+}
+func (m *MockUserCartRepository) FindByUser(ctx context.Context, userID string) ([]domain.UserCart, error) {
+	args := m.Called(ctx, userID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]domain.UserCart), args.Error(1)
+}
+func (m *MockUserCartRepository) Delete(ctx context.Context, id string) error {
+	return m.Called(ctx, id).Error(0)
 }
 
 // MockRadarRepository

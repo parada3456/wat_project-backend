@@ -70,6 +70,7 @@ type UserTaskRepository interface {
 type PointLedgerRepository interface {
 	Insert(ctx context.Context, l *domain.PointLedger) error
 	InsertBatch(ctx context.Context, ledgers []domain.PointLedger) error
+	FindByUser(ctx context.Context, userID string) ([]domain.PointLedger, error)
 }
 
 type BadgeRepository interface {
@@ -131,6 +132,8 @@ type UserCartRepository interface {
 	FindByUserAndJob(ctx context.Context, userID, jobID string) (*domain.UserCart, error)
 	FindByID(ctx context.Context, id string) (*domain.UserCart, error)
 	UpdateStatus(ctx context.Context, id string, status domain.CartStatus) error
+	FindByUser(ctx context.Context, userID string) ([]domain.UserCart, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type RadarRepository interface {

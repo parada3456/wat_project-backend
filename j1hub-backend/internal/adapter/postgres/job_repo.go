@@ -263,3 +263,33 @@ func (r *userCartRepo) UpdateStatus(ctx context.Context, id string, status domai
 	_, err := r.pool.Exec(ctx, `UPDATE user_carts SET status = $1, updated_at = NOW() WHERE cart_id = $2`, status, id)
 	return err
 }
+
+func (r *userCartRepo) FindByUser(ctx context.Context, userID string) ([]domain.UserCart, error) {
+	log.Println("debugprint: entering (*userCartRepo).FindByUser")
+	rows, err := r.pool.Query(ctx, `SELECT cart_id, user_id, job_id, status, added_at, updated_at FROM user_carts WHERE user_id = $1`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var carts []domain.UserCart
+	for rows.Next() {
+		var c domain.UserCart
+		if err := rows.Scan(&c.CartID, &c.UserID, &c.JobID, &c.Status, &c.AddedAt, &c.UpdatedAt); err != nil {
+			return nil, err
+		}
+		carts = append(carts, c)
+	}
+	return carts, nil
+}
+
+func (r *userCartRepo) Delete(ctx context.Context, id string) error {
+	log.Println("debugprint: entering (*userCartRepo).Delete")
+	res, err := r.pool.Exec(ctx, `DELETE FROM user_carts WHERE cart_id = $1`, id)
+	if err != nil {
+		return err
+	}
+	if res.RowsAffected() == 0 {
+		return domain.ErrNotFound
+	}
+	return nil
+}

@@ -2,9 +2,9 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/j1hub/backend/internal/adapter/http/middleware"
@@ -41,7 +41,25 @@ func (h *NotificationHandler) ListNotifications(w http.ResponseWriter, r *http.R
 		apperror.RespondError(w, err)
 		return
 	}
-	json.NewEncoder(w).Encode(notifs)
+
+	isReadStr := r.URL.Query().Get("isRead")
+	if isReadStr == "" {
+		isReadStr = r.URL.Query().Get("is_read")
+	}
+	if isReadStr != "" {
+		if isRead, err := strconv.ParseBool(isReadStr); err == nil {
+			var filtered []domain.Notification
+			for _, n := range notifs {
+				if n.IsRead == isRead {
+					filtered = append(filtered, n)
+				}
+			}
+			notifs = filtered
+		}
+	}
+
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, notifs, page, pageSize, len(notifs))
 }
 
 func (h *NotificationHandler) MarkRead(w http.ResponseWriter, r *http.Request) {

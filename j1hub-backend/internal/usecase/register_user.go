@@ -7,9 +7,11 @@ import (
 
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/port"
+	"github.com/j1hub/backend/pkg/apperror"
 	"github.com/j1hub/backend/pkg/timeutil"
 	"github.com/j1hub/backend/pkg/uid"
 	"github.com/jackc/pgx/v5"
+	"net/http"
 )
 
 type TxBeginner interface {
@@ -70,7 +72,12 @@ func (uc *RegisterUserUseCase) Register(ctx context.Context, cmd RegisterCommand
 	log.Println("debugprint: entering (*RegisterUserUseCase).Register")
 	hash, err := uc.hasher.Hash(cmd.Password)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, &apperror.ProblemDetails{
+			Type:   "https://example.com/probs/internal-error",
+			Title:  "Password Hashing Failed",
+			Status: http.StatusInternalServerError,
+			Detail: "Could not hash the password.",
+		}
 	}
 
 	user := &domain.User{
@@ -86,12 +93,22 @@ func (uc *RegisterUserUseCase) Register(ctx context.Context, cmd RegisterCommand
 	// Transactional insert
 	tx, err := uc.pool.Begin(ctx)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, &apperror.ProblemDetails{
+			Type:   "https://example.com/probs/internal-error",
+			Title:  "Transaction Error",
+			Status: http.StatusInternalServerError,
+			Detail: "Could not begin database transaction.",
+		}
 	}
 	defer tx.Rollback(ctx)
 
 	if err := uc.userRepo.Create(ctx, user); err != nil {
-		return nil, nil, err
+		return nil, nil, &apperror.ProblemDetails{
+			Type:   "https://example.com/probs/user-creation-failed",
+			Title:  "User Creation Failed",
+			Status: http.StatusInternalServerError,
+			Detail: "Failed to create user in the database.",
+		}
 	}
 
 	profile := &domain.Profile{
@@ -101,7 +118,12 @@ func (uc *RegisterUserUseCase) Register(ctx context.Context, cmd RegisterCommand
 		UpdatedAt:       uc.clock.Now(),
 	}
 	if err := uc.profileRepo.Create(ctx, profile); err != nil {
-		return nil, nil, err
+		return nil, nil, &apperror.ProblemDetails{
+			Type:   "https://example.com/probs/profile-creation-failed",
+			Title:  "Profile Creation Failed",
+			Status: http.StatusInternalServerError,
+			Detail: "Failed to create user profile.",
+		}
 	}
 
 	credit := &domain.CreditScore{
@@ -111,16 +133,31 @@ func (uc *RegisterUserUseCase) Register(ctx context.Context, cmd RegisterCommand
 		LastUpdated:  uc.clock.Now(),
 	}
 	if err := uc.creditRepo.Create(ctx, credit); err != nil {
-		return nil, nil, err
+		return nil, nil, &apperror.ProblemDetails{
+			Type:   "https://example.com/probs/credit-creation-failed",
+			Title:  "Credit Creation Failed",
+			Status: http.StatusInternalServerError,
+			Detail: "Failed to create credit score record.",
+		}
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return nil, nil, err
+		return nil, nil, &apperror.ProblemDetails{
+			Type:   "https://example.com/probs/transaction-commit-failed",
+			Title:  "Transaction Commit Failed",
+			Status: http.StatusInternalServerError,
+			Detail: "Could not commit the database transaction.",
+		}
 	}
 
 	tokens, err := uc.tokenIssuer.Issue(user.UserID, false)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, &apperror.ProblemDetails{
+			Type:   "https://example.com/probs/token-issue-failed",
+			Title:  "Token Issue Failed",
+			Status: http.StatusInternalServerError,
+			Detail: "Failed to issue authentication tokens.",
+		}
 	}
 
 	return user, tokens, nil

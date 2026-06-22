@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"github.com/j1hub/backend/internal/adapter/http/handler/dto"
+
 	"context"
 	"encoding/json"
 	"log"
@@ -37,25 +39,9 @@ func NewAuthHandler(registerUC RegisterUserUC, loginUC LoginUC) *AuthHandler {
 	}
 }
 
-type registerReq struct {
-	Email     string `json:"email" validate:"required,email"`
-	Password  string `json:"password" validate:"required,min=8"`
-	FirstName string `json:"first_name" validate:"required"`
-	LastName  string `json:"last_name" validate:"required"`
-}
-
-type loginReq struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
-}
-
-type refreshReq struct {
-	RefreshToken string `json:"refresh_token" validate:"required"`
-}
-
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	log.Println("debugprint: entering (*AuthHandler).Register")
-	var req registerReq
+	var req dto.RegisterReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body", Err: err})
 		return
@@ -77,18 +63,21 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"user_id":       user.UserID,
-		"access_token":  tokens.AccessToken,
-		"refresh_token": tokens.RefreshToken,
-		"expires_at":    tokens.ExpiresAt,
-	})
+	respDTO := dto.NewRegisterResponse(user, tokens)
+	json.NewEncoder(w).Encode(respDTO)
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	log.Println("debugprint: entering (*AuthHandler).Login")
-	var req loginReq
+
+	if r.Body == nil || r.ContentLength == 0 {
+		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Request body cannot be empty"})
+		return
+	}
+
+	var req dto.LoginReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body", Err: err})
 		return
@@ -104,30 +93,33 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Password: req.Password,
 	})
 	if err != nil {
-		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Invalid credentials"})
+		log.Printf("login failed for email %s: %v", req.Email, err)
+		apperror.RespondError(w, err)
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"user_id":       user.UserID,
-		"access_token":  tokens.AccessToken,
-		"refresh_token": tokens.RefreshToken,
-		"expires_at":    tokens.ExpiresAt,
-	})
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	respDTO := dto.NewLoginResponse(user, tokens)
+	if err := json.NewEncoder(w).Encode(respDTO); err != nil {
+		log.Printf("failed to encode login response: %v", err)
+	}
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	log.
-		// For stateless JWT, client just discards token.
-		// If we want to blacklist, we would do it here.
-		Println("debugprint: entering (*AuthHandler).Logout")
+	log.Println("debugprint: entering (*AuthHandler).Logout")
+	var req dto.LogoutReq
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body", Err: err})
+		return
+	}
 
 	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	log.Println("debugprint: entering (*AuthHandler).Refresh")
-	var req refreshReq
+	var req dto.RefreshReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body", Err: err})
 		return
@@ -139,9 +131,8 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"access_token":  tokens.AccessToken,
-		"refresh_token": tokens.RefreshToken,
-		"expires_at":    tokens.ExpiresAt,
-	})
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	respDTO := dto.NewRefreshResponse(tokens)
+	json.NewEncoder(w).Encode(respDTO)
 }

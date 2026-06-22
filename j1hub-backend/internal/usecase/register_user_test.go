@@ -202,7 +202,7 @@ func TestRegisterUserUseCase_Register_HashError(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, user)
 	assert.Nil(t, tokens)
-	assert.Equal(t, "hash error", err.Error())
+	assert.Equal(t, "Password Hashing Failed: Could not hash the password.", err.Error())
 }
 
 func TestRegisterUserUseCase_Register_BeginTxError(t *testing.T) {
@@ -219,7 +219,7 @@ func TestRegisterUserUseCase_Register_BeginTxError(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, user)
 	assert.Nil(t, tokens)
-	assert.Equal(t, "db error", err.Error())
+	assert.Equal(t, "Transaction Error: Could not begin database transaction.", err.Error())
 }
 
 func TestRegisterUserUseCase_Register_CreateUserError(t *testing.T) {
@@ -241,5 +241,5 @@ func TestRegisterUserUseCase_Register_CreateUserError(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, user)
 	assert.Nil(t, tokens)
-	assert.Equal(t, "insert error", err.Error())
+	assert.Equal(t, "User Creation Failed: Failed to create user in the database.", err.Error())
 }

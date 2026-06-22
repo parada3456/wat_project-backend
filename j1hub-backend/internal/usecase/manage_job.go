@@ -89,17 +89,38 @@ func (uc *ManageJobUseCase) GetJobDetail(ctx context.Context, jobID string) (*do
 }
 
 func (uc *ManageJobUseCase) ListCart(ctx context.Context, userID string) ([]domain.UserCart, error) {
-	log.
-		// Need FindByUser in repo
-		Println("debugprint: entering (*ManageJobUseCase).ListCart")
-
-	return nil, nil
+	log.Println("debugprint: entering (*ManageJobUseCase).ListCart")
+	return uc.cartRepo.FindByUser(ctx, userID)
 }
 
 func (uc *ManageJobUseCase) RemoveFromCart(ctx context.Context, userID, cartID string) error {
-	log.
-		// Check ownership and delete
-		Println("debugprint: entering (*ManageJobUseCase).RemoveFromCart")
+	log.Println("debugprint: entering (*ManageJobUseCase).RemoveFromCart")
+	cart, err := uc.cartRepo.FindByID(ctx, cartID)
+	if err != nil {
+		return err
+	}
+	if cart.UserID != userID {
+		return domain.ErrForbidden
+	}
+	return uc.cartRepo.Delete(ctx, cartID)
+}
 
-	return nil
+func (uc *ManageJobUseCase) ListReviews(ctx context.Context, jobID string) ([]domain.JobReview, error) {
+	log.Println("debugprint: entering (*ManageJobUseCase).ListReviews")
+	return uc.reviewRepo.FindByJobID(ctx, jobID)
+}
+
+func (uc *ManageJobUseCase) UpdateCartStatus(ctx context.Context, userID, cartID string, status domain.CartStatus) error {
+	log.Println("debugprint: entering (*ManageJobUseCase).UpdateCartStatus")
+	cart, err := uc.cartRepo.FindByID(ctx, cartID)
+	if err != nil {
+		return err
+	}
+	if cart.UserID != userID {
+		return domain.ErrForbidden
+	}
+	if !status.Valid() {
+		return domain.ErrInvalidInput
+	}
+	return uc.cartRepo.UpdateStatus(ctx, cart.CartID, status)
 }

@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"github.com/j1hub/backend/internal/adapter/http/handler/dto"
+
 	"encoding/json"
 	"net/http"
 
@@ -43,17 +45,11 @@ func (h *AdminHandler) ListPendingVerifications(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"data": ums,
-	})
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, ums, page, pageSize, len(ums))
 }
 
-type VerifyMissionRequest struct {
-	Approved        bool    `json:"approved"`
-	RejectionReason *string `json:"rejectionReason"`
-}
+
 
 func (h *AdminHandler) VerifyMission(w http.ResponseWriter, r *http.Request) {
 	userMissionID := chi.URLParam(r, "id")
@@ -63,7 +59,7 @@ func (h *AdminHandler) VerifyMission(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req VerifyMissionRequest
+	var req dto.VerifyMissionRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Malformed request body", Err: err})
 		return
@@ -77,12 +73,8 @@ func (h *AdminHandler) VerifyMission(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"userMissionId": um.UserMissionID,
-		"status":        um.Status,
-		"verifiedAt":    um.VerifiedAt,
-		"verifiedBy":    um.VerifiedBy,
-	})
+	respDTO := dto.NewVerifyMissionResponse(um)
+	json.NewEncoder(w).Encode(respDTO)
 }
 
 func (h *AdminHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
@@ -93,11 +85,8 @@ func (h *AdminHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"data": users,
-	})
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, users, page, pageSize, len(users))
 }
 
 func (h *AdminHandler) GetUserDetail(w http.ResponseWriter, r *http.Request) {
@@ -113,14 +102,11 @@ func (h *AdminHandler) GetUserDetail(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-type AdjustPointsRequest struct {
-	PointsDelta int    `json:"pointsDelta"`
-	Reason      string `json:"reason" validate:"required"`
-}
+
 
 func (h *AdminHandler) AdjustPoints(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "id")
-	var req AdjustPointsRequest
+	var req dto.AdjustPointsRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Malformed request body", Err: err})
 		return

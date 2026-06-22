@@ -1,12 +1,13 @@
 package handler
 
 import (
+	"github.com/j1hub/backend/internal/adapter/http/handler/dto"
+
 	"context"
 	"encoding/json"
 	"io"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
@@ -49,19 +50,8 @@ func (h *ExpenseHandler) ListExpenses(w http.ResponseWriter, r *http.Request) {
 		apperror.RespondError(w, err)
 		return
 	}
-	json.NewEncoder(w).Encode(expenses)
-}
-
-type createExpenseReq struct {
-	Title       string    `json:"title" validate:"required"`
-	TotalAmount float64   `json:"total_amount" validate:"required,gt=0"`
-	Currency    string    `json:"currency" validate:"required"`
-	Memo        string    `json:"memo"`
-	DueDate     time.Time `json:"due_date" validate:"required"`
-	Splits      []struct {
-		UserID    string  `json:"user_id" validate:"required"`
-		OweAmount float64 `json:"owe_amount" validate:"required,gt=0"`
-	} `json:"splits" validate:"required,dive"`
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, expenses, page, pageSize, len(expenses))
 }
 
 func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
@@ -72,7 +62,7 @@ func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req createExpenseReq
+	var req dto.CreateExpenseReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body", Err: err})
 		return
@@ -121,10 +111,10 @@ func (h *ExpenseHandler) GetExpenseDetail(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"transaction": txn,
-		"splits":      splits,
-	})
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	respDTO := dto.NewExpenseDetailResponse(txn, splits)
+	json.NewEncoder(w).Encode(respDTO)
 }
 
 func (h *ExpenseHandler) DeleteExpense(w http.ResponseWriter, r *http.Request) {
@@ -158,7 +148,52 @@ func (h *ExpenseHandler) ListPending(w http.ResponseWriter, r *http.Request) {
 		apperror.RespondError(w, err)
 		return
 	}
-	json.NewEncoder(w).Encode(pending)
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, pending, page, pageSize, len(pending))
+}
+
+func (h *ExpenseHandler) UpdateSplit(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*ExpenseHandler).UpdateSplit")
+	claims := middleware.GetClaims(r.Context())
+	if claims == nil {
+		apperror.RespondError(w, &apperror.AppError{Code: http.StatusUnauthorized, Message: "Unauthorized"})
+		return
+	}
+
+	splitID := chi.URLParam(r, "splitId")
+	if splitID == "" {
+		splitID = chi.URLParam(r, "id")
+	}
+
+	contentType := r.Header.Get("Content-Type")
+	isMultipart := false
+	if len(contentType) >= 19 && contentType[:19] == "multipart/form-data" {
+		isMultipart = true
+	}
+
+	if isMultipart {
+		r.ParseMultipartForm(10 << 20)
+		file, header, err := r.FormFile("slip")
+		if err != nil {
+			apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Slip file required", Err: err})
+			return
+		}
+		defer file.Close()
+
+		err = h.expenseUC.SubmitSlip(r.Context(), claims.UserID, splitID, file, header.Header.Get("Content-Type"))
+		if err != nil {
+			apperror.RespondError(w, err)
+			return
+		}
+	} else {
+		err := h.expenseUC.ApproveSplit(r.Context(), claims.UserID, splitID)
+		if err != nil {
+			apperror.RespondError(w, err)
+			return
+		}
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *ExpenseHandler) PaySplit(w http.ResponseWriter, r *http.Request) {

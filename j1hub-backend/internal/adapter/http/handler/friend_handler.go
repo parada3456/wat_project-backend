@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"github.com/j1hub/backend/internal/adapter/http/handler/dto"
+
 	"context"
 	"encoding/json"
 	"log"
@@ -35,9 +37,7 @@ func NewFriendHandler(friendshipUC FriendshipUC, radarUC RadarUC) *FriendHandler
 	return &FriendHandler{friendshipUC: friendshipUC, radarUC: radarUC}
 }
 
-type friendRequestReq struct {
-	TargetUserID string `json:"target_user_id" validate:"required"`
-}
+
 
 func (h *FriendHandler) SendRequest(w http.ResponseWriter, r *http.Request) {
 	log.Println("debugprint: entering (*FriendHandler).SendRequest")
@@ -47,7 +47,7 @@ func (h *FriendHandler) SendRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req friendRequestReq
+	var req dto.FriendRequestReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body", Err: err})
 		return
@@ -76,13 +76,11 @@ func (h *FriendHandler) ListPendingRequests(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	json.NewEncoder(w).Encode(requests)
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, requests, page, pageSize, len(requests))
 }
 
-type respondFriendReq struct {
-	FriendshipID string `json:"friendship_id" validate:"required"`
-	Accept       bool   `json:"accept"`
-}
+
 
 func (h *FriendHandler) RespondToRequest(w http.ResponseWriter, r *http.Request) {
 	log.Println("debugprint: entering (*FriendHandler).RespondToRequest")
@@ -92,13 +90,22 @@ func (h *FriendHandler) RespondToRequest(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	var req respondFriendReq
+	id := chi.URLParam(r, "id")
+
+	var req dto.RespondFriendReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		apperror.RespondError(w, &apperror.AppError{Code: http.StatusBadRequest, Message: "Invalid request body", Err: err})
 		return
 	}
 
-	err := h.friendshipUC.RespondToRequest(r.Context(), claims.UserID, req.FriendshipID, req.Accept)
+	accept := false
+	if req.Accept != nil {
+		accept = *req.Accept
+	} else if req.Status == "Accepted" {
+		accept = true
+	}
+
+	err := h.friendshipUC.RespondToRequest(r.Context(), claims.UserID, id, accept)
 	if err != nil {
 		apperror.RespondError(w, err)
 		return
@@ -121,7 +128,8 @@ func (h *FriendHandler) ListFriends(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(friends)
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, friends, page, pageSize, len(friends))
 }
 
 func (h *FriendHandler) RemoveFriend(w http.ResponseWriter, r *http.Request) {
@@ -132,7 +140,11 @@ func (h *FriendHandler) RemoveFriend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := chi.URLParam(r, "id")
+	id := chi.URLParam(r, "friendshipId")
+	if id == "" {
+		id = chi.URLParam(r, "id")
+	}
+
 	err := h.friendshipUC.RemoveFriend(r.Context(), claims.UserID, id)
 	if err != nil {
 		apperror.RespondError(w, err)
@@ -156,5 +168,6 @@ func (h *FriendHandler) GetRadar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(radar)
+	page, pageSize := parsePagination(r)
+	apperror.RespondList(w, radar, page, pageSize, len(radar))
 }
