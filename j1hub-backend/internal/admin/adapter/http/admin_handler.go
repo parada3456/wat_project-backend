@@ -1,6 +1,8 @@
 package http
 
 import (
+	"log"
+
 	"github.com/j1hub/backend/internal/admin/adapter/http/dto"
 
 	"encoding/json"
@@ -9,9 +11,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	"github.com/j1hub/backend/internal/domain"
 	port "github.com/j1hub/backend/internal/admin/port"
+	"github.com/j1hub/backend/internal/domain"
+	"github.com/j1hub/backend/internal/transport/http/middleware"
 	"github.com/j1hub/backend/pkg/apperror"
 )
 
@@ -51,6 +53,7 @@ func (h *AdminHandler) ListPendingVerifications(w http.ResponseWriter, r *http.R
 }
 
 func (h *AdminHandler) VerifyMission(w http.ResponseWriter, r *http.Request) {
+	log.Printf("debugprint: entering (*AdminHandler).VerifyMission")
 	userMissionID := chi.URLParam(r, "id")
 	claims := middleware.GetClaims(r.Context())
 	if claims == nil || !claims.IsAdmin {

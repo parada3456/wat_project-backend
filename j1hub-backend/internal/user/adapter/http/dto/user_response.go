@@ -1,8 +1,6 @@
 package dto
 
 import (
-	"log"
-
 	userdomain "github.com/j1hub/backend/internal/user/domain"
 	userusecase "github.com/j1hub/backend/internal/user/usecase"
 )

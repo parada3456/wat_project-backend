@@ -1,5 +1,10 @@
 # J1 Hub Backend Makefile
 
+ifneq ($(wildcard .env),)
+    include .env
+    export
+endif
+
 .PHONY: run build test lint migrate-up migrate-down docker-up docker-down
 
 run:
