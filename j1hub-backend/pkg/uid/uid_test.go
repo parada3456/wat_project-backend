@@ -11,5 +11,5 @@ import (
 func TestNew_Prefix(t *testing.T) {
 	id := uid.New("usr_")
 	assert.True(t, strings.HasPrefix(id, "usr_"))
-	assert.Len(t, id, 4 + 26) // "usr_" (4 chars) + ULID (26 chars)
+	assert.Len(t, id, 4+26) // "usr_" (4 chars) + ULID (26 chars)
 }

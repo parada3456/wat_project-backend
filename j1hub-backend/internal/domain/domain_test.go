@@ -3,17 +3,24 @@ package domain
 import (
 	"testing"
 	"time"
+
+	expensedomain "github.com/j1hub/backend/internal/expense/domain"
+	frienddomain "github.com/j1hub/backend/internal/friend/domain"
+	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+	jobdomain "github.com/j1hub/backend/internal/job/domain"
+	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	userdomain "github.com/j1hub/backend/internal/user/domain"
 )
 
 func TestPaymentStatusValid(t *testing.T) {
 	tests := []struct {
-		status PaymentStatus
+		status expensedomain.PaymentStatus
 		valid  bool
 	}{
-		{PaymentPending, true},
-		{PaymentSubmitted, true},
-		{PaymentApproved, true},
-		{PaymentOverdue, true},
+		{expensedomain.PaymentPending, true},
+		{expensedomain.PaymentSubmitted, true},
+		{expensedomain.PaymentApproved, true},
+		{expensedomain.PaymentOverdue, true},
 		{"INVALID", false},
 	}
 	for _, tc := range tests {
@@ -25,12 +32,12 @@ func TestPaymentStatusValid(t *testing.T) {
 
 func TestApprovalStatusValid(t *testing.T) {
 	tests := []struct {
-		status ApprovalStatus
+		status expensedomain.ApprovalStatus
 		valid  bool
 	}{
-		{ApprovalPending, true},
-		{ApprovalApproved, true},
-		{ApprovalRejected, true},
+		{expensedomain.ApprovalPending, true},
+		{expensedomain.ApprovalApproved, true},
+		{expensedomain.ApprovalRejected, true},
 		{"INVALID", false},
 	}
 	for _, tc := range tests {
@@ -41,25 +48,25 @@ func TestApprovalStatusValid(t *testing.T) {
 }
 
 func TestExpenseSplitIsSettled(t *testing.T) {
-	split := &ExpenseSplit{PaymentStatus: PaymentApproved}
+	split := &expensedomain.ExpenseSplit{PaymentStatus: expensedomain.PaymentApproved}
 	if !split.IsSettled() {
-		t.Error("expected IsSettled() to be true for PaymentApproved")
+		t.Error("expected IsSettled() to be true for expensedomain.PaymentApproved")
 	}
 
-	split.PaymentStatus = PaymentPending
+	split.PaymentStatus = expensedomain.PaymentPending
 	if split.IsSettled() {
-		t.Error("expected IsSettled() to be false for PaymentPending")
+		t.Error("expected IsSettled() to be false for expensedomain.PaymentPending")
 	}
 }
 
 func TestFriendshipStatusValid(t *testing.T) {
 	tests := []struct {
-		status FriendshipStatus
+		status frienddomain.FriendshipStatus
 		valid  bool
 	}{
-		{FriendshipPending, true},
-		{FriendshipAccepted, true},
-		{FriendshipBlocked, true},
+		{frienddomain.FriendshipPending, true},
+		{frienddomain.FriendshipAccepted, true},
+		{frienddomain.FriendshipBlocked, true},
 		{"INVALID", false},
 	}
 	for _, tc := range tests {
@@ -70,28 +77,28 @@ func TestFriendshipStatusValid(t *testing.T) {
 }
 
 func TestCanonicalOrder(t *testing.T) {
-	r1, r2 := CanonicalOrder("alice", "bob")
+	r1, r2 := frienddomain.CanonicalOrder("alice", "bob")
 	if r1 != "alice" || r2 != "bob" {
-		t.Errorf("CanonicalOrder(\"alice\", \"bob\") = (%s, %s); want (alice, bob)", r1, r2)
+		t.Errorf("frienddomain.CanonicalOrder(\"alice\", \"bob\") = (%s, %s); want (alice, bob)", r1, r2)
 	}
 
-	r1, r2 = CanonicalOrder("bob", "alice")
+	r1, r2 = frienddomain.CanonicalOrder("bob", "alice")
 	if r1 != "alice" || r2 != "bob" {
-		t.Errorf("CanonicalOrder(\"bob\", \"alice\") = (%s, %s); want (alice, bob)", r1, r2)
+		t.Errorf("frienddomain.CanonicalOrder(\"bob\", \"alice\") = (%s, %s); want (alice, bob)", r1, r2)
 	}
 }
 
 func TestSourceTypeValid(t *testing.T) {
 	tests := []struct {
-		st    SourceType
+		st    gamificationdomain.SourceType
 		valid bool
 	}{
-		{SourceMissionBase, true},
-		{SourceSpeedBonus, true},
-		{SourceStreakBonus, true},
-		{SourceFirstCompleter, true},
-		{SourceExpensePenalty, true},
-		{SourceAdminAdjust, true},
+		{gamificationdomain.SourceMissionBase, true},
+		{gamificationdomain.SourceSpeedBonus, true},
+		{gamificationdomain.SourceStreakBonus, true},
+		{gamificationdomain.SourceFirstCompleter, true},
+		{gamificationdomain.SourceExpensePenalty, true},
+		{gamificationdomain.SourceAdminAdjust, true},
 		{"INVALID", false},
 	}
 	for _, tc := range tests {
@@ -103,14 +110,14 @@ func TestSourceTypeValid(t *testing.T) {
 
 func TestTriggerTypeValid(t *testing.T) {
 	tests := []struct {
-		tt    TriggerType
+		tt    gamificationdomain.TriggerType
 		valid bool
 	}{
-		{TriggerSpeed, true},
-		{TriggerStreak, true},
-		{TriggerFirstCompleter, true},
-		{TriggerPhaseComplete, true},
-		{TriggerManual, true},
+		{gamificationdomain.TriggerSpeed, true},
+		{gamificationdomain.TriggerStreak, true},
+		{gamificationdomain.TriggerFirstCompleter, true},
+		{gamificationdomain.TriggerPhaseComplete, true},
+		{gamificationdomain.TriggerManual, true},
 		{"INVALID", false},
 	}
 	for _, tc := range tests {
@@ -122,13 +129,13 @@ func TestTriggerTypeValid(t *testing.T) {
 
 func TestCartStatusValid(t *testing.T) {
 	tests := []struct {
-		status CartStatus
+		status jobdomain.CartStatus
 		valid  bool
 	}{
-		{CartSaved, true},
-		{CartViewed, true},
-		{CartApplied, true},
-		{CartRemoved, true},
+		{jobdomain.CartSaved, true},
+		{jobdomain.CartViewed, true},
+		{jobdomain.CartApplied, true},
+		{jobdomain.CartRemoved, true},
 		{"INVALID", false},
 	}
 	for _, tc := range tests {
@@ -139,7 +146,7 @@ func TestCartStatusValid(t *testing.T) {
 }
 
 func TestJobReviewScoreMap(t *testing.T) {
-	review := &JobReview{
+	review := &jobdomain.JobReview{
 		ScoreAgency:               1,
 		ScoreJob:                  2,
 		ScoreCoworkers:            3,
@@ -158,14 +165,14 @@ func TestJobReviewScoreMap(t *testing.T) {
 
 func TestUserMissionStatusValid(t *testing.T) {
 	tests := []struct {
-		status UserMissionStatus
+		status missiondomain.UserMissionStatus
 		valid  bool
 	}{
-		{StatusNotStarted, true},
-		{StatusInProgress, true},
-		{StatusPendingVerification, true},
-		{StatusCompleted, true},
-		{StatusOverdue, true},
+		{missiondomain.StatusNotStarted, true},
+		{missiondomain.StatusInProgress, true},
+		{missiondomain.StatusPendingVerification, true},
+		{missiondomain.StatusCompleted, true},
+		{missiondomain.StatusOverdue, true},
 		{"INVALID", false},
 	}
 	for _, tc := range tests {
@@ -177,12 +184,12 @@ func TestUserMissionStatusValid(t *testing.T) {
 
 func TestVerificationTypeValid(t *testing.T) {
 	tests := []struct {
-		vt    VerificationType
+		vt    missiondomain.VerificationType
 		valid bool
 	}{
-		{VerificationNone, true},
-		{VerificationUpload, true},
-		{VerificationAdmin, true},
+		{missiondomain.VerificationNone, true},
+		{missiondomain.VerificationUpload, true},
+		{missiondomain.VerificationAdmin, true},
 		{"INVALID", false},
 	}
 	for _, tc := range tests {
@@ -195,7 +202,7 @@ func TestVerificationTypeValid(t *testing.T) {
 func TestMissionCalculateDueDate(t *testing.T) {
 	now := time.Now()
 	// Relative Type
-	m1 := &Mission{
+	m1 := &missiondomain.Mission{
 		DueDateType:        "Relative",
 		RelativeDaysOffset: 5,
 	}
@@ -207,7 +214,7 @@ func TestMissionCalculateDueDate(t *testing.T) {
 
 	// Fixed Type
 	fixed := now.Add(24 * time.Hour)
-	m2 := &Mission{
+	m2 := &missiondomain.Mission{
 		DueDateType:  "Fixed",
 		FixedDueDate: &fixed,
 	}
@@ -218,31 +225,31 @@ func TestMissionCalculateDueDate(t *testing.T) {
 }
 
 func TestCanAdvancePhase(t *testing.T) {
-	missions := []UserMission{
-		{Status: StatusCompleted},
-		{Status: StatusCompleted},
+	missions := []missiondomain.UserMission{
+		{Status: missiondomain.StatusCompleted},
+		{Status: missiondomain.StatusCompleted},
 	}
-	if !CanAdvancePhase(missions) {
-		t.Error("expected CanAdvancePhase to return true when all completed")
+	if !missiondomain.CanAdvancePhase(missions) {
+		t.Error("expected missiondomain.CanAdvancePhase to return true when all completed")
 	}
 
-	missions2 := []UserMission{
-		{Status: StatusCompleted},
-		{Status: StatusInProgress},
+	missions2 := []missiondomain.UserMission{
+		{Status: missiondomain.StatusCompleted},
+		{Status: missiondomain.StatusInProgress},
 	}
-	if CanAdvancePhase(missions2) {
-		t.Error("expected CanAdvancePhase to return false when one is in progress")
+	if missiondomain.CanAdvancePhase(missions2) {
+		t.Error("expected missiondomain.CanAdvancePhase to return false when one is in progress")
 	}
 }
 
 func TestRadarVisibilityValid(t *testing.T) {
 	tests := []struct {
-		v     RadarVisibility
+		v     userdomain.RadarVisibility
 		valid bool
 	}{
-		{VisibilityShowAnonymous, true},
-		{VisibilityShowFriends, true},
-		{VisibilityHidden, true},
+		{userdomain.VisibilityShowAnonymous, true},
+		{userdomain.VisibilityShowFriends, true},
+		{userdomain.VisibilityHidden, true},
 		{"INVALID", false},
 	}
 	for _, tc := range tests {

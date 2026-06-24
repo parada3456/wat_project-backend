@@ -1,51 +1,76 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"os"
 	"sync"
+	"time"
 
-	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/scraper"
+	"github.com/j1hub/backend/internal/infrastructure/outbound/scraper"
+	"github.com/j1hub/backend/internal/infrastructure/outbound/scraper/acadex"
+	"github.com/j1hub/backend/internal/infrastructure/outbound/scraper/iee"
+	"github.com/j1hub/backend/internal/infrastructure/outbound/scraper/ihappy"
+	jobdomain "github.com/j1hub/backend/internal/job/domain"
 )
 
 func main() {
 	log.Println("debugprint: entering main")
-	s := scraper.NewScraper()
 
-	results := make(chan scraper.Result)
+	acadexScraper := acadex.NewAcadexScraper(nil)
+	ihappyScraper := ihappy.NewIHappyScraper(nil)
+	ieeScraper := iee.NewIEEScraper(nil)
+
+	results := make(chan *jobdomain.JobPosting)
 	var wg sync.WaitGroup
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	scrapeSource := func(source scraper.JobSource, name string, url string) {
+		defer wg.Done()
+		log.Printf("Starting %s scraper for %s...", name, url)
+
+		links, err := source.GetJobLinks(ctx, url)
+		if err != nil {
+			log.Printf("Failed to get job links for %s: %v", name, err)
+			return
+		}
+		log.Printf("Found %d links for %s", len(links), name)
+
+		for _, link := range links {
+			job, err := source.GetJobDetails(ctx, link)
+			if err != nil {
+				log.Printf("Failed to get job details for %s from %s: %v", name, link, err)
+				continue
+			}
+			if job != nil {
+				results <- job
+			}
+		}
+	}
 
 	// Phase 2: Scrape Acadex
 	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		log.Println("Starting Acadex scraper...")
-		// Using placeholder URLs, in a real scenario we'd use the actual ones
-		s.ScrapeAcadex("https://www.acadexthailand.com/program/work-and-travel-summer/", results)
-	}()
+	go scrapeSource(acadexScraper, "Acadex", "https://www.acadexthailand.com/program/work-and-travel-summer/")
 
 	// Phase 3: Scrape iHappy
 	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		log.Println("Starting iHappy scraper...")
-		s.ScrapeIHappy("https://www.ihappyeducation.com/job-location-summer/", results)
-	}()
+	go scrapeSource(ihappyScraper, "iHappy", "https://www.ihappyeducation.com/job-location-summer/")
 
-	var jobs []domain.JobPosting
-	var housings []domain.JobHousing
+	// Phase 4: Scrape IEE
+	wg.Add(1)
+	go scrapeSource(ieeScraper, "IEE", "https://www.ieethailand.com/work-and-travel-new/")
 
-	// Phase 4: Output Generation
+	var jobs []jobdomain.JobPosting
+
+	// Phase 5: Output Generation
 	done := make(chan bool)
 	go func() {
-		for res := range results {
-			if res.Job != nil {
-				jobs = append(jobs, *res.Job)
-			}
-			if res.Housing != nil {
-				housings = append(housings, *res.Housing)
+		for job := range results {
+			if job != nil {
+				jobs = append(jobs, *job)
 			}
 		}
 		done <- true
@@ -61,11 +86,8 @@ func main() {
 	}
 	log.Printf("Exported %d job postings to job_posting.json", len(jobs))
 
-	if err := exportToJSON("job_housing.json", housings); err != nil {
-		log.Fatalf("Failed to export housings: %v", err)
-	}
-	log.Printf("Exported %d job housings to job_housing.json", len(housings))
-
+	// The old code exported housings, but we didn't specify JobHousing in the new interface.
+	// You can add logic to extract housing from JobPosting or create them as separate entities.
 	log.Println("Scraping and export completed successfully.")
 }
 

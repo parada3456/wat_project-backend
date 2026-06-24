@@ -1,0 +1,43 @@
+#!/bin/bash
+cd /Users/user/development/work/WAT_project/backend/j1hub-backend/internal
+
+# Create feature directories
+mkdir -p auth/domain auth/usecase auth/port auth/adapter
+mkdir -p user/domain user/usecase user/port user/adapter
+mkdir -p job/domain job/usecase job/port job/adapter
+mkdir -p journey/domain journey/usecase journey/port journey/adapter
+mkdir -p expense/domain expense/usecase expense/port expense/adapter
+mkdir -p friend/domain friend/usecase friend/port friend/adapter
+mkdir -p mission/domain mission/usecase mission/port mission/adapter
+mkdir -p gamification/domain gamification/usecase gamification/port gamification/adapter
+mkdir -p notification/domain notification/usecase notification/port notification/adapter
+mkdir -p admin/domain admin/usecase admin/port admin/adapter
+mkdir -p scraper/domain scraper/usecase scraper/port scraper/adapter
+
+# Move domain files
+mv domain/user.go user/domain/
+mv domain/job.go job/domain/
+mv domain/expense.go expense/domain/
+mv domain/friendship.go friend/domain/
+mv domain/mission.go mission/domain/
+mv domain/gamification.go gamification/domain/
+mv domain/notification.go notification/domain/
+
+# Move usecase files
+mv usecase/login_user* auth/usecase/
+mv usecase/register_user* auth/usecase/
+mv usecase/manage_user* user/usecase/
+mv usecase/manage_job* job/usecase/
+mv usecase/manage_journey* journey/usecase/
+mv usecase/manage_expense* expense/usecase/
+mv usecase/manage_friendship* friend/usecase/
+mv usecase/manage_mission* mission/usecase/
+mv usecase/complete_mission* mission/usecase/
+mv usecase/leaderboard* gamification/usecase/
+mv usecase/radar* gamification/usecase/
+mv usecase/reward_engine* gamification/usecase/
+mv usecase/manage_notification* notification/usecase/
+mv usecase/admin_usecase* admin/usecase/
+
+# Print status
+echo "Initial domains and usecases moved into feature-first structure."

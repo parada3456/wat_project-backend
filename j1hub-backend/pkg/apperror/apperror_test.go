@@ -38,9 +38,10 @@ func TestRespondError_AppError(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, w.Code)
 	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
 
-	var body map[string]string
+	var body map[string]map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &body)
-	assert.Equal(t, "Resource not found", body["message"])
+	assert.Equal(t, "Resource not found", body["error"]["message"])
+	assert.Equal(t, "RESOURCE_NOT_FOUND", body["error"]["code"])
 }
 
 func TestRespondError_InternalError(t *testing.T) {
@@ -52,7 +53,8 @@ func TestRespondError_InternalError(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
 
-	var body map[string]string
+	var body map[string]map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &body)
-	assert.Equal(t, "Internal server error", body["message"])
+	assert.Equal(t, "Internal server error", body["error"]["message"])
+	assert.Equal(t, "INTERNAL_SERVER_ERROR", body["error"]["code"])
 }

@@ -9,15 +9,41 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/j1hub/backend/internal/adapter/auth"
-	"github.com/j1hub/backend/internal/adapter/http/handler"
-	"github.com/j1hub/backend/internal/adapter/notification"
-	"github.com/j1hub/backend/internal/adapter/postgres"
-	"github.com/j1hub/backend/internal/adapter/storage"
+	adminhandler "github.com/j1hub/backend/internal/admin/adapter/http"
+	adminpostgres "github.com/j1hub/backend/internal/admin/adapter/postgres"
+	adminusecase "github.com/j1hub/backend/internal/admin/usecase"
+	authhandler "github.com/j1hub/backend/internal/auth/adapter/http"
+	authusecase "github.com/j1hub/backend/internal/auth/usecase"
+	expensehandler "github.com/j1hub/backend/internal/expense/adapter/http"
+	expensepostgres "github.com/j1hub/backend/internal/expense/adapter/postgres"
+	expenseusecase "github.com/j1hub/backend/internal/expense/usecase"
+	friendhandler "github.com/j1hub/backend/internal/friend/adapter/http"
+	friendpostgres "github.com/j1hub/backend/internal/friend/adapter/postgres"
+	friendusecase "github.com/j1hub/backend/internal/friend/usecase"
+	journeyhandler "github.com/j1hub/backend/internal/gamification/adapter/http"
+	gamificationpostgres "github.com/j1hub/backend/internal/gamification/adapter/postgres"
+	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
 	"github.com/j1hub/backend/internal/infrastructure/config"
 	"github.com/j1hub/backend/internal/infrastructure/db"
+	"github.com/j1hub/backend/internal/infrastructure/notification"
+	scraper "github.com/j1hub/backend/internal/infrastructure/outbound/scraper"
 	"github.com/j1hub/backend/internal/infrastructure/scheduler"
-	"github.com/j1hub/backend/internal/usecase"
+	"github.com/j1hub/backend/internal/infrastructure/security"
+	"github.com/j1hub/backend/internal/infrastructure/storage"
+	jobhandler "github.com/j1hub/backend/internal/job/adapter/http"
+	"github.com/j1hub/backend/internal/media"
+	jobpostgres "github.com/j1hub/backend/internal/job/adapter/postgres"
+	jobusecase "github.com/j1hub/backend/internal/job/usecase"
+	missionhandler "github.com/j1hub/backend/internal/mission/adapter/http"
+	missionpostgres "github.com/j1hub/backend/internal/mission/adapter/postgres"
+	missionusecase "github.com/j1hub/backend/internal/mission/usecase"
+	notifhandler "github.com/j1hub/backend/internal/notification/adapter/http"
+	notificationpostgres "github.com/j1hub/backend/internal/notification/adapter/postgres"
+	notificationusecase "github.com/j1hub/backend/internal/notification/usecase"
+	transporthttp "github.com/j1hub/backend/internal/transport/http"
+	userhandler "github.com/j1hub/backend/internal/user/adapter/http"
+	userpostgres "github.com/j1hub/backend/internal/user/adapter/postgres"
+	userusecase "github.com/j1hub/backend/internal/user/usecase"
 	"github.com/j1hub/backend/pkg/timeutil"
 )
 
@@ -35,83 +61,88 @@ func main() {
 		log.Printf("migration error (might be expected if already applied): %v", err)
 	}
 
+	if err := db.SeedMockData(pool); err != nil {
+		log.Printf("failed to seed mock data: %v", err)
+	}
+
 	clock := timeutil.RealClock{}
 
 	// Repos
-	userRepo := postgres.NewUserRepository(pool)
-	profileRepo := postgres.NewProfileRepository(pool)
-	creditRepo := postgres.NewCreditScoreRepository(pool)
-	phaseRepo := postgres.NewJourneyPhaseRepository(pool)
-	historyRepo := postgres.NewUserPhaseHistoryRepository(pool)
-	missionRepo := postgres.NewMissionRepository(pool)
-	umRepo := postgres.NewUserMissionRepository(pool)
-	ledgerRepo := postgres.NewPointLedgerRepository(pool)
-	splitRepo := postgres.NewExpenseSplitRepository(pool)
-	adminRepo := postgres.NewAdminRepository(pool)
+	userRepo := userpostgres.NewUserRepository(pool)
+	profileRepo := userpostgres.NewProfileRepository(pool)
+	creditRepo := gamificationpostgres.NewCreditScoreRepository(pool)
+	phaseRepo := missionpostgres.NewJourneyPhaseRepository(pool)
+	historyRepo := missionpostgres.NewUserPhaseHistoryRepository(pool)
+	missionRepo := missionpostgres.NewMissionRepository(pool)
+	umRepo := missionpostgres.NewUserMissionRepository(pool)
+	ledgerRepo := gamificationpostgres.NewPointLedgerRepository(pool)
+	splitRepo := expensepostgres.NewExpenseSplitRepository(pool)
+	adminRepo := adminpostgres.NewAdminRepository(pool)
+	friendRepo := friendpostgres.NewFriendshipRepository(pool)
 
 	// Adapters
-	hasher := auth.NewArgon2Hasher()
-	issuer := auth.NewJWTIssuer(cfg)
+	hasher := security.NewArgon2Hasher()
+	issuer := security.NewJWTIssuer(cfg)
 	storage := storage.NewSupabaseStorage(cfg)
 	notifier := notification.NewFCMNotifier(cfg, userRepo)
 
 	// Usecases
-	rewardEngine := usecase.NewRewardEngine(cfg, userRepo, umRepo)
-	registerUC := usecase.NewRegisterUserUseCase(pool, userRepo, profileRepo, creditRepo, phaseRepo, historyRepo, missionRepo, umRepo, hasher, issuer, clock)
-	loginUC := usecase.NewLoginUseCase(userRepo, hasher, issuer)
-	userUC := usecase.NewUserUseCase(userRepo, profileRepo, creditRepo, hasher)
+	rewardEngine := gamificationusecase.NewRewardEngine(cfg, userRepo, umRepo)
+	registerUC := authusecase.NewRegisterUserUseCase(pool, userRepo, profileRepo, creditRepo, phaseRepo, historyRepo, missionRepo, umRepo, hasher, issuer, clock)
+	loginUC := authusecase.NewLoginUseCase(userRepo, hasher, issuer)
+	userUC := userusecase.NewUserUseCase(userRepo, profileRepo, creditRepo, friendRepo, hasher)
 
-	taskRepo := postgres.NewTaskRepository(pool)
-	utRepo := postgres.NewUserTaskRepository(pool)
-	badgeRepo := postgres.NewBadgeRepository(pool)
-	ubRepo := postgres.NewUserBadgeRepository(pool)
+	taskRepo := missionpostgres.NewTaskRepository(pool)
+	utRepo := missionpostgres.NewUserTaskRepository(pool)
+	badgeRepo := gamificationpostgres.NewBadgeRepository(pool)
+	ubRepo := gamificationpostgres.NewUserBadgeRepository(pool)
 
-	leaderRepo := postgres.NewLeaderboardRepository(pool)
+	leaderRepo := gamificationpostgres.NewLeaderboardRepository(pool)
 
-	missionUC := usecase.NewMissionUseCase(missionRepo, umRepo, taskRepo, utRepo, userRepo)
-	completeUC := usecase.NewCompleteMissionUseCase(umRepo, missionRepo, taskRepo, utRepo, userRepo, ledgerRepo, badgeRepo, ubRepo, storage, notifier, rewardEngine, clock)
-	journeyUC := usecase.NewJourneyUseCase(phaseRepo, historyRepo, badgeRepo, ubRepo, creditRepo)
-	advanceUC := usecase.NewAdvancePhaseUseCase(userRepo, umRepo, phaseRepo, historyRepo, missionRepo, notifier, clock)
-	leaderboardUC := usecase.NewLeaderboardUseCase(leaderRepo, profileRepo, ubRepo)
+	missionUC := missionusecase.NewMissionUseCase(missionRepo, umRepo, taskRepo, utRepo, userRepo)
+	completeUC := missionusecase.NewCompleteMissionUseCase(umRepo, missionRepo, taskRepo, utRepo, userRepo, ledgerRepo, badgeRepo, ubRepo, storage, notifier, rewardEngine, clock)
+	journeyUC := gamificationusecase.NewJourneyUseCase(phaseRepo, historyRepo, badgeRepo, ubRepo, creditRepo, ledgerRepo)
+	advanceUC := gamificationusecase.NewAdvancePhaseUseCase(userRepo, umRepo, phaseRepo, historyRepo, missionRepo, notifier, clock)
+	leaderboardUC := gamificationusecase.NewLeaderboardUseCase(leaderRepo, profileRepo, ubRepo)
 
-	friendRepo := postgres.NewFriendshipRepository(pool)
-	radarRepo := postgres.NewRadarRepository(pool)
+	radarRepo := gamificationpostgres.NewRadarRepository(pool)
 
-	friendshipUC := usecase.NewManageFriendshipUseCase(friendRepo, userRepo, notifier, clock)
-	radarUC := usecase.NewRadarUseCase(cfg, profileRepo, radarRepo, friendRepo)
+	friendshipUC := friendusecase.NewManageFriendshipUseCase(friendRepo, userRepo, notifier, clock)
+	radarUC := gamificationusecase.NewRadarUseCase(cfg, profileRepo, radarRepo, friendRepo)
 
-	txnRepo := postgres.NewExpenseRepository(pool)
-	expenseUC := usecase.NewManageExpenseUseCase(txnRepo, splitRepo, storage, notifier, clock)
+	txnRepo := expensepostgres.NewExpenseRepository(pool)
+	expenseUC := expenseusecase.NewManageExpenseUseCase(txnRepo, splitRepo, storage, notifier, clock)
 
-	notifRepo := postgres.NewNotificationRepository(pool)
-	notifUC := usecase.NewNotificationUseCase(notifRepo)
-	adminUC := usecase.NewAdminUseCase(pool, adminRepo, userRepo, umRepo, missionRepo, ledgerRepo, notifier, rewardEngine, clock)
+	notifRepo := notificationpostgres.NewNotificationRepository(pool)
+	notifUC := notificationusecase.NewNotificationUseCase(notifRepo)
+	adminUC := adminusecase.NewAdminUseCase(pool, adminRepo, userRepo, umRepo, missionRepo, ledgerRepo, notifier, rewardEngine, clock)
 
-	jobRepo := postgres.NewJobRepository(pool)
-	housingRepo := postgres.NewJobHousingRepository(pool)
-	ratingRepo := postgres.NewJobOverallRatingRepository(pool)
-	reviewRepo := postgres.NewJobReviewRepository(pool)
-	cartRepo := postgres.NewUserCartRepository(pool)
+	jobRepo := jobpostgres.NewJobRepository(pool)
+	housingRepo := jobpostgres.NewJobHousingRepository(pool)
+	ratingRepo := jobpostgres.NewJobOverallRatingRepository(pool)
+	reviewRepo := jobpostgres.NewJobReviewRepository(pool)
+	cartRepo := jobpostgres.NewUserCartRepository(pool)
 
-	jobUC := usecase.NewManageJobUseCase(jobRepo, housingRepo, ratingRepo, reviewRepo, cartRepo, clock)
-	scrapeJobsUC := usecase.NewScrapeJobsUseCase(jobRepo, housingRepo)
+	jobUC := jobusecase.NewManageJobUseCase(jobRepo, housingRepo, ratingRepo, reviewRepo, cartRepo, clock)
+	scrapeJobsUC := scraper.NewScrapeJobsUseCase(jobRepo, housingRepo)
 
 	// Handlers
-	authH := handler.NewAuthHandler(registerUC, loginUC)
-	userH := handler.NewUserHandler(userUC)
-	missionH := handler.NewMissionHandler(missionUC, completeUC)
-	journeyH := handler.NewJourneyHandler(journeyUC, advanceUC, leaderboardUC)
-	friendH := handler.NewFriendHandler(friendshipUC, radarUC)
-	expenseH := handler.NewExpenseHandler(expenseUC)
-	notifH := handler.NewNotificationHandler(notifUC)
-	jobH := handler.NewJobHandler(jobUC)
-	adminH := handler.NewAdminHandler(adminUC)
+	authH := authhandler.NewAuthHandler(registerUC, loginUC)
+	userH := userhandler.NewUserHandler(userUC)
+	missionH := missionhandler.NewMissionHandler(missionUC, completeUC)
+	journeyH := journeyhandler.NewJourneyHandler(journeyUC, advanceUC, leaderboardUC)
+	friendH := friendhandler.NewFriendHandler(friendshipUC, radarUC)
+	expenseH := expensehandler.NewExpenseHandler(expenseUC)
+	notifH := notifhandler.NewNotificationHandler(notifUC)
+	jobH := jobhandler.NewJobHandler(jobUC)
+	adminH := adminhandler.NewAdminHandler(adminUC)
+	mediaH := media.NewMediaHandler(storage)
 
-	r := handler.NewRouter(issuer, authH, userH, missionH, journeyH, friendH, expenseH, notifH, jobH, adminH)
+	r := transporthttp.NewRouter(issuer, authH, userH, missionH, journeyH, friendH, expenseH, notifH, jobH, adminH, mediaH)
 
 	// Jobs
-	overdueExpenseJob := usecase.NewOverdueExpenseJob(splitRepo, creditRepo, ledgerRepo, notifier)
-	overdueMissionJob := usecase.NewOverdueMissionJob(umRepo, missionRepo, userRepo, notifier)
+	overdueExpenseJob := scheduler.NewOverdueExpenseJob(splitRepo, creditRepo, ledgerRepo, notifier)
+	overdueMissionJob := scheduler.NewOverdueMissionJob(umRepo, missionRepo, userRepo, notifier)
 	cron := scheduler.NewScheduler(cfg, overdueExpenseJob, overdueMissionJob, scrapeJobsUC)
 	cron.Start()
 	defer cron.Stop()

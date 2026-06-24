@@ -9,7 +9,7 @@ import (
 
 func main() {
 	log.Println("debugprint: entering main")
-	port := "8080"
+	port := "3456"
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("GET /health from %s", r.RemoteAddr)
