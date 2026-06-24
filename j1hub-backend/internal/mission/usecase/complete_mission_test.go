@@ -7,12 +7,14 @@ import (
 	"testing"
 	"time"
 
+	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
+	missionusecase "github.com/j1hub/backend/internal/mission/usecase"
+
 	missiondomain "github.com/j1hub/backend/internal/mission/domain"
 	userdomain "github.com/j1hub/backend/internal/user/domain"
 
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/internal/infrastructure/config"
-	"github.com/j1hub/backend/internal/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -33,9 +35,9 @@ func TestCompleteMissionUseCase_SubmitProof_Success(t *testing.T) {
 	clock := &MockClock{NowTime: nowTime}
 
 	cfg := &config.Config{}
-	rewardEngine := usecase.NewRewardEngine(cfg, userRepo, umRepo)
+	rewardEngine := gamificationusecase.NewRewardEngine(cfg, userRepo, umRepo)
 
-	uc := missionmissionusecase.NewCompleteMissionUseCase(
+	uc := missionusecase.NewCompleteMissionUseCase(
 		umRepo, missionRepo, taskRepo, utRepo, userRepo, ledgerRepo,
 		badgeRepo, ubRepo, storage, notifier, rewardEngine, clock,
 	)
@@ -50,19 +52,19 @@ func TestCompleteMissionUseCase_SubmitProof_Success(t *testing.T) {
 	mockUM := &missiondomain.UserMission{
 		UserMissionID: userMissionID,
 		UserID:        userID,
-		Status:        domain.StatusInProgress,
+		Status:        missiondomain.StatusInProgress,
 	}
 
 	umRepo.On("FindByID", ctx, userMissionID).Return(mockUM, nil)
 	storage.On("UploadFile", ctx, "proofs", userMissionID, fileReader, contentType).Return("https://supabase.com/proof.png", nil)
-	umRepo.On("UpdateStatus", ctx, userMissionID, domain.StatusPendingVerification).Return(nil)
+	umRepo.On("UpdateStatus", ctx, userMissionID, missiondomain.StatusPendingVerification).Return(nil)
 
 	err := uc.SubmitProof(ctx, userID, userMissionID, fileReader, contentType)
 
 	assert.NoError(t, err)
 	assert.Equal(t, "https://supabase.com/proof.png", mockUM.ProofURL)
 	assert.Equal(t, nowTime, *mockUM.ProofSubmittedAt)
-	assert.Equal(t, domain.StatusPendingVerification, mockUM.Status)
+	assert.Equal(t, missiondomain.StatusPendingVerification, mockUM.Status)
 }
 
 func TestCompleteMissionUseCase_VerifyMission_Approve(t *testing.T) {
@@ -85,9 +87,9 @@ func TestCompleteMissionUseCase_VerifyMission_Approve(t *testing.T) {
 			SpeedBonus7dPct: 10,
 		},
 	}
-	rewardEngine := usecase.NewRewardEngine(cfg, userRepo, umRepo)
+	rewardEngine := gamificationusecase.NewRewardEngine(cfg, userRepo, umRepo)
 
-	uc := missionmissionusecase.NewCompleteMissionUseCase(
+	uc := missionusecase.NewCompleteMissionUseCase(
 		umRepo, missionRepo, taskRepo, utRepo, userRepo, ledgerRepo,
 		badgeRepo, ubRepo, storage, notifier, rewardEngine, clock,
 	)
@@ -103,7 +105,7 @@ func TestCompleteMissionUseCase_VerifyMission_Approve(t *testing.T) {
 		UserMissionID:     userMissionID,
 		UserID:            userID,
 		MissionID:         missionID,
-		Status:            domain.StatusPendingVerification,
+		Status:            missiondomain.StatusPendingVerification,
 		ProofSubmittedAt:  &submitTime,
 		CalculatedDueDate: nowTime.Add(24 * time.Hour),
 	}
@@ -123,8 +125,8 @@ func TestCompleteMissionUseCase_VerifyMission_Approve(t *testing.T) {
 	userRepo.On("FindByID", ctx, userID).Return(mockUser, nil)
 	missionRepo.On("FindByID", ctx, missionID).Return(mockMission, nil)
 
-	umRepo.On("UpdateReward", ctx, userMissionID, mock.AnythingOfType("*missiondomain.PointReward"), nowTime).Return(nil)
-	umRepo.On("UpdateStatus", ctx, userMissionID, domain.StatusCompleted).Return(nil)
+	umRepo.On("UpdateReward", ctx, userMissionID, mock.AnythingOfType("*gamificationdomain.PointReward"), nowTime).Return(nil)
+	umRepo.On("UpdateStatus", ctx, userMissionID, missiondomain.StatusCompleted).Return(nil)
 	userRepo.On("IncrementPoints", ctx, userID, 100, 100).Return(nil)
 
 	ledgerRepo.On("Insert", ctx, mock.Anything).Return(nil)
@@ -148,7 +150,7 @@ func TestCompleteMissionUseCase_VerifyMission_Reject(t *testing.T) {
 	notifier := new(MockNotifierPort)
 	clock := &MockClock{}
 
-	uc := missionmissionusecase.NewCompleteMissionUseCase(
+	uc := missionusecase.NewCompleteMissionUseCase(
 		umRepo, missionRepo, taskRepo, utRepo, userRepo, ledgerRepo,
 		badgeRepo, ubRepo, storage, notifier, nil, clock,
 	)
@@ -160,11 +162,11 @@ func TestCompleteMissionUseCase_VerifyMission_Reject(t *testing.T) {
 	mockUM := &missiondomain.UserMission{
 		UserMissionID: userMissionID,
 		UserID:        "usr_123",
-		Status:        domain.StatusPendingVerification,
+		Status:        missiondomain.StatusPendingVerification,
 	}
 
 	umRepo.On("FindByID", ctx, userMissionID).Return(mockUM, nil)
-	umRepo.On("UpdateStatus", ctx, userMissionID, domain.StatusInProgress).Return(nil)
+	umRepo.On("UpdateStatus", ctx, userMissionID, missiondomain.StatusInProgress).Return(nil)
 
 	err := uc.VerifyMission(ctx, adminID, userMissionID, false)
 
@@ -173,7 +175,7 @@ func TestCompleteMissionUseCase_VerifyMission_Reject(t *testing.T) {
 
 func TestCompleteMissionUseCase_SubmitProof_FindByID_Error(t *testing.T) {
 	umRepo := new(MockUserMissionRepository)
-	uc := missionmissionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	uc := missionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	ctx := context.Background()
 	umRepo.On("FindByID", ctx, "ums_1").Return((*missiondomain.UserMission)(nil), errors.New("db error"))
 
@@ -183,7 +185,7 @@ func TestCompleteMissionUseCase_SubmitProof_FindByID_Error(t *testing.T) {
 
 func TestCompleteMissionUseCase_SubmitProof_Forbidden(t *testing.T) {
 	umRepo := new(MockUserMissionRepository)
-	uc := missionmissionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	uc := missionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	ctx := context.Background()
 	mockUM := &missiondomain.UserMission{UserID: "usr_456"}
 	umRepo.On("FindByID", ctx, "ums_1").Return(mockUM, nil)
@@ -194,9 +196,9 @@ func TestCompleteMissionUseCase_SubmitProof_Forbidden(t *testing.T) {
 
 func TestCompleteMissionUseCase_SubmitProof_AlreadyCompleted(t *testing.T) {
 	umRepo := new(MockUserMissionRepository)
-	uc := missionmissionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	uc := missionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	ctx := context.Background()
-	mockUM := &missiondomain.UserMission{UserID: "usr_123", Status: domain.StatusCompleted}
+	mockUM := &missiondomain.UserMission{UserID: "usr_123", Status: missiondomain.StatusCompleted}
 	umRepo.On("FindByID", ctx, "ums_1").Return(mockUM, nil)
 
 	err := uc.SubmitProof(ctx, "usr_123", "ums_1", nil, "image/png")
@@ -206,9 +208,9 @@ func TestCompleteMissionUseCase_SubmitProof_AlreadyCompleted(t *testing.T) {
 func TestCompleteMissionUseCase_SubmitProof_UploadError(t *testing.T) {
 	umRepo := new(MockUserMissionRepository)
 	storage := new(MockStoragePort)
-	uc := missionmissionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, nil, nil, nil, nil, storage, nil, nil, nil)
+	uc := missionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, nil, nil, nil, nil, storage, nil, nil, nil)
 	ctx := context.Background()
-	mockUM := &missiondomain.UserMission{UserID: "usr_123", Status: domain.StatusInProgress}
+	mockUM := &missiondomain.UserMission{UserID: "usr_123", Status: missiondomain.StatusInProgress}
 	umRepo.On("FindByID", ctx, "ums_1").Return(mockUM, nil)
 	storage.On("UploadFile", ctx, "proofs", "ums_1", mock.Anything, "image/png").Return("", errors.New("upload fail"))
 
@@ -220,12 +222,12 @@ func TestCompleteMissionUseCase_SubmitProof_UpdateStatusError(t *testing.T) {
 	umRepo := new(MockUserMissionRepository)
 	storage := new(MockStoragePort)
 	clock := &MockClock{NowTime: time.Now()}
-	uc := missionmissionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, nil, nil, nil, nil, storage, nil, nil, clock)
+	uc := missionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, nil, nil, nil, nil, storage, nil, nil, clock)
 	ctx := context.Background()
-	mockUM := &missiondomain.UserMission{UserID: "usr_123", Status: domain.StatusInProgress}
+	mockUM := &missiondomain.UserMission{UserID: "usr_123", Status: missiondomain.StatusInProgress}
 	umRepo.On("FindByID", ctx, "ums_1").Return(mockUM, nil)
 	storage.On("UploadFile", ctx, "proofs", "ums_1", mock.Anything, "image/png").Return("http://url", nil)
-	umRepo.On("UpdateStatus", ctx, "ums_1", domain.StatusPendingVerification).Return(errors.New("update fail"))
+	umRepo.On("UpdateStatus", ctx, "ums_1", missiondomain.StatusPendingVerification).Return(errors.New("update fail"))
 
 	err := uc.SubmitProof(ctx, "usr_123", "ums_1", nil, "image/png")
 	assert.Error(t, err)
@@ -233,7 +235,7 @@ func TestCompleteMissionUseCase_SubmitProof_UpdateStatusError(t *testing.T) {
 
 func TestCompleteMissionUseCase_VerifyMission_FindByID_Error(t *testing.T) {
 	umRepo := new(MockUserMissionRepository)
-	uc := missionmissionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	uc := missionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	ctx := context.Background()
 	umRepo.On("FindByID", ctx, "ums_1").Return((*missiondomain.UserMission)(nil), errors.New("db error"))
 
@@ -243,11 +245,11 @@ func TestCompleteMissionUseCase_VerifyMission_FindByID_Error(t *testing.T) {
 
 func TestCompleteMissionUseCase_VerifyMission_Reject_UpdateStatusError(t *testing.T) {
 	umRepo := new(MockUserMissionRepository)
-	uc := missionmissionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	uc := missionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	ctx := context.Background()
-	mockUM := &missiondomain.UserMission{Status: domain.StatusPendingVerification}
+	mockUM := &missiondomain.UserMission{Status: missiondomain.StatusPendingVerification}
 	umRepo.On("FindByID", ctx, "ums_1").Return(mockUM, nil)
-	umRepo.On("UpdateStatus", ctx, "ums_1", domain.StatusInProgress).Return(errors.New("db error"))
+	umRepo.On("UpdateStatus", ctx, "ums_1", missiondomain.StatusInProgress).Return(errors.New("db error"))
 
 	err := uc.VerifyMission(ctx, "adm_1", "ums_1", false)
 	assert.Error(t, err)
@@ -257,9 +259,9 @@ func TestCompleteMissionUseCase_VerifyMission_UpdateVerificationError(t *testing
 	umRepo := new(MockUserMissionRepository)
 	now := time.Now()
 	clock := &MockClock{NowTime: now}
-	uc := missionmissionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, clock)
+	uc := missionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, clock)
 	ctx := context.Background()
-	mockUM := &missiondomain.UserMission{Status: domain.StatusPendingVerification}
+	mockUM := &missiondomain.UserMission{Status: missiondomain.StatusPendingVerification}
 	umRepo.On("FindByID", ctx, "ums_1").Return(mockUM, nil)
 	umRepo.On("UpdateVerification", ctx, "ums_1", now, "adm_1").Return(errors.New("db error"))
 
@@ -272,9 +274,9 @@ func TestCompleteMissionUseCase_VerifyMission_UserFindByID_Error(t *testing.T) {
 	userRepo := new(MockUserRepository)
 	now := time.Now()
 	clock := &MockClock{NowTime: now}
-	uc := missionmissionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, userRepo, nil, nil, nil, nil, nil, nil, clock)
+	uc := missionusecase.NewCompleteMissionUseCase(umRepo, nil, nil, nil, userRepo, nil, nil, nil, nil, nil, nil, clock)
 	ctx := context.Background()
-	mockUM := &missiondomain.UserMission{Status: domain.StatusPendingVerification, UserID: "usr_1"}
+	mockUM := &missiondomain.UserMission{Status: missiondomain.StatusPendingVerification, UserID: "usr_1"}
 	umRepo.On("FindByID", ctx, "ums_1").Return(mockUM, nil)
 	umRepo.On("UpdateVerification", ctx, "ums_1", now, "adm_1").Return(nil)
 	userRepo.On("FindByID", ctx, "usr_1").Return((*userdomain.User)(nil), errors.New("db error"))
@@ -289,9 +291,9 @@ func TestCompleteMissionUseCase_VerifyMission_MissionFindByID_Error(t *testing.T
 	missionRepo := new(MockMissionRepository)
 	now := time.Now()
 	clock := &MockClock{NowTime: now}
-	uc := missionmissionusecase.NewCompleteMissionUseCase(umRepo, missionRepo, nil, nil, userRepo, nil, nil, nil, nil, nil, nil, clock)
+	uc := missionusecase.NewCompleteMissionUseCase(umRepo, missionRepo, nil, nil, userRepo, nil, nil, nil, nil, nil, nil, clock)
 	ctx := context.Background()
-	mockUM := &missiondomain.UserMission{Status: domain.StatusPendingVerification, UserID: "usr_1", MissionID: "m_1"}
+	mockUM := &missiondomain.UserMission{Status: missiondomain.StatusPendingVerification, UserID: "usr_1", MissionID: "m_1"}
 	umRepo.On("FindByID", ctx, "ums_1").Return(mockUM, nil)
 	umRepo.On("UpdateVerification", ctx, "ums_1", now, "adm_1").Return(nil)
 	userRepo.On("FindByID", ctx, "usr_1").Return(&userdomain.User{}, nil)
@@ -307,10 +309,10 @@ func TestCompleteMissionUseCase_VerifyMission_UpdateRewardError(t *testing.T) {
 	missionRepo := new(MockMissionRepository)
 	now := time.Now()
 	clock := &MockClock{NowTime: now}
-	rewardEngine := usecase.NewRewardEngine(&config.Config{}, userRepo, umRepo)
-	uc := missionmissionusecase.NewCompleteMissionUseCase(umRepo, missionRepo, nil, nil, userRepo, nil, nil, nil, nil, nil, rewardEngine, clock)
+	rewardEngine := gamificationusecase.NewRewardEngine(&config.Config{}, userRepo, umRepo)
+	uc := missionusecase.NewCompleteMissionUseCase(umRepo, missionRepo, nil, nil, userRepo, nil, nil, nil, nil, nil, rewardEngine, clock)
 	ctx := context.Background()
-	mockUM := &missiondomain.UserMission{Status: domain.StatusPendingVerification, UserID: "usr_1", MissionID: "m_1"}
+	mockUM := &missiondomain.UserMission{Status: missiondomain.StatusPendingVerification, UserID: "usr_1", MissionID: "m_1"}
 	umRepo.On("FindByID", ctx, "ums_1").Return(mockUM, nil)
 	umRepo.On("UpdateVerification", ctx, "ums_1", now, "adm_1").Return(nil)
 	userRepo.On("FindByID", ctx, "usr_1").Return(&userdomain.User{}, nil)
@@ -327,16 +329,16 @@ func TestCompleteMissionUseCase_VerifyMission_UpdateStatusError(t *testing.T) {
 	missionRepo := new(MockMissionRepository)
 	now := time.Now()
 	clock := &MockClock{NowTime: now}
-	rewardEngine := usecase.NewRewardEngine(&config.Config{}, userRepo, umRepo)
-	uc := missionmissionusecase.NewCompleteMissionUseCase(umRepo, missionRepo, nil, nil, userRepo, nil, nil, nil, nil, nil, rewardEngine, clock)
+	rewardEngine := gamificationusecase.NewRewardEngine(&config.Config{}, userRepo, umRepo)
+	uc := missionusecase.NewCompleteMissionUseCase(umRepo, missionRepo, nil, nil, userRepo, nil, nil, nil, nil, nil, rewardEngine, clock)
 	ctx := context.Background()
-	mockUM := &missiondomain.UserMission{Status: domain.StatusPendingVerification, UserID: "usr_1", MissionID: "m_1"}
+	mockUM := &missiondomain.UserMission{Status: missiondomain.StatusPendingVerification, UserID: "usr_1", MissionID: "m_1"}
 	umRepo.On("FindByID", ctx, "ums_1").Return(mockUM, nil)
 	umRepo.On("UpdateVerification", ctx, "ums_1", now, "adm_1").Return(nil)
 	userRepo.On("FindByID", ctx, "usr_1").Return(&userdomain.User{}, nil)
 	missionRepo.On("FindByID", ctx, "m_1").Return(&missiondomain.Mission{}, nil)
 	umRepo.On("UpdateReward", ctx, "ums_1", mock.Anything, now).Return(nil)
-	umRepo.On("UpdateStatus", ctx, "ums_1", domain.StatusCompleted).Return(errors.New("db error"))
+	umRepo.On("UpdateStatus", ctx, "ums_1", missiondomain.StatusCompleted).Return(errors.New("db error"))
 
 	err := uc.VerifyMission(ctx, "adm_1", "ums_1", true)
 	assert.Error(t, err)
@@ -348,16 +350,16 @@ func TestCompleteMissionUseCase_VerifyMission_IncrementPointsError(t *testing.T)
 	missionRepo := new(MockMissionRepository)
 	now := time.Now()
 	clock := &MockClock{NowTime: now}
-	rewardEngine := usecase.NewRewardEngine(&config.Config{}, userRepo, umRepo)
-	uc := missionmissionusecase.NewCompleteMissionUseCase(umRepo, missionRepo, nil, nil, userRepo, nil, nil, nil, nil, nil, rewardEngine, clock)
+	rewardEngine := gamificationusecase.NewRewardEngine(&config.Config{}, userRepo, umRepo)
+	uc := missionusecase.NewCompleteMissionUseCase(umRepo, missionRepo, nil, nil, userRepo, nil, nil, nil, nil, nil, rewardEngine, clock)
 	ctx := context.Background()
-	mockUM := &missiondomain.UserMission{Status: domain.StatusPendingVerification, UserID: "usr_1", MissionID: "m_1"}
+	mockUM := &missiondomain.UserMission{Status: missiondomain.StatusPendingVerification, UserID: "usr_1", MissionID: "m_1"}
 	umRepo.On("FindByID", ctx, "ums_1").Return(mockUM, nil)
 	umRepo.On("UpdateVerification", ctx, "ums_1", now, "adm_1").Return(nil)
 	userRepo.On("FindByID", ctx, "usr_1").Return(&userdomain.User{UserID: "usr_1"}, nil)
 	missionRepo.On("FindByID", ctx, "m_1").Return(&missiondomain.Mission{}, nil)
 	umRepo.On("UpdateReward", ctx, "ums_1", mock.Anything, now).Return(nil)
-	umRepo.On("UpdateStatus", ctx, "ums_1", domain.StatusCompleted).Return(nil)
+	umRepo.On("UpdateStatus", ctx, "ums_1", missiondomain.StatusCompleted).Return(nil)
 	userRepo.On("IncrementPoints", ctx, "usr_1", mock.Anything, mock.Anything).Return(errors.New("db error"))
 
 	err := uc.VerifyMission(ctx, "adm_1", "ums_1", true)

@@ -6,11 +6,12 @@ import (
 	"testing"
 	"time"
 
+	authusecase "github.com/j1hub/backend/internal/auth/usecase"
+
 	userdomain "github.com/j1hub/backend/internal/user/domain"
 
 	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/port"
-	"github.com/j1hub/backend/internal/usecase"
+	port "github.com/j1hub/backend/internal/auth/port"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,7 +20,7 @@ func TestLoginUseCase_Login_Success(t *testing.T) {
 	hasher := new(MockHasher)
 	tokenIssuer := new(MockIssuer)
 
-	uc := usecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
+	uc := authusecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
 
 	ctx := context.Background()
 	email := "user@example.com"
@@ -43,7 +44,7 @@ func TestLoginUseCase_Login_Success(t *testing.T) {
 	hasher.On("Verify", password, hash).Return(true)
 	tokenIssuer.On("Issue", userID, false).Return(mockTokens, nil)
 
-	user, tokens, err := uc.Login(ctx, usecase.LoginCommand{
+	user, tokens, err := uc.Login(ctx, authusecase.LoginCommand{
 		Email:    email,
 		Password: password,
 	})
@@ -62,7 +63,7 @@ func TestLoginUseCase_Login_IssueTokenError(t *testing.T) {
 	hasher := new(MockHasher)
 	tokenIssuer := new(MockIssuer)
 
-	uc := usecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
+	uc := authusecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
 
 	ctx := context.Background()
 	email := "user@example.com"
@@ -80,7 +81,7 @@ func TestLoginUseCase_Login_IssueTokenError(t *testing.T) {
 	hasher.On("Verify", password, hash).Return(true)
 	tokenIssuer.On("Issue", userID, false).Return((*port.TokenPair)(nil), errors.New("issuance error"))
 
-	user, tokens, err := uc.Login(ctx, usecase.LoginCommand{
+	user, tokens, err := uc.Login(ctx, authusecase.LoginCommand{
 		Email:    email,
 		Password: password,
 	})
@@ -96,14 +97,14 @@ func TestLoginUseCase_Login_UserNotFound(t *testing.T) {
 	hasher := new(MockHasher)
 	tokenIssuer := new(MockIssuer)
 
-	uc := usecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
+	uc := authusecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
 
 	ctx := context.Background()
 	email := "nonexistent@example.com"
 
 	userRepo.On("FindByEmail", ctx, email).Return((*userdomain.User)(nil), domain.ErrNotFound)
 
-	user, tokens, err := uc.Login(ctx, usecase.LoginCommand{
+	user, tokens, err := uc.Login(ctx, authusecase.LoginCommand{
 		Email:    email,
 		Password: "somepassword",
 	})
@@ -111,7 +112,7 @@ func TestLoginUseCase_Login_UserNotFound(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, user)
 	assert.Nil(t, tokens)
-	assert.Contains(t, err.Error(), "invalid credentials")
+	assert.Contains(t, err.Error(), "Invalid credentials")
 }
 
 func TestLoginUseCase_Login_WrongPassword(t *testing.T) {
@@ -119,7 +120,7 @@ func TestLoginUseCase_Login_WrongPassword(t *testing.T) {
 	hasher := new(MockHasher)
 	tokenIssuer := new(MockIssuer)
 
-	uc := usecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
+	uc := authusecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
 
 	ctx := context.Background()
 	email := "user@example.com"
@@ -135,7 +136,7 @@ func TestLoginUseCase_Login_WrongPassword(t *testing.T) {
 	userRepo.On("FindByEmail", ctx, email).Return(mockUser, nil)
 	hasher.On("Verify", password, hash).Return(false)
 
-	user, tokens, err := uc.Login(ctx, usecase.LoginCommand{
+	user, tokens, err := uc.Login(ctx, authusecase.LoginCommand{
 		Email:    email,
 		Password: password,
 	})
@@ -151,7 +152,7 @@ func TestLoginUseCase_Refresh_Success(t *testing.T) {
 	hasher := new(MockHasher)
 	tokenIssuer := new(MockIssuer)
 
-	uc := usecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
+	uc := authusecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
 
 	ctx := context.Background()
 	refreshToken := "valid_refresh_token"
@@ -173,7 +174,7 @@ func TestLoginUseCase_Refresh_Error(t *testing.T) {
 	hasher := new(MockHasher)
 	tokenIssuer := new(MockIssuer)
 
-	uc := usecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
+	uc := authusecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
 
 	ctx := context.Background()
 	refreshToken := "invalid_refresh_token"

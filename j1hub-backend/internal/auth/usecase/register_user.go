@@ -2,18 +2,16 @@ package authusecase
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
+	"github.com/j1hub/backend/internal/domain"
 	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
 	missiondomain "github.com/j1hub/backend/internal/mission/domain"
 	userdomain "github.com/j1hub/backend/internal/user/domain"
 
-	"net/http"
-
-	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/port"
-	"github.com/j1hub/backend/pkg/apperror"
+	port "github.com/j1hub/backend/internal/auth/port"
 	"github.com/j1hub/backend/pkg/timeutil"
 	"github.com/j1hub/backend/pkg/uid"
 	"github.com/jackc/pgx/v5"
@@ -38,7 +36,7 @@ type RegisterUserUseCase struct {
 }
 
 func NewRegisterUserUseCase(
-	pool TxBeginner,
+	pool port.TxBeginner,
 	userRepo port.UserRepository,
 	profileRepo port.ProfileRepository,
 	creditRepo port.CreditScoreRepository,
@@ -77,12 +75,7 @@ func (uc *RegisterUserUseCase) Register(ctx context.Context, cmd RegisterCommand
 	log.Println("debugprint: entering (*RegisterUserUseCase).Register")
 	hash, err := uc.hasher.Hash(cmd.Password)
 	if err != nil {
-		return nil, nil, &apperror.ProblemDetails{
-			Type:   "https://example.com/probs/internal-error",
-			Title:  "Password Hashing Failed",
-			Status: http.StatusInternalServerError,
-			Detail: "Could not hash the password.",
-		}
+		return nil, nil, fmt.Errorf("%w: Could not hash the password.", domain.ErrPasswordHashFailed)
 	}
 
 	user := &userdomain.User{
@@ -98,71 +91,41 @@ func (uc *RegisterUserUseCase) Register(ctx context.Context, cmd RegisterCommand
 	// Transactional insert
 	tx, err := uc.pool.Begin(ctx)
 	if err != nil {
-		return nil, nil, &apperror.ProblemDetails{
-			Type:   "https://example.com/probs/internal-error",
-			Title:  "Transaction Error",
-			Status: http.StatusInternalServerError,
-			Detail: "Could not begin database transaction.",
-		}
+		return nil, nil, fmt.Errorf("%w: Could not begin database transaction.", domain.ErrTransactionBeginFailed)
 	}
 	defer tx.Rollback(ctx)
 
 	if err := uc.userRepo.Create(ctx, user); err != nil {
-		return nil, nil, &apperror.ProblemDetails{
-			Type:   "https://example.com/probs/user-creation-failed",
-			Title:  "User Creation Failed",
-			Status: http.StatusInternalServerError,
-			Detail: "Failed to create user in the database.",
-		}
+		return nil, nil, fmt.Errorf("%w: Failed to create user in the database.", domain.ErrUserCreationFailed)
 	}
 
 	profile := &userdomain.Profile{
 		ProfileID:       uid.New("prf_"),
 		UserID:          user.UserID,
-		RadarVisibility: domain.VisibilityShowAnonymous,
+		RadarVisibility: userdomain.VisibilityShowAnonymous,
 		UpdatedAt:       uc.clock.Now(),
 	}
 	if err := uc.profileRepo.Create(ctx, profile); err != nil {
-		return nil, nil, &apperror.ProblemDetails{
-			Type:   "https://example.com/probs/profile-creation-failed",
-			Title:  "Profile Creation Failed",
-			Status: http.StatusInternalServerError,
-			Detail: "Failed to create user profile.",
-		}
+		return nil, nil, fmt.Errorf("%w: Failed to create user profile.", domain.ErrProfileCreationFailed)
 	}
 
-	credit := &userdomain.CreditScore{
+	credit := &gamificationdomain.CreditScore{
 		CreditID:     uid.New("crd_"),
 		UserID:       user.UserID,
 		CurrentScore: 100,
 		LastUpdated:  uc.clock.Now(),
 	}
 	if err := uc.creditRepo.Create(ctx, credit); err != nil {
-		return nil, nil, &apperror.ProblemDetails{
-			Type:   "https://example.com/probs/credit-creation-failed",
-			Title:  "Credit Creation Failed",
-			Status: http.StatusInternalServerError,
-			Detail: "Failed to create credit score record.",
-		}
+		return nil, nil, fmt.Errorf("%w: Failed to create credit score record.", domain.ErrCreditCreationFailed)
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return nil, nil, &apperror.ProblemDetails{
-			Type:   "https://example.com/probs/transaction-commit-failed",
-			Title:  "Transaction Commit Failed",
-			Status: http.StatusInternalServerError,
-			Detail: "Could not commit the database transaction.",
-		}
+		return nil, nil, fmt.Errorf("%w: Could not commit the database transaction.", domain.ErrTransactionCommitFailed)
 	}
 
 	tokens, err := uc.tokenIssuer.Issue(user.UserID, false)
 	if err != nil {
-		return nil, nil, &apperror.ProblemDetails{
-			Type:   "https://example.com/probs/token-issue-failed",
-			Title:  "Token Issue Failed",
-			Status: http.StatusInternalServerError,
-			Detail: "Failed to issue authentication tokens.",
-		}
+		return nil, nil, fmt.Errorf("%w: Failed to issue authentication tokens.", domain.ErrTokenIssueFailed)
 	}
 
 	return user, tokens, nil
@@ -207,7 +170,7 @@ func (uc *RegisterUserUseCase) InitializeJourney(ctx context.Context, userID str
 			UserMissionID:     uid.New("ums_"),
 			UserID:            user.UserID,
 			MissionID:         m.MissionID,
-			Status:            domain.StatusNotStarted,
+			Status:            missiondomain.StatusNotStarted,
 			CalculatedDueDate: m.CalculateDueDate(triggerDate),
 			CreatedAt:         uc.clock.Now(),
 			UpdatedAt:         uc.clock.Now(),
@@ -220,7 +183,7 @@ func (uc *RegisterUserUseCase) InitializeJourney(ctx context.Context, userID str
 		return err
 	}
 
-	history := &gamificationdomain.UserPhaseHistory{
+	history := &missiondomain.UserPhaseHistory{
 		HistoryID: uid.New("uph_"),
 		UserID:    user.UserID,
 		PhaseID:   phase.PhaseID,

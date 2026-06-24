@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/j1hub/backend/internal/port"
+	port "github.com/j1hub/backend/internal/gamification/port"
 )
 
 type LeaderboardUseCase struct {

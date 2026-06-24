@@ -3,11 +3,15 @@ package userusecase
 import (
 	"context"
 	"log"
+	"time"
+
+	frienddomain "github.com/j1hub/backend/internal/friend/domain"
+	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
 
 	userdomain "github.com/j1hub/backend/internal/user/domain"
 
 	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/port"
+	port "github.com/j1hub/backend/internal/user/port"
 )
 
 type UserUseCase struct {
@@ -36,9 +40,11 @@ func NewUserUseCase(
 }
 
 type UserProfileResponse struct {
-	User        *userdomain.User        `json:"user"`
-	Profile     *userdomain.Profile     `json:"profile"`
-	CreditScore *userdomain.CreditScore `json:"credit_score_detail,omitempty"`
+	User        *userdomain.User                `json:"user"`
+	Profile     *userdomain.Profile             `json:"profile"`
+	CreditScore *gamificationdomain.CreditScore `json:"credit_score_detail,omitempty"`
+	UserJob     *userdomain.UserJob             `json:"user_job,omitempty"` // Main job
+	UserJobs    []userdomain.UserJob            `json:"user_jobs,omitempty"` // All jobs
 }
 
 func (uc *UserUseCase) GetProfile(ctx context.Context, userID string) (*UserProfileResponse, error) {
@@ -58,10 +64,22 @@ func (uc *UserUseCase) GetProfile(ctx context.Context, userID string) (*UserProf
 		return nil, err
 	}
 
+	userJob, err := uc.userRepo.FindUserJob(ctx, userID)
+	if err != nil && err != domain.ErrNotFound {
+		return nil, err
+	}
+
+	userJobs, err := uc.userRepo.FindUserJobs(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
 	return &UserProfileResponse{
 		User:        user,
 		Profile:     profile,
 		CreditScore: credit,
+		UserJob:     userJob,
+		UserJobs:    userJobs,
 	}, nil
 }
 
@@ -112,7 +130,7 @@ func (uc *UserUseCase) UpdateSettings(ctx context.Context, userID string, settin
 	if !ok {
 		return domain.ErrInvalidInput
 	}
-	visibility := domain.RadarVisibility(visibilityStr)
+	visibility := userdomain.RadarVisibility(visibilityStr)
 	if !visibility.Valid() {
 		return domain.ErrInvalidInput
 	}
@@ -151,17 +169,44 @@ func (uc *UserUseCase) GetPublicProfile(ctx context.Context, currentUserID, targ
 	}
 
 	switch targetProfile.RadarVisibility {
-	case domain.VisibilityHidden:
+	case userdomain.VisibilityHidden:
 		return nil, nil, domain.ErrNotFound
-	case domain.VisibilityShowFriends:
-		u1, u2 := domain.CanonicalOrder(currentUserID, targetUserID)
+	case userdomain.VisibilityShowFriends:
+		u1, u2 := frienddomain.CanonicalOrder(currentUserID, targetUserID)
 		f, err := uc.friendRepo.FindByCanonicalPair(ctx, u1, u2)
-		if err != nil || f.Status != domain.FriendshipAccepted {
+		if err != nil || f.Status != frienddomain.FriendshipAccepted {
 			return nil, nil, domain.ErrNotFound
 		}
-	case domain.VisibilityShowAnonymous:
+	case userdomain.VisibilityShowAnonymous:
 		// allowed
 	}
 
 	return targetUser, targetProfile, nil
 }
+
+func (uc *UserUseCase) AssignJob(ctx context.Context, userID, jobID string, isMain bool, startDate, endDate *time.Time) error {
+	log.Println("debugprint: entering (*UserUseCase).AssignJob")
+	return uc.userRepo.AssignJob(ctx, userID, jobID, isMain, startDate, endDate)
+}
+
+func (uc *UserUseCase) UpdatePassword(ctx context.Context, userID string, currentPassword, newPassword string) error {
+	log.Println("debugprint: entering (*UserUseCase).UpdatePassword")
+	user, err := uc.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	if !uc.hasher.Verify(currentPassword, user.PasswordHash) {
+		return domain.ErrUnauthorized
+	}
+
+	newHash, err := uc.hasher.Hash(newPassword)
+	if err != nil {
+		return err
+	}
+
+	user.PasswordHash = newHash
+
+	return uc.userRepo.Update(ctx, user)
+}
+

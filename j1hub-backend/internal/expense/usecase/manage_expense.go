@@ -9,7 +9,7 @@ import (
 
 	"github.com/j1hub/backend/internal/domain"
 	expensedomain "github.com/j1hub/backend/internal/expense/domain"
-	"github.com/j1hub/backend/internal/port"
+	port "github.com/j1hub/backend/internal/expense/port"
 	"github.com/j1hub/backend/pkg/timeutil"
 	"github.com/j1hub/backend/pkg/uid"
 )

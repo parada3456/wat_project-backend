@@ -2,14 +2,13 @@ package authusecase
 
 import (
 	"context"
+	"fmt"
 	"log"
 
+	"github.com/j1hub/backend/internal/domain"
 	userdomain "github.com/j1hub/backend/internal/user/domain"
 
-	"net/http"
-
-	"github.com/j1hub/backend/internal/port"
-	"github.com/j1hub/backend/pkg/apperror"
+	port "github.com/j1hub/backend/internal/auth/port"
 )
 
 type LoginUseCase struct {
@@ -40,21 +39,11 @@ func (uc *LoginUseCase) Login(ctx context.Context, cmd LoginCommand) (*userdomai
 	log.Println("debugprint: entering (*LoginUseCase).Login")
 	user, err := uc.userRepo.FindByEmail(ctx, cmd.Email)
 	if err != nil {
-		return nil, nil, &apperror.ProblemDetails{
-			Type:   "https://example.com/probs/invalid-credentials",
-			Title:  "Invalid credentials",
-			Status: http.StatusUnauthorized,
-			Detail: "The email or password provided is incorrect.",
-		}
+		return nil, nil, fmt.Errorf("%w: The email or password provided is incorrect.", domain.ErrInvalidCredentials)
 	}
 
 	if !uc.hasher.Verify(cmd.Password, user.PasswordHash) {
-		return nil, nil, &apperror.ProblemDetails{
-			Type:   "https://example.com/probs/invalid-credentials",
-			Title:  "Invalid credentials",
-			Status: http.StatusUnauthorized,
-			Detail: "The email or password provided is incorrect.",
-		}
+		return nil, nil, fmt.Errorf("%w: The email or password provided is incorrect.", domain.ErrInvalidCredentials)
 	}
 
 	tokens, err := uc.tokenIssuer.Issue(user.UserID, false)

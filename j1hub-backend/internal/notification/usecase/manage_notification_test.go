@@ -4,15 +4,16 @@ import (
 	"context"
 	"testing"
 
+	notificationusecase "github.com/j1hub/backend/internal/notification/usecase"
+
 	notificationdomain "github.com/j1hub/backend/internal/notification/domain"
 
-	"github.com/j1hub/backend/internal/usecase"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNotificationUseCase_ListNotifications_Success(t *testing.T) {
 	notifRepo := new(MockNotificationRepository)
-	uc := usecase.NewNotificationUseCase(notifRepo)
+	uc := notificationusecase.NewNotificationUseCase(notifRepo)
 
 	ctx := context.Background()
 	userID := "usr_123"
@@ -30,7 +31,7 @@ func TestNotificationUseCase_ListNotifications_Success(t *testing.T) {
 
 func TestNotificationUseCase_MarkRead_Success(t *testing.T) {
 	notifRepo := new(MockNotificationRepository)
-	uc := usecase.NewNotificationUseCase(notifRepo)
+	uc := notificationusecase.NewNotificationUseCase(notifRepo)
 
 	ctx := context.Background()
 	id := "notif_1"
@@ -44,7 +45,7 @@ func TestNotificationUseCase_MarkRead_Success(t *testing.T) {
 
 func TestNotificationUseCase_MarkAllRead_Success(t *testing.T) {
 	notifRepo := new(MockNotificationRepository)
-	uc := usecase.NewNotificationUseCase(notifRepo)
+	uc := notificationusecase.NewNotificationUseCase(notifRepo)
 
 	ctx := context.Background()
 	userID := "usr_123"
@@ -58,7 +59,7 @@ func TestNotificationUseCase_MarkAllRead_Success(t *testing.T) {
 
 func TestNotificationUseCase_Delete_Success(t *testing.T) {
 	notifRepo := new(MockNotificationRepository)
-	uc := usecase.NewNotificationUseCase(notifRepo)
+	uc := notificationusecase.NewNotificationUseCase(notifRepo)
 
 	ctx := context.Background()
 	id := "notif_1"

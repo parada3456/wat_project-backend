@@ -1,4 +1,4 @@
-package usecase
+package jobusecase
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/j1hub/backend/internal/domain"
 	jobdomain "github.com/j1hub/backend/internal/job/domain"
-	"github.com/j1hub/backend/internal/port"
+	port "github.com/j1hub/backend/internal/job/port"
 	"github.com/j1hub/backend/pkg/timeutil"
 	"github.com/j1hub/backend/pkg/uid"
 )
@@ -124,4 +124,107 @@ func (uc *ManageJobUseCase) UpdateCartStatus(ctx context.Context, userID, cartID
 		return domain.ErrInvalidInput
 	}
 	return uc.cartRepo.UpdateStatus(ctx, cart.CartID, status)
+}
+
+func (uc *ManageJobUseCase) CreateJob(ctx context.Context, job *jobdomain.JobPosting) error {
+	log.Println("debugprint: entering (*ManageJobUseCase).CreateJob")
+	if job.JobID == "" {
+		job.JobID = uid.New("job_")
+	}
+	job.PostedAt = uc.clock.Now()
+	job.UpdatedAt = uc.clock.Now()
+	if job.ScrapeAt.IsZero() {
+		job.ScrapeAt = uc.clock.Now()
+	}
+	return uc.jobRepo.Upsert(ctx, job)
+}
+
+func (uc *ManageJobUseCase) UpdateJob(ctx context.Context, job *jobdomain.JobPosting) error {
+	log.Println("debugprint: entering (*ManageJobUseCase).UpdateJob")
+	existing, err := uc.jobRepo.FindByID(ctx, job.JobID)
+	if err != nil {
+		return err
+	}
+	if job.PostedAt.IsZero() {
+		job.PostedAt = existing.PostedAt
+	}
+	if job.ScrapeAt.IsZero() {
+		job.ScrapeAt = existing.ScrapeAt
+	}
+	job.UpdatedAt = uc.clock.Now()
+	return uc.jobRepo.Upsert(ctx, job)
+}
+
+func (uc *ManageJobUseCase) PatchJob(ctx context.Context, jobID string, updates map[string]interface{}) error {
+	log.Println("debugprint: entering (*ManageJobUseCase).PatchJob")
+	existing, err := uc.jobRepo.FindByID(ctx, jobID)
+	if err != nil {
+		return err
+	}
+
+	for k, v := range updates {
+		switch k {
+		case "agency_name":
+			if val, ok := v.(string); ok {
+				existing.AgencyName = val
+			}
+		case "employer_title":
+			if val, ok := v.(string); ok {
+				existing.EmployerTitle = val
+			}
+		case "position":
+			if val, ok := v.(string); ok {
+				existing.Position = val
+			}
+		case "position_type":
+			if val, ok := v.(string); ok {
+				existing.PositionType = val
+			}
+		case "location_city":
+			if val, ok := v.(string); ok {
+				existing.LocationCity = val
+			}
+		case "location_state":
+			if val, ok := v.(string); ok {
+				existing.LocationState = val
+			}
+		case "group_location":
+			if val, ok := v.(string); ok {
+				existing.GroupLocation = val
+			}
+		case "us_sponsor":
+			if val, ok := v.(bool); ok {
+				existing.USSponsor = val
+			}
+		case "salary_range_min":
+			if val, ok := v.(float64); ok {
+				existing.SalaryRangeMin = val
+			}
+		case "salary_range_max":
+			if val, ok := v.(float64); ok {
+				existing.SalaryRangeMax = val
+			}
+		case "available_slots":
+			if val, ok := v.(float64); ok {
+				existing.AvailableSlots = int(val)
+			} else if val, ok := v.(int); ok {
+				existing.AvailableSlots = val
+			}
+		case "description":
+			if val, ok := v.(string); ok {
+				existing.Description = val
+			}
+		case "source_url":
+			if val, ok := v.(string); ok {
+				existing.SourceURL = val
+			}
+		}
+	}
+	existing.UpdatedAt = uc.clock.Now()
+	return uc.jobRepo.Upsert(ctx, existing)
+}
+
+func (uc *ManageJobUseCase) DeleteJob(ctx context.Context, jobID string) error {
+	log.Println("debugprint: entering (*ManageJobUseCase).DeleteJob")
+	return uc.jobRepo.Delete(ctx, jobID)
 }

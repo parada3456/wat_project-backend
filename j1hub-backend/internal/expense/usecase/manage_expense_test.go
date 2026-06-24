@@ -107,7 +107,6 @@ func TestNewManageExpenseUseCase(t *testing.T) {
 
 func TestManageExpenseUseCase_CreateExpense(t *testing.T) {
 	nowTime := time.Date(2026, 6, 17, 10, 0, 0, 0, time.UTC)
-	dueDate := nowTime.Add(24 * time.Hour)
 	ctx := context.Background()
 
 	t.Run("Success", func(t *testing.T) {
@@ -197,7 +196,7 @@ func TestManageExpenseUseCase_SubmitSlip(t *testing.T) {
 
 		mockSplit := &expensedomain.ExpenseSplit{SplitID: "spl_123", UserID: "usr_debtor"}
 		file := bytes.NewReader([]byte("fake"))
-		
+
 		splitRepo.On("FindByID", ctx, "spl_123").Return(mockSplit, nil)
 		storage.On("UploadFile", ctx, "slips", "spl_123", file, "image/jpeg").Return("http://url", nil)
 		splitRepo.On("UpdatePaymentStatus", ctx, "spl_123", expensedomain.PaymentSubmitted, "http://url").Return(nil)

@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
+
 	frienddomain "github.com/j1hub/backend/internal/friend/domain"
 	userdomain "github.com/j1hub/backend/internal/user/domain"
 
@@ -22,7 +24,7 @@ func TestRadarUseCase_GetRadar_Success(t *testing.T) {
 		RadarStaleMinutes: 30,
 	}
 
-	uc := gamificationgamificationusecase.NewRadarUseCase(cfg, profileRepo, radarRepo, friendRepo)
+	uc := gamificationusecase.NewRadarUseCase(cfg, profileRepo, radarRepo, friendRepo)
 
 	ctx := context.Background()
 	requesterID := "usr_req"
@@ -38,21 +40,21 @@ func TestRadarUseCase_GetRadar_Success(t *testing.T) {
 			UserID:          "usr_friend",
 			Lat:             40.7130,
 			Lng:             -74.0058,
-			RadarVisibility: domain.VisibilityShowFriends,
+			RadarVisibility: userdomain.VisibilityShowFriends,
 			AvatarURL:       "friend_avatar.png",
 		},
 		{
 			UserID:          "usr_anon",
 			Lat:             40.7140,
 			Lng:             -74.0050,
-			RadarVisibility: domain.VisibilityShowAnonymous,
+			RadarVisibility: userdomain.VisibilityShowAnonymous,
 			AvatarURL:       "anon_avatar.png",
 		},
 		{
 			UserID:          "usr_hidden",
 			Lat:             40.7150,
 			Lng:             -74.0040,
-			RadarVisibility: domain.VisibilityHidden,
+			RadarVisibility: userdomain.VisibilityHidden,
 		},
 	}
 
@@ -61,7 +63,7 @@ func TestRadarUseCase_GetRadar_Success(t *testing.T) {
 
 	// Friend friendship check: mock as accepted friend
 	friendRepo.On("FindByCanonicalPair", ctx, "usr_friend", "usr_req").Return(&frienddomain.Friendship{
-		Status: domain.FriendshipAccepted,
+		Status: frienddomain.FriendshipAccepted,
 	}, nil)
 
 	// Anon friendship check: mock as not a friend

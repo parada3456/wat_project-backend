@@ -5,15 +5,15 @@ import (
 	"log"
 
 	"github.com/j1hub/backend/internal/infrastructure/config"
-	"github.com/j1hub/backend/internal/usecase"
+	scraper "github.com/j1hub/backend/internal/infrastructure/outbound/scraper"
 	"github.com/robfig/cron/v3"
 )
 
 func NewScheduler(
 	cfg *config.Config,
-	overdueExpenseJob *usecase.OverdueExpenseJob,
-	overdueMissionJob *usecase.OverdueMissionJob,
-	scrapeJobsJob *usecase.ScrapeJobsUseCase,
+	overdueExpenseJob *OverdueExpenseJob,
+	overdueMissionJob *OverdueMissionJob,
+	scrapeJobsJob *scraper.ScrapeJobsUseCase,
 ) *cron.Cron {
 	log.Println("debugprint: entering NewScheduler")
 	c := cron.New()

@@ -5,10 +5,13 @@ import (
 	"io"
 	"log"
 
+	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
+	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+
 	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
 
 	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/port"
+	port "github.com/j1hub/backend/internal/mission/port"
 	"github.com/j1hub/backend/pkg/timeutil"
 )
 
@@ -23,7 +26,7 @@ type CompleteMissionUseCase struct {
 	ubRepo       port.UserBadgeRepository
 	storage      port.StoragePort
 	notifier     port.NotifierPort
-	rewardEngine *RewardEngine
+	rewardEngine *gamificationusecase.RewardEngine
 	clock        timeutil.Clock
 }
 
@@ -38,7 +41,7 @@ func NewCompleteMissionUseCase(
 	ubRepo port.UserBadgeRepository,
 	storage port.StoragePort,
 	notifier port.NotifierPort,
-	rewardEngine *RewardEngine,
+	rewardEngine *gamificationusecase.RewardEngine,
 	clock timeutil.Clock,
 ) *CompleteMissionUseCase {
 	log.Println("debugprint: entering NewCompleteMissionUseCase")
@@ -67,7 +70,7 @@ func (uc *CompleteMissionUseCase) SubmitProof(ctx context.Context, userID, userM
 	if um.UserID != userID {
 		return domain.ErrForbidden
 	}
-	if um.Status == domain.StatusCompleted {
+	if um.Status == missiondomain.StatusCompleted {
 		return domain.ErrAlreadyCompleted
 	}
 
@@ -79,7 +82,7 @@ func (uc *CompleteMissionUseCase) SubmitProof(ctx context.Context, userID, userM
 	um.ProofURL = url
 	now := uc.clock.Now()
 	um.ProofSubmittedAt = &now
-	um.Status = domain.StatusPendingVerification
+	um.Status = missiondomain.StatusPendingVerification
 	um.UpdatedAt = now
 
 	return uc.umRepo.UpdateStatus(ctx, userMissionID, um.Status)
@@ -95,7 +98,7 @@ func (uc *CompleteMissionUseCase) VerifyMission(ctx context.Context, adminID, us
 	}
 
 	if !approved {
-		return uc.umRepo.UpdateStatus(ctx, userMissionID, domain.StatusInProgress)
+		return uc.umRepo.UpdateStatus(ctx, userMissionID, missiondomain.StatusInProgress)
 	}
 
 	now := uc.clock.Now()
@@ -122,7 +125,7 @@ func (uc *CompleteMissionUseCase) VerifyMission(ctx context.Context, adminID, us
 	if err := uc.umRepo.UpdateReward(ctx, userMissionID, reward, now); err != nil {
 		return err
 	}
-	if err := uc.umRepo.UpdateStatus(ctx, userMissionID, domain.StatusCompleted); err != nil {
+	if err := uc.umRepo.UpdateStatus(ctx, userMissionID, missiondomain.StatusCompleted); err != nil {
 		return err
 	}
 

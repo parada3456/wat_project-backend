@@ -5,11 +5,12 @@ import (
 	"testing"
 	"time"
 
+	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
+
 	missiondomain "github.com/j1hub/backend/internal/mission/domain"
 	userdomain "github.com/j1hub/backend/internal/user/domain"
 
 	"github.com/j1hub/backend/internal/infrastructure/config"
-	"github.com/j1hub/backend/internal/usecase"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,7 +27,7 @@ func TestRewardEngine_Calculate(t *testing.T) {
 
 	userRepo := new(MockUserRepository)
 	umRepo := new(MockUserMissionRepository)
-	engine := usecase.NewRewardEngine(cfg, userRepo, umRepo)
+	engine := gamificationusecase.NewRewardEngine(cfg, userRepo, umRepo)
 
 	ctx := context.Background()
 

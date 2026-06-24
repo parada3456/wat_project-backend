@@ -7,7 +7,7 @@ import (
 	missiondomain "github.com/j1hub/backend/internal/mission/domain"
 
 	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/port"
+	port "github.com/j1hub/backend/internal/mission/port"
 )
 
 type MissionUseCase struct {

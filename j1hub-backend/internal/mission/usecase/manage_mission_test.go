@@ -4,11 +4,12 @@ import (
 	"context"
 	"testing"
 
+	missionusecase "github.com/j1hub/backend/internal/mission/usecase"
+
 	missiondomain "github.com/j1hub/backend/internal/mission/domain"
 	userdomain "github.com/j1hub/backend/internal/user/domain"
 
 	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/usecase"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,7 +20,7 @@ func TestMissionUseCase_ListAvailableMissions_Success(t *testing.T) {
 	utRepo := new(MockUserTaskRepository)
 	userRepo := new(MockUserRepository)
 
-	uc := usecase.NewMissionUseCase(missionRepo, umRepo, taskRepo, utRepo, userRepo)
+	uc := missionusecase.NewMissionUseCase(missionRepo, umRepo, taskRepo, utRepo, userRepo)
 
 	ctx := context.Background()
 	userID := "usr_123"
@@ -46,7 +47,7 @@ func TestMissionUseCase_GetMissionDetail_Success(t *testing.T) {
 	utRepo := new(MockUserTaskRepository)
 	userRepo := new(MockUserRepository)
 
-	uc := usecase.NewMissionUseCase(missionRepo, umRepo, taskRepo, utRepo, userRepo)
+	uc := missionusecase.NewMissionUseCase(missionRepo, umRepo, taskRepo, utRepo, userRepo)
 
 	ctx := context.Background()
 	userID := "usr_123"
@@ -80,7 +81,7 @@ func TestMissionUseCase_GetMissionDetail_Forbidden(t *testing.T) {
 	utRepo := new(MockUserTaskRepository)
 	userRepo := new(MockUserRepository)
 
-	uc := usecase.NewMissionUseCase(missionRepo, umRepo, taskRepo, utRepo, userRepo)
+	uc := missionusecase.NewMissionUseCase(missionRepo, umRepo, taskRepo, utRepo, userRepo)
 
 	ctx := context.Background()
 	userID := "usr_123"
@@ -99,7 +100,7 @@ func TestMissionUseCase_GetMissionDetail_Forbidden(t *testing.T) {
 }
 
 func TestMissionUseCase_ToggleTask_Stub(t *testing.T) {
-	uc := usecase.NewMissionUseCase(nil, nil, nil, nil, nil)
+	uc := missionusecase.NewMissionUseCase(nil, nil, nil, nil, nil)
 	err := uc.ToggleTask(context.Background(), "usr_123", "ut_1", true)
 	assert.NoError(t, err)
 }

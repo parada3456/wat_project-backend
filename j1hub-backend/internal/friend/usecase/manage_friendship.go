@@ -7,7 +7,7 @@ import (
 	frienddomain "github.com/j1hub/backend/internal/friend/domain"
 
 	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/port"
+	port "github.com/j1hub/backend/internal/friend/port"
 	"github.com/j1hub/backend/pkg/timeutil"
 	"github.com/j1hub/backend/pkg/uid"
 )
@@ -35,7 +35,7 @@ func (uc *ManageFriendshipUseCase) SendRequest(ctx context.Context, senderID, ta
 		return err
 	}
 
-	u1, u2 := domain.CanonicalOrder(senderID, targetID)
+	u1, u2 := frienddomain.CanonicalOrder(senderID, targetID)
 	existing, err := uc.friendRepo.FindByCanonicalPair(ctx, u1, u2)
 	if err == nil && existing != nil {
 		return domain.ErrDuplicateFriend
@@ -45,7 +45,7 @@ func (uc *ManageFriendshipUseCase) SendRequest(ctx context.Context, senderID, ta
 		FriendshipID: uid.New("frn_"),
 		UserID1:      u1,
 		UserID2:      u2,
-		Status:       domain.FriendshipPending,
+		Status:       frienddomain.FriendshipPending,
 		CreatedAt:    uc.clock.Now(),
 		UpdatedAt:    uc.clock.Now(),
 	}
@@ -71,9 +71,9 @@ func (uc *ManageFriendshipUseCase) RespondToRequest(ctx context.Context, respond
 		return domain.ErrForbidden
 	}
 
-	status := domain.FriendshipAccepted
+	status := frienddomain.FriendshipAccepted
 	if !accept {
-		status = domain.FriendshipBlocked
+		status = frienddomain.FriendshipBlocked
 	}
 
 	if err := uc.friendRepo.UpdateStatus(ctx, friendshipID, status); err != nil {

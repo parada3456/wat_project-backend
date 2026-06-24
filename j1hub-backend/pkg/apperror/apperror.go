@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"reflect"
+	"strconv"
 
 	"github.com/j1hub/backend/internal/domain"
 )
@@ -64,13 +65,18 @@ func RespondError(w http.ResponseWriter, err error) {
 	if !errors.As(err, &appErr) {
 		if errors.Is(err, domain.ErrNotFound) {
 			appErr = &AppError{Code: http.StatusNotFound, Message: err.Error(), Err: err}
-		} else if errors.Is(err, domain.ErrUnauthorized) {
+		} else if errors.Is(err, domain.ErrUnauthorized) || errors.Is(err, domain.ErrInvalidCredentials) {
 			appErr = &AppError{Code: http.StatusUnauthorized, Message: err.Error(), Err: err}
 		} else if errors.Is(err, domain.ErrForbidden) {
 			appErr = &AppError{Code: http.StatusForbidden, Message: err.Error(), Err: err}
-		} else if errors.Is(err, domain.ErrConflict) {
+		} else if errors.Is(err, domain.ErrConflict) ||
+			errors.Is(err, domain.ErrAlreadyCompleted) ||
+			errors.Is(err, domain.ErrDuplicateFriend) ||
+			errors.Is(err, domain.ErrProofAlreadySubmitted) {
 			appErr = &AppError{Code: http.StatusConflict, Message: err.Error(), Err: err}
-		} else if errors.Is(err, domain.ErrInvalidInput) {
+		} else if errors.Is(err, domain.ErrInvalidInput) ||
+			errors.Is(err, domain.ErrSelfSplit) ||
+			errors.Is(err, domain.ErrPhaseNotComplete) {
 			appErr = &AppError{Code: http.StatusBadRequest, Message: err.Error(), Err: err}
 		} else {
 			appErr = &AppError{
@@ -157,3 +163,10 @@ func RespondList(w http.ResponseWriter, items interface{}, page, pageSize, total
 		},
 	})
 }
+
+func ParsePagination(r *http.Request) (int, int) {
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	pageSize, _ := strconv.Atoi(r.URL.Query().Get("pageSize"))
+	return page, pageSize
+}
+

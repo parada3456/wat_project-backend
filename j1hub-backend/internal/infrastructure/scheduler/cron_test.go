@@ -1,25 +1,25 @@
-package scheduler_test
+package scheduler
 
 import (
 	"context"
 	"errors"
 	"testing"
 
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
-
 	expensedomain "github.com/j1hub/backend/internal/expense/domain"
+	expenseport "github.com/j1hub/backend/internal/expense/port"
 	"github.com/j1hub/backend/internal/infrastructure/config"
-	"github.com/j1hub/backend/internal/infrastructure/scheduler"
+	scraper "github.com/j1hub/backend/internal/infrastructure/outbound/scraper"
 	jobdomain "github.com/j1hub/backend/internal/job/domain"
-	"github.com/j1hub/backend/internal/port"
-	"github.com/j1hub/backend/internal/usecase"
+	jobport "github.com/j1hub/backend/internal/job/port"
+	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	missionport "github.com/j1hub/backend/internal/mission/port"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 type MockSplitRepo struct {
 	mock.Mock
-	port.ExpenseSplitRepository
+	expenseport.ExpenseSplitRepository
 }
 
 func (m *MockSplitRepo) FindOverdue(ctx context.Context) ([]expensedomain.ExpenseSplit, error) {
@@ -32,7 +32,7 @@ func (m *MockSplitRepo) FindOverdue(ctx context.Context) ([]expensedomain.Expens
 
 type MockUserMissionRepo struct {
 	mock.Mock
-	port.UserMissionRepository
+	missionport.UserMissionRepository
 }
 
 func (m *MockUserMissionRepo) FindOverdue(ctx context.Context) ([]missiondomain.UserMission, error) {
@@ -45,7 +45,7 @@ func (m *MockUserMissionRepo) FindOverdue(ctx context.Context) ([]missiondomain.
 
 type MockJobPostingRepo struct {
 	mock.Mock
-	port.JobPostingRepository
+	jobport.JobPostingRepository
 }
 
 func (m *MockJobPostingRepo) Upsert(ctx context.Context, job *jobdomain.JobPosting) error {
@@ -54,7 +54,7 @@ func (m *MockJobPostingRepo) Upsert(ctx context.Context, job *jobdomain.JobPosti
 
 type MockJobHousingRepo struct {
 	mock.Mock
-	port.JobHousingRepository
+	jobport.JobHousingRepository
 }
 
 func (m *MockJobHousingRepo) Upsert(ctx context.Context, housing *jobdomain.JobHousing) error {
@@ -73,11 +73,11 @@ func TestNewScheduler(t *testing.T) {
 	jobRepo := new(MockJobPostingRepo)
 	housingRepo := new(MockJobHousingRepo)
 
-	expenseJob := usecase.NewOverdueExpenseJob(splitRepo, nil, nil, nil)
-	missionJob := usecase.NewOverdueMissionJob(umRepo, nil, nil, nil)
-	scrapeJob := usecase.NewScrapeJobsUseCase(jobRepo, housingRepo)
+	expenseJob := NewOverdueExpenseJob(splitRepo, nil, nil, nil)
+	missionJob := NewOverdueMissionJob(umRepo, nil, nil, nil)
+	scrapeJob := scraper.NewScrapeJobsUseCase(jobRepo, housingRepo)
 
-	cronInstance := scheduler.NewScheduler(cfg, expenseJob, missionJob, scrapeJob)
+	cronInstance := NewScheduler(cfg, expenseJob, missionJob, scrapeJob)
 	assert.NotNil(t, cronInstance)
 
 	splitRepo.On("FindOverdue", mock.Anything).Return(nil, errors.New("err")).Once()

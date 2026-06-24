@@ -6,7 +6,7 @@ import (
 
 	notificationdomain "github.com/j1hub/backend/internal/notification/domain"
 
-	"github.com/j1hub/backend/internal/port"
+	port "github.com/j1hub/backend/internal/notification/port"
 )
 
 type NotificationUseCase struct {

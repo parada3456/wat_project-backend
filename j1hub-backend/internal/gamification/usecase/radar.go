@@ -4,9 +4,11 @@ import (
 	"context"
 	"log"
 
-	"github.com/j1hub/backend/internal/domain"
+	frienddomain "github.com/j1hub/backend/internal/friend/domain"
+	userdomain "github.com/j1hub/backend/internal/user/domain"
+
 	"github.com/j1hub/backend/internal/infrastructure/config"
-	"github.com/j1hub/backend/internal/port"
+	port "github.com/j1hub/backend/internal/gamification/port"
 )
 
 type RadarUseCase struct {
@@ -47,7 +49,7 @@ func (uc *RadarUseCase) GetRadar(ctx context.Context, requesterID string) ([]Rad
 			continue
 		}
 
-		if n.RadarVisibility == domain.VisibilityHidden {
+		if n.RadarVisibility == userdomain.VisibilityHidden {
 			continue
 		}
 
@@ -60,17 +62,17 @@ func (uc *RadarUseCase) GetRadar(ctx context.Context, requesterID string) ([]Rad
 		}
 
 		isFriend := false
-		u1, u2 := domain.CanonicalOrder(requesterID, n.UserID)
+		u1, u2 := frienddomain.CanonicalOrder(requesterID, n.UserID)
 		f, err := uc.friendRepo.FindByCanonicalPair(ctx, u1, u2)
-		if err == nil && f.Status == domain.FriendshipAccepted {
+		if err == nil && f.Status == frienddomain.FriendshipAccepted {
 			isFriend = true
 		}
 
-		if n.RadarVisibility == domain.VisibilityShowFriends && !isFriend {
+		if n.RadarVisibility == userdomain.VisibilityShowFriends && !isFriend {
 			continue
 		}
 
-		if isFriend || n.RadarVisibility == domain.VisibilityShowAnonymous {
+		if isFriend || n.RadarVisibility == userdomain.VisibilityShowAnonymous {
 			// In real case we'd fetch user name
 			entry.Name = "Real Name" // placeholder
 			entry.AvatarURL = n.AvatarURL

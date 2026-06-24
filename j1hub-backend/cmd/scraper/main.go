@@ -8,10 +8,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/j1hub/backend/internal/adapter/outbound/scraper"
-	"github.com/j1hub/backend/internal/adapter/outbound/scraper/acadex"
-	"github.com/j1hub/backend/internal/adapter/outbound/scraper/iee"
-	"github.com/j1hub/backend/internal/adapter/outbound/scraper/ihappy"
+	"github.com/j1hub/backend/internal/infrastructure/outbound/scraper"
+	"github.com/j1hub/backend/internal/infrastructure/outbound/scraper/acadex"
+	"github.com/j1hub/backend/internal/infrastructure/outbound/scraper/iee"
+	"github.com/j1hub/backend/internal/infrastructure/outbound/scraper/ihappy"
 	jobdomain "github.com/j1hub/backend/internal/job/domain"
 )
 

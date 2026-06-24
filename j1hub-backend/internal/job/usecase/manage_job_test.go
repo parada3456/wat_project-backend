@@ -1,4 +1,4 @@
-package usecase_test
+package jobusecase_test
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/j1hub/backend/internal/domain"
 	jobdomain "github.com/j1hub/backend/internal/job/domain"
-	"github.com/j1hub/backend/internal/job/usecase"
+	jobusecase "github.com/j1hub/backend/internal/job/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -23,7 +23,7 @@ func TestManageJobUseCase_AddToCart_Success(t *testing.T) {
 	nowTime := time.Date(2026, 6, 17, 10, 0, 0, 0, time.UTC)
 	clock := &MockClock{NowTime: nowTime}
 
-	uc := usecase.NewManageJobUseCase(jobRepo, housingRepo, ratingRepo, reviewRepo, cartRepo, clock)
+	uc := jobusecase.NewManageJobUseCase(jobRepo, housingRepo, ratingRepo, reviewRepo, cartRepo, clock)
 
 	ctx := context.Background()
 	userID := "usr_123"
@@ -52,7 +52,7 @@ func TestManageJobUseCase_AddToCart_Conflict(t *testing.T) {
 	cartRepo := new(MockUserCartRepository)
 	clock := &MockClock{}
 
-	uc := usecase.NewManageJobUseCase(jobRepo, housingRepo, ratingRepo, reviewRepo, cartRepo, clock)
+	uc := jobusecase.NewManageJobUseCase(jobRepo, housingRepo, ratingRepo, reviewRepo, cartRepo, clock)
 
 	ctx := context.Background()
 	userID := "usr_123"
@@ -76,7 +76,7 @@ func TestManageJobUseCase_WriteReview_Success(t *testing.T) {
 	nowTime := time.Date(2026, 6, 17, 10, 0, 0, 0, time.UTC)
 	clock := &MockClock{NowTime: nowTime}
 
-	uc := usecase.NewManageJobUseCase(jobRepo, housingRepo, ratingRepo, reviewRepo, cartRepo, clock)
+	uc := jobusecase.NewManageJobUseCase(jobRepo, housingRepo, ratingRepo, reviewRepo, cartRepo, clock)
 
 	ctx := context.Background()
 	userID := "usr_123"
@@ -104,7 +104,7 @@ func TestManageJobUseCase_WriteReview_Success(t *testing.T) {
 
 func TestManageJobUseCase_ListJobs_Success(t *testing.T) {
 	jobRepo := new(MockJobPostingRepository)
-	uc := usecase.NewManageJobUseCase(jobRepo, nil, nil, nil, nil, &MockClock{})
+	uc := jobusecase.NewManageJobUseCase(jobRepo, nil, nil, nil, nil, &MockClock{})
 
 	ctx := context.Background()
 	filters := map[string]interface{}{"agency": "InterExchange"}
@@ -122,7 +122,7 @@ func TestManageJobUseCase_GetJobDetail_Success(t *testing.T) {
 	jobRepo := new(MockJobPostingRepository)
 	housingRepo := new(MockJobHousingRepository)
 	ratingRepo := new(MockJobOverallRatingRepository)
-	uc := usecase.NewManageJobUseCase(jobRepo, housingRepo, ratingRepo, nil, nil, &MockClock{})
+	uc := jobusecase.NewManageJobUseCase(jobRepo, housingRepo, ratingRepo, nil, nil, &MockClock{})
 
 	ctx := context.Background()
 	jobID := "job_1"
@@ -144,7 +144,7 @@ func TestManageJobUseCase_GetJobDetail_Success(t *testing.T) {
 
 func TestManageJobUseCase_ListCart_Success(t *testing.T) {
 	cartRepo := new(MockUserCartRepository)
-	uc := usecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
+	uc := jobusecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
 	ctx := context.Background()
 	userID := "usr_1"
 	mockCart := []jobdomain.UserCart{{CartID: "crt_1", UserID: userID}}
@@ -158,7 +158,7 @@ func TestManageJobUseCase_ListCart_Success(t *testing.T) {
 
 func TestManageJobUseCase_RemoveFromCart_Success(t *testing.T) {
 	cartRepo := new(MockUserCartRepository)
-	uc := usecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
+	uc := jobusecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
 	ctx := context.Background()
 	userID := "usr_1"
 	cartID := "crt_1"
@@ -172,7 +172,7 @@ func TestManageJobUseCase_RemoveFromCart_Success(t *testing.T) {
 
 func TestManageJobUseCase_RemoveFromCart_Forbidden(t *testing.T) {
 	cartRepo := new(MockUserCartRepository)
-	uc := usecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
+	uc := jobusecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
 	ctx := context.Background()
 	userID := "usr_1"
 	cartID := "crt_1"
@@ -186,7 +186,7 @@ func TestManageJobUseCase_RemoveFromCart_Forbidden(t *testing.T) {
 
 func TestManageJobUseCase_ListReviews_Success(t *testing.T) {
 	reviewRepo := new(MockJobReviewRepository)
-	uc := usecase.NewManageJobUseCase(nil, nil, nil, reviewRepo, nil, &MockClock{})
+	uc := jobusecase.NewManageJobUseCase(nil, nil, nil, reviewRepo, nil, &MockClock{})
 	ctx := context.Background()
 	jobID := "job_1"
 	mockReviews := []jobdomain.JobReview{{ReviewID: "rev_1", JobID: jobID}}
@@ -200,7 +200,7 @@ func TestManageJobUseCase_ListReviews_Success(t *testing.T) {
 
 func TestManageJobUseCase_UpdateCartStatus_Success(t *testing.T) {
 	cartRepo := new(MockUserCartRepository)
-	uc := usecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
+	uc := jobusecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
 	ctx := context.Background()
 	userID := "usr_1"
 	cartID := "crt_1"
@@ -215,7 +215,7 @@ func TestManageJobUseCase_UpdateCartStatus_Success(t *testing.T) {
 
 func TestManageJobUseCase_UpdateCartStatus_Forbidden(t *testing.T) {
 	cartRepo := new(MockUserCartRepository)
-	uc := usecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
+	uc := jobusecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
 	ctx := context.Background()
 	userID := "usr_1"
 	cartID := "crt_1"
@@ -230,7 +230,7 @@ func TestManageJobUseCase_UpdateCartStatus_Forbidden(t *testing.T) {
 
 func TestManageJobUseCase_UpdateCartStatus_InvalidStatus(t *testing.T) {
 	cartRepo := new(MockUserCartRepository)
-	uc := usecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
+	uc := jobusecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
 	ctx := context.Background()
 	userID := "usr_1"
 	cartID := "crt_1"
@@ -245,7 +245,7 @@ func TestManageJobUseCase_UpdateCartStatus_InvalidStatus(t *testing.T) {
 
 func TestManageJobUseCase_WriteReview_InsertError(t *testing.T) {
 	reviewRepo := new(MockJobReviewRepository)
-	uc := usecase.NewManageJobUseCase(nil, nil, nil, reviewRepo, nil, &MockClock{})
+	uc := jobusecase.NewManageJobUseCase(nil, nil, nil, reviewRepo, nil, &MockClock{})
 	ctx := context.Background()
 
 	review := &jobdomain.JobReview{}
@@ -257,7 +257,7 @@ func TestManageJobUseCase_WriteReview_InsertError(t *testing.T) {
 
 func TestManageJobUseCase_GetJobDetail_NotFound(t *testing.T) {
 	jobRepo := new(MockJobPostingRepository)
-	uc := usecase.NewManageJobUseCase(jobRepo, nil, nil, nil, nil, &MockClock{})
+	uc := jobusecase.NewManageJobUseCase(jobRepo, nil, nil, nil, nil, &MockClock{})
 	ctx := context.Background()
 
 	jobRepo.On("FindByID", ctx, "job_1").Return((*jobdomain.JobPosting)(nil), domain.ErrNotFound)
@@ -269,7 +269,7 @@ func TestManageJobUseCase_GetJobDetail_NotFound(t *testing.T) {
 
 func TestManageJobUseCase_RemoveFromCart_NotFound(t *testing.T) {
 	cartRepo := new(MockUserCartRepository)
-	uc := usecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
+	uc := jobusecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
 	ctx := context.Background()
 
 	cartRepo.On("FindByID", ctx, "crt_1").Return((*jobdomain.UserCart)(nil), domain.ErrNotFound)
@@ -281,7 +281,7 @@ func TestManageJobUseCase_RemoveFromCart_NotFound(t *testing.T) {
 
 func TestManageJobUseCase_UpdateCartStatus_NotFound(t *testing.T) {
 	cartRepo := new(MockUserCartRepository)
-	uc := usecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
+	uc := jobusecase.NewManageJobUseCase(nil, nil, nil, nil, cartRepo, &MockClock{})
 	ctx := context.Background()
 
 	cartRepo.On("FindByID", ctx, "crt_1").Return((*jobdomain.UserCart)(nil), domain.ErrNotFound)
@@ -289,4 +289,105 @@ func TestManageJobUseCase_UpdateCartStatus_NotFound(t *testing.T) {
 	err := uc.UpdateCartStatus(ctx, "usr_1", "crt_1", jobdomain.CartApplied)
 	assert.Error(t, err)
 	assert.Equal(t, domain.ErrNotFound, err)
+}
+
+func TestManageJobUseCase_CreateJob_Success(t *testing.T) {
+	jobRepo := new(MockJobPostingRepository)
+	nowTime := time.Date(2026, 6, 17, 10, 0, 0, 0, time.UTC)
+	clock := &MockClock{NowTime: nowTime}
+	uc := jobusecase.NewManageJobUseCase(jobRepo, nil, nil, nil, nil, clock)
+	ctx := context.Background()
+
+	job := &jobdomain.JobPosting{
+		AgencyName: "Test Agency",
+	}
+
+	jobRepo.On("Upsert", ctx, job).Return(nil).Run(func(args mock.Arguments) {
+		j := args.Get(1).(*jobdomain.JobPosting)
+		assert.NotEmpty(t, j.JobID)
+		assert.Equal(t, nowTime, j.PostedAt)
+		assert.Equal(t, nowTime, j.UpdatedAt)
+		assert.Equal(t, nowTime, j.ScrapeAt)
+	})
+
+	err := uc.CreateJob(ctx, job)
+	assert.NoError(t, err)
+}
+
+func TestManageJobUseCase_UpdateJob_Success(t *testing.T) {
+	jobRepo := new(MockJobPostingRepository)
+	nowTime := time.Date(2026, 6, 17, 10, 0, 0, 0, time.UTC)
+	clock := &MockClock{NowTime: nowTime}
+	uc := jobusecase.NewManageJobUseCase(jobRepo, nil, nil, nil, nil, clock)
+	ctx := context.Background()
+
+	existing := &jobdomain.JobPosting{
+		JobID:    "job_123",
+		PostedAt: nowTime.Add(-1 * time.Hour),
+		ScrapeAt: nowTime.Add(-1 * time.Hour),
+	}
+	job := &jobdomain.JobPosting{
+		JobID:      "job_123",
+		AgencyName: "Updated Agency",
+	}
+
+	jobRepo.On("FindByID", ctx, "job_123").Return(existing, nil)
+	jobRepo.On("Upsert", ctx, job).Return(nil).Run(func(args mock.Arguments) {
+		j := args.Get(1).(*jobdomain.JobPosting)
+		assert.Equal(t, existing.PostedAt, j.PostedAt)
+		assert.Equal(t, existing.ScrapeAt, j.ScrapeAt)
+		assert.Equal(t, nowTime, j.UpdatedAt)
+	})
+
+	err := uc.UpdateJob(ctx, job)
+	assert.NoError(t, err)
+}
+
+func TestManageJobUseCase_UpdateJob_NotFound(t *testing.T) {
+	jobRepo := new(MockJobPostingRepository)
+	uc := jobusecase.NewManageJobUseCase(jobRepo, nil, nil, nil, nil, &MockClock{})
+	ctx := context.Background()
+
+	job := &jobdomain.JobPosting{JobID: "job_123"}
+	jobRepo.On("FindByID", ctx, "job_123").Return((*jobdomain.JobPosting)(nil), domain.ErrNotFound)
+
+	err := uc.UpdateJob(ctx, job)
+	assert.Error(t, err)
+	assert.Equal(t, domain.ErrNotFound, err)
+}
+
+func TestManageJobUseCase_PatchJob_Success(t *testing.T) {
+	jobRepo := new(MockJobPostingRepository)
+	nowTime := time.Date(2026, 6, 17, 10, 0, 0, 0, time.UTC)
+	clock := &MockClock{NowTime: nowTime}
+	uc := jobusecase.NewManageJobUseCase(jobRepo, nil, nil, nil, nil, clock)
+	ctx := context.Background()
+
+	existing := &jobdomain.JobPosting{
+		JobID:      "job_123",
+		AgencyName: "Original Agency",
+		Position:   "Original Position",
+	}
+
+	jobRepo.On("FindByID", ctx, "job_123").Return(existing, nil)
+	jobRepo.On("Upsert", ctx, existing).Return(nil).Run(func(args mock.Arguments) {
+		j := args.Get(1).(*jobdomain.JobPosting)
+		assert.Equal(t, "Patched Agency", j.AgencyName)
+		assert.Equal(t, "Original Position", j.Position)
+		assert.Equal(t, nowTime, j.UpdatedAt)
+	})
+
+	err := uc.PatchJob(ctx, "job_123", map[string]interface{}{"agency_name": "Patched Agency"})
+	assert.NoError(t, err)
+}
+
+func TestManageJobUseCase_DeleteJob_Success(t *testing.T) {
+	jobRepo := new(MockJobPostingRepository)
+	uc := jobusecase.NewManageJobUseCase(jobRepo, nil, nil, nil, nil, &MockClock{})
+	ctx := context.Background()
+
+	jobRepo.On("Delete", ctx, "job_123").Return(nil)
+
+	err := uc.DeleteJob(ctx, "job_123")
+	assert.NoError(t, err)
 }

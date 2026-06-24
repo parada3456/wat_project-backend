@@ -4,11 +4,13 @@ import (
 	"context"
 	"log"
 
+	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+
 	missiondomain "github.com/j1hub/backend/internal/mission/domain"
 	userdomain "github.com/j1hub/backend/internal/user/domain"
 
 	"github.com/j1hub/backend/internal/infrastructure/config"
-	"github.com/j1hub/backend/internal/port"
+	port "github.com/j1hub/backend/internal/gamification/port"
 )
 
 type RewardEngine struct {
@@ -22,9 +24,9 @@ func NewRewardEngine(cfg *config.Config, userRepo port.UserRepository, umRepo po
 	return &RewardEngine{cfg: cfg, userRepo: userRepo, umRepo: umRepo}
 }
 
-func (re *RewardEngine) Calculate(ctx context.Context, um *missiondomain.UserMission, user *userdomain.User, mission *missiondomain.Mission) (*missiondomain.PointReward, error) {
+func (re *RewardEngine) Calculate(ctx context.Context, um *missiondomain.UserMission, user *userdomain.User, mission *missiondomain.Mission) (*gamificationdomain.PointReward, error) {
 	log.Println("debugprint: entering (*RewardEngine).Calculate")
-	reward := &missiondomain.PointReward{
+	reward := &gamificationdomain.PointReward{
 		Base: mission.BasePoints,
 	}
 

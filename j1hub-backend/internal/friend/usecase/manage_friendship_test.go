@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	friendusecase "github.com/j1hub/backend/internal/friend/usecase"
+
 	frienddomain "github.com/j1hub/backend/internal/friend/domain"
 	userdomain "github.com/j1hub/backend/internal/user/domain"
 
@@ -21,7 +23,7 @@ func TestManageFriendshipUseCase_SendRequest_Success(t *testing.T) {
 	nowTime := time.Date(2026, 6, 17, 10, 0, 0, 0, time.UTC)
 	clock := &MockClock{NowTime: nowTime}
 
-	uc := friendfriendusecase.NewManageFriendshipUseCase(friendRepo, userRepo, notifier, clock)
+	uc := friendusecase.NewManageFriendshipUseCase(friendRepo, userRepo, notifier, clock)
 
 	ctx := context.Background()
 	senderID := "usr_aaa"
@@ -33,7 +35,7 @@ func TestManageFriendshipUseCase_SendRequest_Success(t *testing.T) {
 		f := args.Get(1).(*frienddomain.Friendship)
 		assert.Equal(t, senderID, f.UserID1)
 		assert.Equal(t, targetID, f.UserID2)
-		assert.Equal(t, domain.FriendshipPending, f.Status)
+		assert.Equal(t, frienddomain.FriendshipPending, f.Status)
 	})
 	notifier.On("Send", ctx, targetID, "Friend request", "Someone wants to be your friend!").Return(nil)
 
@@ -50,7 +52,7 @@ func TestManageFriendshipUseCase_SendRequest_Duplicate(t *testing.T) {
 	notifier := new(MockNotifierPort)
 	clock := &MockClock{}
 
-	uc := friendfriendusecase.NewManageFriendshipUseCase(friendRepo, userRepo, notifier, clock)
+	uc := friendusecase.NewManageFriendshipUseCase(friendRepo, userRepo, notifier, clock)
 
 	ctx := context.Background()
 	senderID := "usr_aaa"
@@ -71,7 +73,7 @@ func TestManageFriendshipUseCase_RespondToRequest_Accept(t *testing.T) {
 	notifier := new(MockNotifierPort)
 	clock := &MockClock{}
 
-	uc := friendfriendusecase.NewManageFriendshipUseCase(friendRepo, userRepo, notifier, clock)
+	uc := friendusecase.NewManageFriendshipUseCase(friendRepo, userRepo, notifier, clock)
 
 	ctx := context.Background()
 	responderID := "usr_bbb"
@@ -81,11 +83,11 @@ func TestManageFriendshipUseCase_RespondToRequest_Accept(t *testing.T) {
 		FriendshipID: friendshipID,
 		UserID1:      "usr_aaa",
 		UserID2:      "usr_bbb",
-		Status:       domain.FriendshipPending,
+		Status:       frienddomain.FriendshipPending,
 	}
 
 	friendRepo.On("FindByID", ctx, friendshipID).Return(mockFriendship, nil)
-	friendRepo.On("UpdateStatus", ctx, friendshipID, domain.FriendshipAccepted).Return(nil)
+	friendRepo.On("UpdateStatus", ctx, friendshipID, frienddomain.FriendshipAccepted).Return(nil)
 	notifier.On("Send", ctx, "usr_aaa", "Friend request accepted", "You are now friends!").Return(nil)
 
 	err := uc.RespondToRequest(ctx, responderID, friendshipID, true)
@@ -99,7 +101,7 @@ func TestManageFriendshipUseCase_RespondToRequest_Forbidden(t *testing.T) {
 	notifier := new(MockNotifierPort)
 	clock := &MockClock{}
 
-	uc := friendfriendusecase.NewManageFriendshipUseCase(friendRepo, userRepo, notifier, clock)
+	uc := friendusecase.NewManageFriendshipUseCase(friendRepo, userRepo, notifier, clock)
 
 	ctx := context.Background()
 	responderID := "usr_ccc" // not aaa or bbb
@@ -125,12 +127,12 @@ func TestManageFriendshipUseCase_ListFriends_Success(t *testing.T) {
 	notifier := new(MockNotifierPort)
 	clock := &MockClock{}
 
-	uc := friendfriendusecase.NewManageFriendshipUseCase(friendRepo, userRepo, notifier, clock)
+	uc := friendusecase.NewManageFriendshipUseCase(friendRepo, userRepo, notifier, clock)
 
 	ctx := context.Background()
 	userID := "usr_aaa"
 	mockFriends := []frienddomain.Friendship{
-		{FriendshipID: "frn_1", UserID1: "usr_aaa", UserID2: "usr_bbb", Status: domain.FriendshipAccepted},
+		{FriendshipID: "frn_1", UserID1: "usr_aaa", UserID2: "usr_bbb", Status: frienddomain.FriendshipAccepted},
 	}
 
 	friendRepo.On("FindFriendsOf", ctx, userID).Return(mockFriends, nil)
@@ -142,14 +144,14 @@ func TestManageFriendshipUseCase_ListFriends_Success(t *testing.T) {
 }
 
 func TestManageFriendshipUseCase_ListPendingRequests_Stub(t *testing.T) {
-	uc := friendfriendusecase.NewManageFriendshipUseCase(nil, nil, nil, &MockClock{})
+	uc := friendusecase.NewManageFriendshipUseCase(nil, nil, nil, &MockClock{})
 	res, err := uc.ListPendingRequests(context.Background(), "usr_aaa")
 	assert.Nil(t, res)
 	assert.NoError(t, err)
 }
 
 func TestManageFriendshipUseCase_RemoveFriend_Stub(t *testing.T) {
-	uc := friendfriendusecase.NewManageFriendshipUseCase(nil, nil, nil, &MockClock{})
+	uc := friendusecase.NewManageFriendshipUseCase(nil, nil, nil, &MockClock{})
 	err := uc.RemoveFriend(context.Background(), "usr_aaa", "frn_1")
 	assert.NoError(t, err)
 }

@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
+
 	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
 	userdomain "github.com/j1hub/backend/internal/user/domain"
 
@@ -15,7 +17,7 @@ func TestLeaderboardUseCase_GetLeaderboard_Success(t *testing.T) {
 	profileRepo := new(MockProfileRepository)
 	ubRepo := new(MockUserBadgeRepository)
 
-	uc := gamificationgamificationusecase.NewLeaderboardUseCase(leaderRepo, profileRepo, ubRepo)
+	uc := gamificationusecase.NewLeaderboardUseCase(leaderRepo, profileRepo, ubRepo)
 
 	ctx := context.Background()
 	scope := "global"

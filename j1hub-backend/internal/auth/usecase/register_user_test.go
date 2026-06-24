@@ -6,13 +6,13 @@ import (
 	"testing"
 	"time"
 
+	authusecase "github.com/j1hub/backend/internal/auth/usecase"
+
 	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
 	missiondomain "github.com/j1hub/backend/internal/mission/domain"
 	userdomain "github.com/j1hub/backend/internal/user/domain"
 
-	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/port"
-	"github.com/j1hub/backend/internal/usecase"
+	port "github.com/j1hub/backend/internal/auth/port"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -31,7 +31,7 @@ func TestRegisterUserUseCase_InitializeJourney_Success(t *testing.T) {
 	nowTime := time.Date(2026, 6, 17, 10, 0, 0, 0, time.UTC)
 	clock := &MockClock{NowTime: nowTime}
 
-	uc := authauthusecase.NewRegisterUserUseCase(
+	uc := authusecase.NewRegisterUserUseCase(
 		nil, // pool is not used by InitializeJourney
 		userRepo,
 		profileRepo,
@@ -56,7 +56,7 @@ func TestRegisterUserUseCase_InitializeJourney_Success(t *testing.T) {
 		CreatedAt: nowTime,
 	}
 
-	mockPhase := &gamificationdomain.JourneyPhase{
+	mockPhase := &missiondomain.JourneyPhase{
 		PhaseID:     "phase_1",
 		PhaseNumber: 1,
 	}
@@ -90,8 +90,8 @@ func TestRegisterUserUseCase_InitializeJourney_Success(t *testing.T) {
 		assert.Equal(t, jobStartDate, u.JobStartDate)
 	})
 
-	historyRepo.On("Insert", ctx, mock.AnythingOfType("*gamificationdomain.UserPhaseHistory")).Return(nil).Run(func(args mock.Arguments) {
-		h := args.Get(1).(*gamificationdomain.UserPhaseHistory)
+	historyRepo.On("Insert", ctx, mock.AnythingOfType("*missiondomain.UserPhaseHistory")).Return(nil).Run(func(args mock.Arguments) {
+		h := args.Get(1).(*missiondomain.UserPhaseHistory)
 		assert.Equal(t, userID, h.UserID)
 		assert.Equal(t, "phase_1", h.PhaseID)
 		assert.Equal(t, nowTime, h.EnteredAt)
@@ -102,10 +102,10 @@ func TestRegisterUserUseCase_InitializeJourney_Success(t *testing.T) {
 		assert.Len(t, ums, 2)
 		assert.Equal(t, userID, ums[0].UserID)
 		assert.Equal(t, "mission_1", ums[0].MissionID)
-		assert.Equal(t, domain.StatusNotStarted, ums[0].Status)
+		assert.Equal(t, missiondomain.StatusNotStarted, ums[0].Status)
 	})
 
-	err := uc.InitializeJourney(ctx, userID, usecase.InitJourneyCommand{
+	err := uc.InitializeJourney(ctx, userID, authusecase.InitJourneyCommand{
 		ArrivalDate:  arrivalDate,
 		JobStartDate: jobStartDate,
 	})
@@ -130,7 +130,7 @@ func TestRegisterUserUseCase_Register_Success(t *testing.T) {
 	nowTime := time.Date(2026, 6, 17, 10, 0, 0, 0, time.UTC)
 	clock := &MockClock{NowTime: nowTime}
 
-	uc := authauthusecase.NewRegisterUserUseCase(
+	uc := authusecase.NewRegisterUserUseCase(
 		poolMock,
 		userRepo,
 		profileRepo,
@@ -145,7 +145,7 @@ func TestRegisterUserUseCase_Register_Success(t *testing.T) {
 	)
 
 	ctx := context.Background()
-	cmd := usecase.RegisterCommand{
+	cmd := authusecase.RegisterCommand{
 		Email:     "john@example.com",
 		Password:  "password123",
 		FirstName: "John",
@@ -165,10 +165,10 @@ func TestRegisterUserUseCase_Register_Success(t *testing.T) {
 	})
 	profileRepo.On("Create", ctx, mock.AnythingOfType("*userdomain.Profile")).Return(nil).Run(func(args mock.Arguments) {
 		p := args.Get(1).(*userdomain.Profile)
-		assert.Equal(t, domain.VisibilityShowAnonymous, p.RadarVisibility)
+		assert.Equal(t, userdomain.VisibilityShowAnonymous, p.RadarVisibility)
 	})
-	creditRepo.On("Create", ctx, mock.AnythingOfType("*userdomain.CreditScore")).Return(nil).Run(func(args mock.Arguments) {
-		c := args.Get(1).(*userdomain.CreditScore)
+	creditRepo.On("Create", ctx, mock.AnythingOfType("*gamificationdomain.CreditScore")).Return(nil).Run(func(args mock.Arguments) {
+		c := args.Get(1).(*gamificationdomain.CreditScore)
 		assert.Equal(t, 100, c.CurrentScore)
 	})
 	txMock.On("Commit", ctx).Return(nil)
@@ -196,10 +196,10 @@ func TestRegisterUserUseCase_Register_Success(t *testing.T) {
 
 func TestRegisterUserUseCase_Register_HashError(t *testing.T) {
 	hasher := new(MockHasher)
-	uc := authauthusecase.NewRegisterUserUseCase(nil, nil, nil, nil, nil, nil, nil, nil, hasher, nil, &MockClock{})
+	uc := authusecase.NewRegisterUserUseCase(nil, nil, nil, nil, nil, nil, nil, nil, hasher, nil, &MockClock{})
 
 	ctx := context.Background()
-	cmd := usecase.RegisterCommand{Password: "pwd"}
+	cmd := authusecase.RegisterCommand{Password: "pwd"}
 	hasher.On("Hash", "pwd").Return("", errors.New("hash error"))
 
 	user, tokens, err := uc.Register(ctx, cmd)
@@ -212,10 +212,10 @@ func TestRegisterUserUseCase_Register_HashError(t *testing.T) {
 func TestRegisterUserUseCase_Register_BeginTxError(t *testing.T) {
 	poolMock := new(MockTxBeginner)
 	hasher := new(MockHasher)
-	uc := authauthusecase.NewRegisterUserUseCase(poolMock, nil, nil, nil, nil, nil, nil, nil, hasher, nil, &MockClock{})
+	uc := authusecase.NewRegisterUserUseCase(poolMock, nil, nil, nil, nil, nil, nil, nil, hasher, nil, &MockClock{})
 
 	ctx := context.Background()
-	cmd := usecase.RegisterCommand{Password: "pwd"}
+	cmd := authusecase.RegisterCommand{Password: "pwd"}
 	hasher.On("Hash", "pwd").Return("hash", nil)
 	poolMock.On("Begin", ctx).Return((*MockTx)(nil), errors.New("db error"))
 
@@ -230,10 +230,10 @@ func TestRegisterUserUseCase_Register_CreateUserError(t *testing.T) {
 	poolMock := new(MockTxBeginner)
 	hasher := new(MockHasher)
 	userRepo := new(MockUserRepository)
-	uc := authauthusecase.NewRegisterUserUseCase(poolMock, userRepo, nil, nil, nil, nil, nil, nil, hasher, nil, &MockClock{})
+	uc := authusecase.NewRegisterUserUseCase(poolMock, userRepo, nil, nil, nil, nil, nil, nil, hasher, nil, &MockClock{})
 
 	ctx := context.Background()
-	cmd := usecase.RegisterCommand{Password: "pwd", Email: "john@test.com"}
+	cmd := authusecase.RegisterCommand{Password: "pwd", Email: "john@test.com"}
 	txMock := new(MockTx)
 
 	hasher.On("Hash", "pwd").Return("hash", nil)

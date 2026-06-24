@@ -5,37 +5,39 @@ import (
 	"fmt"
 	"log"
 
+	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
+
 	missiondomain "github.com/j1hub/backend/internal/mission/domain"
 	userdomain "github.com/j1hub/backend/internal/user/domain"
 
 	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/port"
+	port "github.com/j1hub/backend/internal/admin/port"
 	"github.com/j1hub/backend/pkg/timeutil"
 	"github.com/j1hub/backend/pkg/uid"
 	"github.com/jackc/pgx/v5"
 )
 
 type adminUseCase struct {
-	pool         TxBeginner
+	pool         port.TxBeginner
 	adminRepo    port.AdminRepository
 	userRepo     port.UserRepository
 	umRepo       port.UserMissionRepository
 	missionRepo  port.MissionRepository
 	ledgerRepo   port.PointLedgerRepository
 	notifier     port.NotifierPort
-	rewardEngine *RewardEngine
+	rewardEngine *gamificationusecase.RewardEngine
 	clock        timeutil.Clock
 }
 
 func NewAdminUseCase(
-	pool TxBeginner,
+	pool port.TxBeginner,
 	adminRepo port.AdminRepository,
 	userRepo port.UserRepository,
 	umRepo port.UserMissionRepository,
 	missionRepo port.MissionRepository,
 	ledgerRepo port.PointLedgerRepository,
 	notifier port.NotifierPort,
-	rewardEngine *RewardEngine,
+	rewardEngine *gamificationusecase.RewardEngine,
 	clock timeutil.Clock,
 ) port.AdminUseCase {
 	log.Println("debugprint: entering NewAdminUseCase")
@@ -176,7 +178,7 @@ func (u *adminUseCase) VerifyMission(ctx context.Context, adminID, userMissionID
 	}
 
 	// Idempotency: Reject calls if user mission is already Completed
-	if um.Status == domain.StatusCompleted {
+	if um.Status == missiondomain.StatusCompleted {
 		return nil, fmt.Errorf("user mission is already completed")
 	}
 
@@ -184,7 +186,7 @@ func (u *adminUseCase) VerifyMission(ctx context.Context, adminID, userMissionID
 
 	if !approved {
 		// Rejection flow
-		um.Status = domain.StatusInProgress
+		um.Status = missiondomain.StatusInProgress
 		_, err = tx.Exec(ctx, `
 			UPDATE user_missions 
 			SET status = $1, updated_at = $2 
@@ -243,7 +245,7 @@ func (u *adminUseCase) VerifyMission(ctx context.Context, adminID, userMissionID
 		return nil, fmt.Errorf("failed to calculate rewards: %w", err)
 	}
 
-	um.Status = domain.StatusCompleted
+	um.Status = missiondomain.StatusCompleted
 	um.BasePointsEarned = reward.Base
 	um.SpeedBonusPoints = reward.SpeedBonus
 	um.StreakBonusPoints = reward.StreakBonus

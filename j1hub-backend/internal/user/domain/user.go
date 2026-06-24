@@ -50,3 +50,12 @@ type Profile struct {
 	LocationUpdatedAt time.Time       `json:"location_updated_at"`
 	UpdatedAt         time.Time       `json:"updated_at"`
 }
+
+type UserJob struct {
+	UserID     string     `json:"user_id"`
+	JobID      string     `json:"job_id"`
+	AssignedAt time.Time  `json:"assigned_at"`
+	IsMain     bool       `json:"is_main"`
+	StartDate  *time.Time `json:"start_date,omitempty"`
+	EndDate    *time.Time `json:"end_date,omitempty"`
+}
