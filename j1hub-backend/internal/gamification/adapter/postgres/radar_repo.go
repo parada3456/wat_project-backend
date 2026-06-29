@@ -24,7 +24,7 @@ func (r *radarRepo) FindNearby(ctx context.Context, lat, lng, radius float64, st
 	query := `
 		SELECT 
 			profile_id, user_id, phone_number, bio, avatar_url, 
-			radar_visibility, ST_X(current_coordinates), ST_Y(current_coordinates), 
+			radar_visibility, ST_X(current_coordinates::geometry), ST_Y(current_coordinates::geometry), 
 			location_updated_at, updated_at
 		FROM profiles 
 		WHERE ST_DWithin(

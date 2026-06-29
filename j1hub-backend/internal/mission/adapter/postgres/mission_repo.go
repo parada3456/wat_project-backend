@@ -176,7 +176,7 @@ func (r *userMissionRepo) UpdateReward(ctx context.Context, id string, reward *g
 
 func (r *userMissionRepo) FindOverdue(ctx context.Context) ([]missiondomain.UserMission, error) {
 	log.Println("debugprint: entering (*userMissionRepo).FindOverdue")
-	query := `SELECT user_mission_id, user_id, mission_id, status, calculated_due_date, created_at, updated_at FROM user_missions WHERE status IN ('Not_Started', 'In_Progress', 'Pending_Verification') AND calculated_due_date < NOW()`
+	query := `SELECT user_mission_id, user_id, mission_id, status, calculated_due_date, created_at, updated_at FROM user_missions WHERE status IN ('not_started', 'in_progress', 'pending_verification') AND calculated_due_date < NOW()`
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {
 		return nil, err
@@ -264,6 +264,16 @@ func (r *userTaskRepo) FindByUserMission(ctx context.Context, userMissionID stri
 	return uts, nil
 }
 
+func (r *userTaskRepo) FindByID(ctx context.Context, id string) (*missiondomain.UserTask, error) {
+	log.Println("debugprint: entering (*userTaskRepo).FindByID")
+	var ut missiondomain.UserTask
+	err := r.pool.QueryRow(ctx, `SELECT user_task_id, user_id, task_id, user_mission_id, is_completed, completed_at, updated_at FROM user_tasks WHERE user_task_id = $1`, id).Scan(&ut.UserTaskID, &ut.UserID, &ut.TaskID, &ut.UserMissionID, &ut.IsCompleted, &ut.CompletedAt, &ut.UpdatedAt)
+	if err == pgx.ErrNoRows {
+		return nil, domain.ErrNotFound
+	}
+	return &ut, err
+}
+
 type journeyPhaseRepo struct {
 	pool *pgxpool.Pool
 }
@@ -301,6 +311,28 @@ func (r *journeyPhaseRepo) FindByID(ctx context.Context, id string) (*missiondom
 	return &jp, err
 }
 
+func (r *journeyPhaseRepo) ListAll(ctx context.Context) ([]missiondomain.JourneyPhase, error) {
+	log.Println("debugprint: entering (*journeyPhaseRepo).ListAll")
+	rows, err := r.pool.Query(ctx, `SELECT phase_id, phase_number, title, description, created_at, updated_at FROM journey_phases ORDER BY phase_number ASC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var phases []missiondomain.JourneyPhase
+	for rows.Next() {
+		var jp missiondomain.JourneyPhase
+		var desc *string
+		if err := rows.Scan(&jp.PhaseID, &jp.PhaseNumber, &jp.Title, &desc, &jp.CreatedAt, &jp.UpdatedAt); err != nil {
+			return nil, err
+		}
+		if desc != nil {
+			jp.Description = *desc
+		}
+		phases = append(phases, jp)
+	}
+	return phases, nil
+}
+
 type userPhaseHistoryRepo struct {
 	pool *pgxpool.Pool
 }
@@ -331,4 +363,22 @@ func (r *userPhaseHistoryRepo) FindByUserAndPhase(ctx context.Context, userID, p
 		return nil, domain.ErrNotFound
 	}
 	return &h, err
+}
+
+func (r *userPhaseHistoryRepo) FindByUser(ctx context.Context, userID string) ([]missiondomain.UserPhaseHistory, error) {
+	log.Println("debugprint: entering (*userPhaseHistoryRepo).FindByUser")
+	rows, err := r.pool.Query(ctx, `SELECT history_id, user_id, phase_id, phase_points_earned, entered_at, completed_at FROM user_phase_history WHERE user_id = $1 ORDER BY entered_at DESC`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var history []missiondomain.UserPhaseHistory
+	for rows.Next() {
+		var h missiondomain.UserPhaseHistory
+		if err := rows.Scan(&h.HistoryID, &h.UserID, &h.PhaseID, &h.PhasePointsEarned, &h.EnteredAt, &h.CompletedAt); err != nil {
+			return nil, err
+		}
+		history = append(history, h)
+	}
+	return history, nil
 }

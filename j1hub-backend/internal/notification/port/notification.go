@@ -7,7 +7,7 @@ import (
 
 type NotificationRepository interface {
 	Insert(ctx context.Context, n *notificationdomain.Notification) error
-	FindByUser(ctx context.Context, userID string) ([]notificationdomain.Notification, error)
+	FindByUser(ctx context.Context, userID string, isRead *bool, limit, offset int) ([]notificationdomain.Notification, int, error)
 	MarkAsRead(ctx context.Context, id string) error
 	MarkAllAsRead(ctx context.Context, userID string) error
 	Delete(ctx context.Context, id string) error

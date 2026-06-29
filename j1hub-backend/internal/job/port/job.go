@@ -6,7 +6,7 @@ import (
 )
 
 type JobPostingRepository interface {
-	FindWithFilters(ctx context.Context, filters map[string]interface{}) ([]jobdomain.JobPosting, error)
+	FindWithFilters(ctx context.Context, filters map[string]interface{}, limit, offset int) ([]jobdomain.JobPosting, int, error)
 	FindByID(ctx context.Context, id string) (*jobdomain.JobPosting, error)
 	Upsert(ctx context.Context, job *jobdomain.JobPosting) error
 	Delete(ctx context.Context, id string) error

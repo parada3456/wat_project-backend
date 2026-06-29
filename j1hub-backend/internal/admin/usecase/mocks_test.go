@@ -281,12 +281,22 @@ func (m *MockFriendshipRepository) FindByID(ctx context.Context, id string) (*fr
 func (m *MockFriendshipRepository) UpdateStatus(ctx context.Context, id string, status frienddomain.FriendshipStatus) error {
 	return m.Called(ctx, id, status).Error(0)
 }
-func (m *MockFriendshipRepository) FindFriendsOf(ctx context.Context, userID string) ([]frienddomain.Friendship, error) {
-	args := m.Called(ctx, userID)
+func (m *MockFriendshipRepository) FindFriendsOf(ctx context.Context, userID string, limit, offset int) ([]frienddomain.Friendship, int, error) {
+	args := m.Called(ctx, userID, limit, offset)
 	if args.Get(0) == nil {
-		return nil, args.Error(1)
+		return nil, args.Int(1), args.Error(2)
 	}
-	return args.Get(0).([]frienddomain.Friendship), args.Error(1)
+	return args.Get(0).([]frienddomain.Friendship), args.Int(1), args.Error(2)
+}
+func (m *MockFriendshipRepository) FindPendingFor(ctx context.Context, userID string, limit, offset int) ([]frienddomain.Friendship, int, error) {
+	args := m.Called(ctx, userID, limit, offset)
+	if args.Get(0) == nil {
+		return nil, args.Int(1), args.Error(2)
+	}
+	return args.Get(0).([]frienddomain.Friendship), args.Int(1), args.Error(2)
+}
+func (m *MockFriendshipRepository) Delete(ctx context.Context, id string) error {
+	return m.Called(ctx, id).Error(0)
 }
 
 // MockExpenseTransactionRepository

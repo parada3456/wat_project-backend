@@ -2,14 +2,14 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"time"
 
+	adminport "github.com/j1hub/backend/internal/admin/port"
 	missiondomain "github.com/j1hub/backend/internal/mission/domain"
 	userdomain "github.com/j1hub/backend/internal/user/domain"
-
-	port "github.com/j1hub/backend/internal/admin/port"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -18,92 +18,115 @@ type adminRepo struct {
 	pool *pgxpool.Pool
 }
 
-func NewAdminRepository(pool *pgxpool.Pool) port.AdminRepository {
+func NewAdminRepository(pool *pgxpool.Pool) adminport.AdminRepository {
 	log.Println("debugprint: entering NewAdminRepository")
 	return &adminRepo{pool: pool}
 }
 
-func (r *adminRepo) GetStats(ctx context.Context) (*port.AdminStats, error) {
-	log.Println("debugprint: entering (*adminRepo).GetStats")
-	stats := &port.AdminStats{}
-
-	// 1. Total Users
-	err := r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM users").Scan(&stats.TotalUsers)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get total users: %w", err)
-	}
-
-	// 2. Active Users (using count for now or filtering where updated_at is recent)
-	err = r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM users").Scan(&stats.ActiveUsers)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get active users: %w", err)
-	}
-
-	// 3. Pending Verifications
-	err = r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM user_missions WHERE status = $1", missiondomain.StatusPendingVerification).Scan(&stats.PendingVerifications)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get pending verifications: %w", err)
-	}
-
-	// 4. Active Jobs
-	err = r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM job_postings").Scan(&stats.ActiveJobs)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get active jobs: %w", err)
-	}
-
-	// 5. Average Credit Score
-	var avgScore float64
-	err = r.pool.QueryRow(ctx, "SELECT COALESCE(AVG(score), 0) FROM credit_scores").Scan(&avgScore)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get average credit score: %w", err)
-	}
-	stats.AverageCreditScore = int(avgScore)
-
-	// 6. Total Points Awarded
-	err = r.pool.QueryRow(ctx, "SELECT COALESCE(SUM(points), 0) FROM point_ledger").Scan(&stats.TotalPointsAwarded)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get total points: %w", err)
-	}
-
-	return stats, nil
+type timeToNullWrapper struct {
+	t time.Time
 }
 
-func (r *adminRepo) ListPendingVerifications(ctx context.Context) ([]missiondomain.UserMission, error) {
+func (w *timeToNullWrapper) Scan(value interface{}) error {
+	log.Println("debugprint: entering (*timeToNullWrapper).Scan")
+	if value == nil {
+		w.t = time.Time{}
+		return nil
+	}
+	t, ok := value.(time.Time)
+	if !ok {
+		return fmt.Errorf("invalid time value: %v", value)
+	}
+	w.t = t
+	return nil
+}
+
+func (r *adminRepo) GetStats(ctx context.Context) (*adminport.AdminStats, error) {
+	log.Println("debugprint: entering (*adminRepo).GetStats")
+	var stats adminport.AdminStats
+
+	err := r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM users").Scan(&stats.TotalUsers)
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM users WHERE updated_at > NOW() - INTERVAL '30 days'").Scan(&stats.ActiveUsers)
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM user_missions WHERE status = 'Pending_Verification'").Scan(&stats.PendingVerifications)
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM job_postings").Scan(&stats.ActiveJobs)
+	if err != nil {
+		return nil, err
+	}
+
+	var avgCredit sql.NullFloat64
+	err = r.pool.QueryRow(ctx, "SELECT AVG(current_score) FROM credit_scores").Scan(&avgCredit)
+	if err != nil {
+		return nil, err
+	}
+	if avgCredit.Valid {
+		stats.AverageCreditScore = int(avgCredit.Float64)
+	} else {
+		stats.AverageCreditScore = 0
+	}
+
+	var sumPoints sql.NullInt64
+	err = r.pool.QueryRow(ctx, "SELECT SUM(points) FROM point_ledger").Scan(&sumPoints)
+	if err != nil {
+		return nil, err
+	}
+	if sumPoints.Valid {
+		stats.TotalPointsAwarded = int(sumPoints.Int64)
+	} else {
+		stats.TotalPointsAwarded = 0
+	}
+
+	return &stats, nil
+}
+
+func (r *adminRepo) ListPendingVerifications(ctx context.Context, limit, offset int) ([]missiondomain.UserMission, int, error) {
 	log.Println("debugprint: entering (*adminRepo).ListPendingVerifications")
+	var totalCount int
+	err := r.pool.QueryRow(ctx, "SELECT COUNT(*) FROM user_missions WHERE status = 'Pending_Verification'").Scan(&totalCount)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to count pending verifications: %w", err)
+	}
+
+	if totalCount == 0 {
+		return []missiondomain.UserMission{}, 0, nil
+	}
+
 	query := `
 		SELECT 
 			user_mission_id, user_id, mission_id, status, calculated_due_date, 
-			proof_url, proof_submitted_at, verified_at, verified_by, 
-			base_points_earned, speed_bonus_points, streak_bonus_points, 
-			first_completer_bonus_points, total_points_earned, rewarded_at, 
-			created_at, updated_at 
+			proof_url, proof_submitted_at, verified_at, verified_by, rewarded_at
 		FROM user_missions 
-		WHERE status = $1 
-		ORDER BY proof_submitted_at ASC`
+		WHERE status = 'Pending_Verification'
+		ORDER BY proof_submitted_at ASC
+		LIMIT $1 OFFSET $2`
 
-	rows, err := r.pool.Query(ctx, query, missiondomain.StatusPendingVerification)
+	rows, err := r.pool.Query(ctx, query, limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query pending verifications: %w", err)
+		return nil, 0, fmt.Errorf("failed to query pending verifications: %w", err)
 	}
 	defer rows.Close()
 
 	var ums []missiondomain.UserMission
 	for rows.Next() {
 		var um missiondomain.UserMission
-		var proofURL *string
 		var verifiedBy *string
 		err := rows.Scan(
 			&um.UserMissionID, &um.UserID, &um.MissionID, &um.Status, &um.CalculatedDueDate,
-			&proofURL, &um.ProofSubmittedAt, &um.VerifiedAt, &verifiedBy,
-			&um.BasePointsEarned, &um.SpeedBonusPoints, &um.StreakBonusPoints,
-			&um.FirstCompleterBonusPoints, &um.TotalPointsEarned, &um.RewardedAt,
-			&um.CreatedAt, &um.UpdatedAt,
+			&um.ProofURL, &um.ProofSubmittedAt, &um.VerifiedAt, &verifiedBy, &um.RewardedAt,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan pending verification: %w", err)
-		}
-		if proofURL != nil {
-			um.ProofURL = *proofURL
+			return nil, 0, fmt.Errorf("failed to scan user mission: %w", err)
 		}
 		if verifiedBy != nil {
 			um.VerifiedBy = *verifiedBy
@@ -111,54 +134,86 @@ func (r *adminRepo) ListPendingVerifications(ctx context.Context) ([]missiondoma
 		ums = append(ums, um)
 	}
 
-	return ums, nil
+	return ums, totalCount, nil
 }
 
-func (r *adminRepo) SearchUsers(ctx context.Context, query string) ([]userdomain.User, error) {
+func (r *adminRepo) SearchUsers(ctx context.Context, query string, limit, offset int) ([]adminport.UserWithProfile, int, error) {
 	log.Println("debugprint: entering (*adminRepo).SearchUsers")
-	var rows pgx.Rows
-	var err error
+	var totalCount int
+	var countQuery string
+	var countArgs []interface{}
 
+	if query == "" {
+		countQuery = "SELECT COUNT(*) FROM users"
+	} else {
+		countQuery = `
+			SELECT COUNT(*) FROM users u
+			LEFT JOIN profiles p ON u.user_id = p.user_id
+			WHERE p.first_name ILIKE $1 OR p.last_name ILIKE $1 OR u.email ILIKE $1`
+		countArgs = append(countArgs, "%"+query+"%")
+	}
+
+	err := r.pool.QueryRow(ctx, countQuery, countArgs...).Scan(&totalCount)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to count users: %w", err)
+	}
+
+	if totalCount == 0 {
+		return []adminport.UserWithProfile{}, 0, nil
+	}
+
+	var rows pgx.Rows
 	if query == "" {
 		sql := `
 			SELECT 
-				user_id, email, password_hash, first_name, last_name, 
-				current_phase_id, total_lifetime_points, current_phase_points, 
-				mission_streak, arrival_date, job_start_date, created_at, updated_at
-			FROM users 
-			ORDER BY created_at DESC`
-		rows, err = r.pool.Query(ctx, sql)
+				u.user_id, u.email, u.password_hash, 
+				u.current_phase_id, u.total_lifetime_points, u.current_phase_points, 
+				u.mission_streak, u.arrival_date, u.job_start_date, u.created_at, u.updated_at,
+				p.profile_id, COALESCE(p.first_name, ''), COALESCE(p.last_name, ''), COALESCE(p.phone_number, ''),
+				COALESCE(p.bio, ''), COALESCE(p.avatar_url, ''), COALESCE(p.radar_visibility, 'hidden')
+			FROM users u
+			LEFT JOIN profiles p ON u.user_id = p.user_id
+			ORDER BY u.created_at DESC
+			LIMIT $1 OFFSET $2`
+		rows, err = r.pool.Query(ctx, sql, limit, offset)
 	} else {
 		sql := `
 			SELECT 
-				user_id, email, password_hash, first_name, last_name, 
-				current_phase_id, total_lifetime_points, current_phase_points, 
-				mission_streak, arrival_date, job_start_date, created_at, updated_at
-			FROM users 
-			WHERE first_name ILIKE $1 OR last_name ILIKE $1 OR email ILIKE $1
-			ORDER BY created_at DESC`
-		rows, err = r.pool.Query(ctx, sql, "%"+query+"%")
+				u.user_id, u.email, u.password_hash, 
+				u.current_phase_id, u.total_lifetime_points, u.current_phase_points, 
+				u.mission_streak, u.arrival_date, u.job_start_date, u.created_at, u.updated_at,
+				p.profile_id, COALESCE(p.first_name, ''), COALESCE(p.last_name, ''), COALESCE(p.phone_number, ''),
+				COALESCE(p.bio, ''), COALESCE(p.avatar_url, ''), COALESCE(p.radar_visibility, 'hidden')
+			FROM users u
+			LEFT JOIN profiles p ON u.user_id = p.user_id
+			WHERE p.first_name ILIKE $1 OR p.last_name ILIKE $1 OR u.email ILIKE $1
+			ORDER BY u.created_at DESC
+			LIMIT $2 OFFSET $3`
+		rows, err = r.pool.Query(ctx, sql, "%"+query+"%", limit, offset)
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to query users: %w", err)
+		return nil, 0, fmt.Errorf("failed to query users: %w", err)
 	}
 	defer rows.Close()
 
-	var users []userdomain.User
+	var users []adminport.UserWithProfile
 	for rows.Next() {
 		var u userdomain.User
+		var p userdomain.Profile
 		var currentPhaseID *string
 		var arrivalDate *timeToNullWrapper
 		var jobStartDate *timeToNullWrapper
 
 		err := rows.Scan(
-			&u.UserID, &u.Email, &u.PasswordHash, &u.FirstName, &u.LastName,
+			&u.UserID, &u.Email, &u.PasswordHash,
 			&currentPhaseID, &u.TotalLifetimePoints, &u.CurrentPhasePoints,
 			&u.MissionStreak, &arrivalDate, &jobStartDate, &u.CreatedAt, &u.UpdatedAt,
+			&p.ProfileID, &p.FirstName, &p.LastName, &p.PhoneNumber,
+			&p.Bio, &p.AvatarURL, &p.RadarVisibility,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan user: %w", err)
+			return nil, 0, fmt.Errorf("failed to scan user: %w", err)
 		}
 
 		if currentPhaseID != nil {
@@ -170,26 +225,9 @@ func (r *adminRepo) SearchUsers(ctx context.Context, query string) ([]userdomain
 		if jobStartDate != nil && !jobStartDate.t.IsZero() {
 			u.JobStartDate = jobStartDate.t
 		}
-		users = append(users, u)
+		p.UserID = u.UserID
+		users = append(users, adminport.UserWithProfile{User: u, Profile: p})
 	}
 
-	return users, nil
-}
-
-type timeToNullWrapper struct {
-	t javaTime
-}
-
-type javaTime = time.Time
-
-func (w *timeToNullWrapper) Scan(value interface{}) error {
-	if value == nil {
-		return nil
-	}
-	t, ok := value.(javaTime)
-	if !ok {
-		return fmt.Errorf("expected time.Time, got %T", value)
-	}
-	w.t = t
-	return nil
+	return users, totalCount, nil
 }

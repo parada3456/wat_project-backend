@@ -8,12 +8,12 @@ import (
 type SourceType string
 
 const (
-	SourceMissionBase    SourceType = "Mission_Base"
-	SourceSpeedBonus     SourceType = "Speed_Bonus"
-	SourceStreakBonus    SourceType = "Streak_Bonus"
-	SourceFirstCompleter SourceType = "First_Completer"
-	SourceExpensePenalty SourceType = "Expense_Penalty"
-	SourceAdminAdjust    SourceType = "Admin_Adjust"
+	SourceMissionBase    SourceType = "mission_base"
+	SourceSpeedBonus     SourceType = "speed_bonus"
+	SourceStreakBonus    SourceType = "streak_bonus"
+	SourceFirstCompleter SourceType = "first_completer"
+	SourceExpensePenalty SourceType = "expense_penalty"
+	SourceAdminAdjust    SourceType = "admin_adjust"
 )
 
 func (s SourceType) Valid() bool {
@@ -28,11 +28,11 @@ func (s SourceType) Valid() bool {
 type TriggerType string
 
 const (
-	TriggerSpeed          TriggerType = "Speed"
-	TriggerStreak         TriggerType = "Streak"
-	TriggerFirstCompleter TriggerType = "First_Completer"
-	TriggerPhaseComplete  TriggerType = "Phase_Complete"
-	TriggerManual         TriggerType = "Manual"
+	TriggerSpeed          TriggerType = "speed"
+	TriggerStreak         TriggerType = "streak"
+	TriggerFirstCompleter TriggerType = "first_completer"
+	TriggerPhaseComplete  TriggerType = "phase_complete"
+	TriggerManual         TriggerType = "manual"
 )
 
 func (t TriggerType) Valid() bool {

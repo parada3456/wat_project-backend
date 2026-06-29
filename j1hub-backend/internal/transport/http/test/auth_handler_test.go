@@ -24,12 +24,16 @@ type MockRegisterUserUC struct {
 	mock.Mock
 }
 
-func (m *MockRegisterUserUC) Register(ctx context.Context, cmd authusecase.RegisterCommand) (*userdomain.User, *port.TokenPair, error) {
+func (m *MockRegisterUserUC) Register(ctx context.Context, cmd authusecase.RegisterCommand) (*userdomain.User, *userdomain.Profile, *port.TokenPair, error) {
 	args := m.Called(ctx, cmd)
 	if args.Get(0) == nil {
-		return nil, nil, args.Error(2)
+		return nil, nil, nil, args.Error(3)
 	}
-	return args.Get(0).(*userdomain.User), args.Get(1).(*port.TokenPair), args.Error(2)
+	var profile *userdomain.Profile
+	if args.Get(1) != nil {
+		profile = args.Get(1).(*userdomain.Profile)
+	}
+	return args.Get(0).(*userdomain.User), profile, args.Get(2).(*port.TokenPair), args.Error(3)
 }
 
 // MockLoginUC
@@ -37,12 +41,16 @@ type MockLoginUC struct {
 	mock.Mock
 }
 
-func (m *MockLoginUC) Login(ctx context.Context, cmd authusecase.LoginCommand) (*userdomain.User, *port.TokenPair, error) {
+func (m *MockLoginUC) Login(ctx context.Context, cmd authusecase.LoginCommand) (*userdomain.User, *userdomain.Profile, *port.TokenPair, error) {
 	args := m.Called(ctx, cmd)
 	if args.Get(0) == nil {
-		return nil, nil, args.Error(2)
+		return nil, nil, nil, args.Error(3)
 	}
-	return args.Get(0).(*userdomain.User), args.Get(1).(*port.TokenPair), args.Error(2)
+	var profile *userdomain.Profile
+	if args.Get(1) != nil {
+		profile = args.Get(1).(*userdomain.Profile)
+	}
+	return args.Get(0).(*userdomain.User), profile, args.Get(2).(*port.TokenPair), args.Error(3)
 }
 
 func (m *MockLoginUC) Refresh(ctx context.Context, refreshToken string) (*port.TokenPair, error) {
@@ -61,6 +69,10 @@ func TestAuthHandler_Register_Success(t *testing.T) {
 	user := &userdomain.User{
 		UserID:    "usr_123",
 		Email:     "john@example.com",
+	}
+	profile := &userdomain.Profile{
+		ProfileID: "prf_123",
+		UserID:    "usr_123",
 		FirstName: "John",
 		LastName:  "Doe",
 	}
@@ -75,7 +87,7 @@ func TestAuthHandler_Register_Success(t *testing.T) {
 		Password:  "password123",
 		FirstName: "John",
 		LastName:  "Doe",
-	}).Return(user, tokens, nil)
+	}).Return(user, profile, tokens, nil)
 
 	body := `{"email":"john@example.com","password":"password123","first_name":"John","last_name":"Doe"}`
 	req := httptest.NewRequest("POST", "/api/v1/auth/register", bytes.NewBufferString(body))
@@ -89,9 +101,13 @@ func TestAuthHandler_Register_Success(t *testing.T) {
 	var resp map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &resp)
 	assert.NoError(t, err)
-	assert.Equal(t, "usr_123", resp["user_id"])
-	assert.Equal(t, "access", resp["access_token"])
-	assert.Equal(t, "refresh", resp["refresh_token"])
+	userMap := resp["user"].(map[string]interface{})
+	authMap := resp["auth"].(map[string]interface{})
+	assert.Equal(t, "usr_123", userMap["user_id"])
+	assert.Equal(t, "John", userMap["first_name"])
+	assert.Equal(t, "Doe", userMap["last_name"])
+	assert.Equal(t, "access", authMap["AccessToken"])
+	assert.Equal(t, "refresh", authMap["RefreshToken"])
 }
 
 func TestAuthHandler_Register_ValidationError(t *testing.T) {
@@ -126,7 +142,7 @@ func TestAuthHandler_Login_Success(t *testing.T) {
 	logUC.On("Login", mock.Anything, authusecase.LoginCommand{
 		Email:    "john@example.com",
 		Password: "password123",
-	}).Return(user, tokens, nil)
+	}).Return(user, (*userdomain.Profile)(nil), tokens, nil)
 
 	body := `{"email":"john@example.com","password":"password123"}`
 	req := httptest.NewRequest("POST", "/api/v1/auth/login", bytes.NewBufferString(body))
@@ -145,7 +161,7 @@ func TestAuthHandler_Login_Failure(t *testing.T) {
 	logUC.On("Login", mock.Anything, authusecase.LoginCommand{
 		Email:    "john@example.com",
 		Password: "wrong_password",
-	}).Return((*userdomain.User)(nil), (*port.TokenPair)(nil), domain.ErrUnauthorized)
+	}).Return((*userdomain.User)(nil), (*userdomain.Profile)(nil), (*port.TokenPair)(nil), domain.ErrUnauthorized)
 
 	body := `{"email":"john@example.com","password":"wrong_password"}`
 	req := httptest.NewRequest("POST", "/api/v1/auth/login", bytes.NewBufferString(body))

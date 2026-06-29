@@ -71,19 +71,17 @@ type RegisterCommand struct {
 	LastName  string
 }
 
-func (uc *RegisterUserUseCase) Register(ctx context.Context, cmd RegisterCommand) (*userdomain.User, *port.TokenPair, error) {
+func (uc *RegisterUserUseCase) Register(ctx context.Context, cmd RegisterCommand) (*userdomain.User, *userdomain.Profile, *port.TokenPair, error) {
 	log.Println("debugprint: entering (*RegisterUserUseCase).Register")
 	hash, err := uc.hasher.Hash(cmd.Password)
 	if err != nil {
-		return nil, nil, fmt.Errorf("%w: Could not hash the password.", domain.ErrPasswordHashFailed)
+		return nil, nil, nil, fmt.Errorf("%w: Could not hash the password.", domain.ErrPasswordHashFailed)
 	}
 
 	user := &userdomain.User{
 		UserID:       uid.New("usr_"),
 		Email:        cmd.Email,
 		PasswordHash: hash,
-		FirstName:    cmd.FirstName,
-		LastName:     cmd.LastName,
 		CreatedAt:    uc.clock.Now(),
 		UpdatedAt:    uc.clock.Now(),
 	}
@@ -91,22 +89,24 @@ func (uc *RegisterUserUseCase) Register(ctx context.Context, cmd RegisterCommand
 	// Transactional insert
 	tx, err := uc.pool.Begin(ctx)
 	if err != nil {
-		return nil, nil, fmt.Errorf("%w: Could not begin database transaction.", domain.ErrTransactionBeginFailed)
+		return nil, nil, nil, fmt.Errorf("%w: Could not begin database transaction.", domain.ErrTransactionBeginFailed)
 	}
 	defer tx.Rollback(ctx)
 
 	if err := uc.userRepo.Create(ctx, user); err != nil {
-		return nil, nil, fmt.Errorf("%w: Failed to create user in the database.", domain.ErrUserCreationFailed)
+		return nil, nil, nil, fmt.Errorf("%w: Failed to create user in the database.", domain.ErrUserCreationFailed)
 	}
 
 	profile := &userdomain.Profile{
 		ProfileID:       uid.New("prf_"),
 		UserID:          user.UserID,
+		FirstName:       cmd.FirstName,
+		LastName:        cmd.LastName,
 		RadarVisibility: userdomain.VisibilityShowAnonymous,
 		UpdatedAt:       uc.clock.Now(),
 	}
 	if err := uc.profileRepo.Create(ctx, profile); err != nil {
-		return nil, nil, fmt.Errorf("%w: Failed to create user profile.", domain.ErrProfileCreationFailed)
+		return nil, nil, nil, fmt.Errorf("%w: Failed to create user profile.", domain.ErrProfileCreationFailed)
 	}
 
 	credit := &gamificationdomain.CreditScore{
@@ -116,19 +116,19 @@ func (uc *RegisterUserUseCase) Register(ctx context.Context, cmd RegisterCommand
 		LastUpdated:  uc.clock.Now(),
 	}
 	if err := uc.creditRepo.Create(ctx, credit); err != nil {
-		return nil, nil, fmt.Errorf("%w: Failed to create credit score record.", domain.ErrCreditCreationFailed)
+		return nil, nil, nil, fmt.Errorf("%w: Failed to create credit score record.", domain.ErrCreditCreationFailed)
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return nil, nil, fmt.Errorf("%w: Could not commit the database transaction.", domain.ErrTransactionCommitFailed)
+		return nil, nil, nil, fmt.Errorf("%w: Could not commit the database transaction.", domain.ErrTransactionCommitFailed)
 	}
 
 	tokens, err := uc.tokenIssuer.Issue(user.UserID, false)
 	if err != nil {
-		return nil, nil, fmt.Errorf("%w: Failed to issue authentication tokens.", domain.ErrTokenIssueFailed)
+		return nil, nil, nil, fmt.Errorf("%w: Failed to issue authentication tokens.", domain.ErrTokenIssueFailed)
 	}
 
-	return user, tokens, nil
+	return user, profile, tokens, nil
 }
 
 type InitJourneyCommand struct {

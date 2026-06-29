@@ -57,6 +57,25 @@ func (r *pointLedgerRepo) FindByUser(ctx context.Context, userID string) ([]gami
 	return ledgers, nil
 }
 
+func (r *pointLedgerRepo) FindByUserAndSourceType(ctx context.Context, userID string, sourceType gamificationdomain.SourceType) ([]gamificationdomain.PointLedger, error) {
+	log.Println("debugprint: entering (*pointLedgerRepo).FindByUserAndSourceType")
+	query := `SELECT ledger_id, user_id, source_type, source_id, delta, lifetime_balance_after, phase_balance_after, note, created_at FROM point_ledger WHERE user_id = $1 AND source_type = $2 ORDER BY created_at DESC`
+	rows, err := r.pool.Query(ctx, query, userID, sourceType)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var ledgers []gamificationdomain.PointLedger
+	for rows.Next() {
+		var l gamificationdomain.PointLedger
+		if err := rows.Scan(&l.LedgerID, &l.UserID, &l.SourceType, &l.SourceID, &l.Delta, &l.LifetimeBalanceAfter, &l.PhaseBalanceAfter, &l.Note, &l.CreatedAt); err != nil {
+			return nil, err
+		}
+		ledgers = append(ledgers, l)
+	}
+	return ledgers, nil
+}
+
 type badgeRepo struct {
 	pool *pgxpool.Pool
 }

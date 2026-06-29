@@ -18,9 +18,21 @@ func NewNotificationUseCase(notifRepo port.NotificationRepository) *Notification
 	return &NotificationUseCase{notifRepo: notifRepo}
 }
 
-func (uc *NotificationUseCase) ListNotifications(ctx context.Context, userID string) ([]notificationdomain.Notification, error) {
+func (uc *NotificationUseCase) ListNotifications(
+	ctx context.Context,
+	userID string,
+	isRead *bool,
+	page,
+	pageSize int,
+) ([]notificationdomain.Notification, int, error) {
 	log.Println("debugprint: entering (*NotificationUseCase).ListNotifications")
-	return uc.notifRepo.FindByUser(ctx, userID)
+
+	// 1. Calculate database boundary variables
+	limit := pageSize
+	offset := (page - 1) * pageSize
+
+	// 2. Pass everything down to your updated repository method
+	return uc.notifRepo.FindByUser(ctx, userID, isRead, limit, offset)
 }
 
 func (uc *NotificationUseCase) MarkRead(ctx context.Context, id string) error {

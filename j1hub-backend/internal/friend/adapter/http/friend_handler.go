@@ -19,9 +19,9 @@ import (
 
 type FriendshipUC interface {
 	SendRequest(ctx context.Context, senderID, targetID string) error
-	ListPendingRequests(ctx context.Context, userID string) ([]frienddomain.Friendship, error)
+	ListPendingRequests(ctx context.Context, userID string, page, pageSize int) ([]frienddomain.Friendship, int, error)
 	RespondToRequest(ctx context.Context, userID, friendshipID string, accept bool) error
-	ListFriends(ctx context.Context, userID string) ([]frienddomain.Friendship, error)
+	ListFriends(ctx context.Context, userID string, page, pageSize int) ([]frienddomain.Friendship, int, error)
 	RemoveFriend(ctx context.Context, userID, friendID string) error
 }
 
@@ -70,14 +70,14 @@ func (h *FriendHandler) ListPendingRequests(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	requests, err := h.friendshipUC.ListPendingRequests(r.Context(), claims.UserID)
+	pago := apperror.ParsePagination(r)
+	requests, totalCount, err := h.friendshipUC.ListPendingRequests(r.Context(), claims.UserID, pago.Page, pago.PageSize)
 	if err != nil {
 		apperror.RespondError(w, err)
 		return
 	}
 
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, requests, page, pageSize, len(requests))
+	apperror.RespondList(w, requests, pago.Page, pago.PageSize, totalCount)
 }
 
 func (h *FriendHandler) RespondToRequest(w http.ResponseWriter, r *http.Request) {
@@ -120,14 +120,14 @@ func (h *FriendHandler) ListFriends(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	friends, err := h.friendshipUC.ListFriends(r.Context(), claims.UserID)
+	pago := apperror.ParsePagination(r)
+	friends, totalCount, err := h.friendshipUC.ListFriends(r.Context(), claims.UserID, pago.Page, pago.PageSize)
 	if err != nil {
 		apperror.RespondError(w, err)
 		return
 	}
 
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, friends, page, pageSize, len(friends))
+	apperror.RespondList(w, friends, pago.Page, pago.PageSize, totalCount)
 }
 
 func (h *FriendHandler) RemoveFriend(w http.ResponseWriter, r *http.Request) {
@@ -166,6 +166,6 @@ func (h *FriendHandler) GetRadar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, radar, page, pageSize, len(radar))
+	pago := apperror.ParsePagination(r)
+	apperror.RespondList(w, radar, pago.Page, pago.PageSize, len(radar))
 }

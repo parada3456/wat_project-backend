@@ -30,7 +30,7 @@ func TestExpenseHandler_ListExpenses(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	expenseUC.On("ListExpenses", mock.Anything, "usr_1").Return([]expensedomain.ExpenseTransaction{}, nil).Once()
+	expenseUC.On("ListExpenses", mock.Anything, "usr_1", 1, 10).Return([]expensedomain.ExpenseTransaction{}, 0, nil).Once()
 	req = httptest.NewRequest("GET", "/expenses", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -38,7 +38,7 @@ func TestExpenseHandler_ListExpenses(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// error
-	expenseUC.On("ListExpenses", mock.Anything, "usr_1").Return(nil, errors.New("err")).Once()
+	expenseUC.On("ListExpenses", mock.Anything, "usr_1", 1, 10).Return(nil, 0, errors.New("err")).Once()
 	req = httptest.NewRequest("GET", "/expenses", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -163,7 +163,7 @@ func TestExpenseHandler_ListPending(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	expenseUC.On("ListPendingExpenses", mock.Anything, "usr_1").Return([]expensedomain.ExpenseSplit{}, nil).Once()
+	expenseUC.On("ListPendingExpenses", mock.Anything, "usr_1", 1, 10).Return([]expensedomain.ExpenseSplit{}, 0, nil).Once()
 	req = httptest.NewRequest("GET", "/expenses/pending", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -171,7 +171,7 @@ func TestExpenseHandler_ListPending(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// error
-	expenseUC.On("ListPendingExpenses", mock.Anything, "usr_1").Return(nil, errors.New("err")).Once()
+	expenseUC.On("ListPendingExpenses", mock.Anything, "usr_1", 1, 10).Return(nil, 0, errors.New("err")).Once()
 	req = httptest.NewRequest("GET", "/expenses/pending", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()

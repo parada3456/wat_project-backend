@@ -3,6 +3,7 @@ package missionusecase
 import (
 	"context"
 	"log"
+	"time"
 
 	missiondomain "github.com/j1hub/backend/internal/mission/domain"
 
@@ -96,9 +97,25 @@ func (uc *MissionUseCase) GetMissionDetail(ctx context.Context, userID, userMiss
 }
 
 func (uc *MissionUseCase) ToggleTask(ctx context.Context, userID, userTaskID string, completed bool) error {
-	log.
-		// Need to check ownership and update user task
-		Println("debugprint: entering (*MissionUseCase).ToggleTask")
+	log.Println("debugprint: entering (*MissionUseCase).ToggleTask")
 
-	return nil
+	ut, err := uc.utRepo.FindByID(ctx, userTaskID)
+	if err != nil {
+		return err
+	}
+
+	if ut.UserID != userID {
+		return domain.ErrForbidden
+	}
+
+	ut.IsCompleted = completed
+	if completed {
+		now := time.Now()
+		ut.CompletedAt = &now
+	} else {
+		ut.CompletedAt = nil
+	}
+	ut.UpdatedAt = time.Now()
+
+	return uc.utRepo.Upsert(ctx, ut)
 }

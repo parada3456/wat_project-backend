@@ -8,9 +8,9 @@ import (
 type RadarVisibility string
 
 const (
-	VisibilityShowAnonymous RadarVisibility = "Show_Anonymous"
-	VisibilityShowFriends   RadarVisibility = "Show_Friends"
-	VisibilityHidden        RadarVisibility = "Hidden"
+	VisibilityShowAnonymous RadarVisibility = "show_anonymous"
+	VisibilityShowFriends   RadarVisibility = "show_friends"
+	VisibilityHidden        RadarVisibility = "hidden"
 )
 
 func (v RadarVisibility) Valid() bool {
@@ -26,8 +26,6 @@ type User struct {
 	UserID              string    `json:"user_id"`
 	Email               string    `json:"email"`
 	PasswordHash        string    `json:"password_hash,omitempty"`
-	FirstName           string    `json:"first_name"`
-	LastName            string    `json:"last_name"`
 	CurrentPhaseID      string    `json:"current_phase_id"`
 	TotalLifetimePoints int       `json:"total_lifetime_points"`
 	CurrentPhasePoints  int       `json:"current_phase_points"`
@@ -41,6 +39,8 @@ type User struct {
 type Profile struct {
 	ProfileID         string          `json:"profile_id"`
 	UserID            string          `json:"user_id"`
+	FirstName         string          `json:"first_name"`
+	LastName          string          `json:"last_name"`
 	PhoneNumber       string          `json:"phone_number"`
 	Bio               string          `json:"bio"`
 	AvatarURL         string          `json:"avatar_url"`

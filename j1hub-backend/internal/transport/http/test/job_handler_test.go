@@ -22,14 +22,14 @@ func TestJobHandler_ListJobs(t *testing.T) {
 	h := jobhandler.NewJobHandler(jobUC)
 
 	// success
-	jobUC.On("ListJobs", mock.Anything, map[string]interface{}{"agency_name": "agency_1"}).Return([]jobdomain.JobPosting{}, nil).Once()
+	jobUC.On("ListJobs", mock.Anything, map[string]interface{}{"agency_name": "agency_1"}, 1, 10).Return([]jobdomain.JobPosting{}, 0, nil).Once()
 	req := httptest.NewRequest("GET", "/jobs?agency=agency_1", nil)
 	w := httptest.NewRecorder()
 	h.ListJobs(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// error
-	jobUC.On("ListJobs", mock.Anything, map[string]interface{}{}).Return(nil, errors.New("err")).Once()
+	jobUC.On("ListJobs", mock.Anything, map[string]interface{}{}, 1, 10).Return(nil, 0, errors.New("err")).Once()
 	req = httptest.NewRequest("GET", "/jobs", nil)
 	w = httptest.NewRecorder()
 	h.ListJobs(w, req)

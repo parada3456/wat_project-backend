@@ -56,8 +56,8 @@ func (h *MissionHandler) ListMissions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, missions, page, pageSize, len(missions))
+	pago := apperror.ParsePagination(r)
+	apperror.RespondList(w, missions, pago.Page, pago.PageSize, len(missions))
 }
 
 func (h *MissionHandler) ListUserMissions(w http.ResponseWriter, r *http.Request) {
@@ -74,8 +74,8 @@ func (h *MissionHandler) ListUserMissions(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, missions, page, pageSize, len(missions))
+	pago := apperror.ParsePagination(r)
+	apperror.RespondList(w, missions, pago.Page, pago.PageSize, len(missions))
 }
 
 func (h *MissionHandler) GetMissionDetail(w http.ResponseWriter, r *http.Request) {

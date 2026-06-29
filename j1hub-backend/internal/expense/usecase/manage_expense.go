@@ -139,12 +139,11 @@ func (uc *ManageExpenseUseCase) ApproveSplit(ctx context.Context, payerID, split
 	return nil
 }
 
-func (uc *ManageExpenseUseCase) ListExpenses(ctx context.Context, userID string) ([]expensedomain.ExpenseTransaction, error) {
-	log.
-		// Need FindByUser in repo
-		Println("debugprint: entering (*ManageExpenseUseCase).ListExpenses")
-
-	return nil, nil
+func (uc *ManageExpenseUseCase) ListExpenses(ctx context.Context, userID string, page, pageSize int) ([]expensedomain.ExpenseTransaction, int, error) {
+	log.Println("debugprint: entering (*ManageExpenseUseCase).ListExpenses")
+	limit := pageSize
+	offset := (page - 1) * pageSize
+	return uc.txnRepo.FindByUser(ctx, userID, limit, offset)
 }
 
 func (uc *ManageExpenseUseCase) GetExpenseDetail(ctx context.Context, userID, transactionID string) (*expensedomain.ExpenseTransaction, []expensedomain.ExpenseSplit, error) {
@@ -153,22 +152,45 @@ func (uc *ManageExpenseUseCase) GetExpenseDetail(ctx context.Context, userID, tr
 	if err != nil {
 		return nil, nil, err
 	}
-	// Fetch splits for txn
-	return txn, nil, nil
+	splits, err := uc.splitRepo.FindByTransactionID(ctx, transactionID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	isAuthorized := txn.PaidByUserID == userID
+	if !isAuthorized {
+		for _, s := range splits {
+			if s.UserID == userID {
+				isAuthorized = true
+				break
+			}
+		}
+	}
+	if !isAuthorized {
+		return nil, nil, domain.ErrForbidden
+	}
+
+	return txn, splits, nil
 }
 
 func (uc *ManageExpenseUseCase) DeleteExpense(ctx context.Context, userID, transactionID string) error {
-	log.
-		// Check ownership and delete
-		Println("debugprint: entering (*ManageExpenseUseCase).DeleteExpense")
-
-	return nil
+	log.Println("debugprint: entering (*ManageExpenseUseCase).DeleteExpense")
+	txn, err := uc.txnRepo.FindByID(ctx, transactionID)
+	if err != nil {
+		return err
+	}
+	if txn.PaidByUserID != userID {
+		return domain.ErrForbidden
+	}
+	if err := uc.splitRepo.DeleteByTransactionID(ctx, transactionID); err != nil {
+		return err
+	}
+	return uc.txnRepo.Delete(ctx, transactionID)
 }
 
-func (uc *ManageExpenseUseCase) ListPendingExpenses(ctx context.Context, userID string) ([]expensedomain.ExpenseSplit, error) {
-	log.
-		// Need FindPendingByUser in repo
-		Println("debugprint: entering (*ManageExpenseUseCase).ListPendingExpenses")
-
-	return nil, nil
+func (uc *ManageExpenseUseCase) ListPendingExpenses(ctx context.Context, userID string, page, pageSize int) ([]expensedomain.ExpenseSplit, int, error) {
+	log.Println("debugprint: entering (*ManageExpenseUseCase).ListPendingExpenses")
+	limit := pageSize
+	offset := (page - 1) * pageSize
+	return uc.splitRepo.FindPendingByUser(ctx, userID, limit, offset)
 }

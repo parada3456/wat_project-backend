@@ -40,29 +40,35 @@ func NewJourneyUseCase(
 }
 
 func (uc *JourneyUseCase) ListPhases(ctx context.Context) ([]missiondomain.JourneyPhase, error) {
-	log.
-		// Need ListAll in repo
-		Println("debugprint: entering (*JourneyUseCase).ListPhases")
-
-	return nil, nil
+	log.Println("debugprint: entering (*JourneyUseCase).ListPhases")
+	if uc.phaseRepo == nil {
+		return nil, nil
+	}
+	return uc.phaseRepo.ListAll(ctx)
 }
 
 func (uc *JourneyUseCase) GetHistory(ctx context.Context, userID string) ([]missiondomain.UserPhaseHistory, error) {
-	log.
-		// Need FindByUser in repo
-		Println("debugprint: entering (*JourneyUseCase).GetHistory")
-
-	return nil, nil
+	log.Println("debugprint: entering (*JourneyUseCase).GetHistory")
+	if uc.historyRepo == nil {
+		return nil, nil
+	}
+	return uc.historyRepo.FindByUser(ctx, userID)
 }
 
 func (uc *JourneyUseCase) ListUserBadges(ctx context.Context, userID string) ([]gamificationdomain.UserBadge, error) {
 	log.Println("debugprint: entering (*JourneyUseCase).ListUserBadges")
+	if uc.ubRepo == nil {
+		return nil, nil
+	}
 	return uc.ubRepo.FindByUser(ctx, userID)
 }
 
 func (uc *JourneyUseCase) GetCreditScoreHistory(ctx context.Context, userID string) ([]gamificationdomain.PointLedger, error) {
 	log.Println("debugprint: entering (*JourneyUseCase).GetCreditScoreHistory")
-	return nil, nil
+	if uc.ledgerRepo == nil {
+		return nil, nil
+	}
+	return uc.ledgerRepo.FindByUserAndSourceType(ctx, userID, gamificationdomain.SourceExpensePenalty)
 }
 
 func (uc *JourneyUseCase) GetPointsLedger(ctx context.Context, userID string) ([]gamificationdomain.PointLedger, error) {

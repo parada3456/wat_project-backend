@@ -17,7 +17,7 @@ import (
 )
 
 type JobUC interface {
-	ListJobs(ctx context.Context, filters map[string]interface{}) ([]jobdomain.JobPosting, error)
+	ListJobs(ctx context.Context, filters map[string]interface{}, page, pageSize int) ([]jobdomain.JobPosting, int, error)
 	GetJobDetail(ctx context.Context, id string) (*jobdomain.JobPosting, []jobdomain.JobHousing, *jobdomain.JobOverallRating, error)
 	AddToCart(ctx context.Context, userID, jobID string) error
 	ListCart(ctx context.Context, userID string) ([]jobdomain.UserCart, error)
@@ -48,13 +48,13 @@ func (h *JobHandler) ListJobs(w http.ResponseWriter, r *http.Request) {
 		filters["agency_name"] = agency
 	}
 
-	jobs, err := h.jobUC.ListJobs(r.Context(), filters)
+	pago := apperror.ParsePagination(r)
+	jobs, totalCount, err := h.jobUC.ListJobs(r.Context(), filters, pago.Page, pago.PageSize)
 	if err != nil {
 		apperror.RespondError(w, err)
 		return
 	}
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, jobs, page, pageSize, len(jobs))
+	apperror.RespondList(w, jobs, pago.Page, pago.PageSize, totalCount)
 }
 
 func (h *JobHandler) GetJobDetail(w http.ResponseWriter, r *http.Request) {
@@ -107,8 +107,8 @@ func (h *JobHandler) ListCart(w http.ResponseWriter, r *http.Request) {
 		apperror.RespondError(w, err)
 		return
 	}
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, cart, page, pageSize, len(cart))
+	pago := apperror.ParsePagination(r)
+	apperror.RespondList(w, cart, pago.Page, pago.PageSize, len(cart))
 }
 
 func (h *JobHandler) RemoveFromCart(w http.ResponseWriter, r *http.Request) {
@@ -167,8 +167,8 @@ func (h *JobHandler) GetJobReviews(w http.ResponseWriter, r *http.Request) {
 		apperror.RespondError(w, err)
 		return
 	}
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, reviews, page, pageSize, len(reviews))
+	pago := apperror.ParsePagination(r)
+	apperror.RespondList(w, reviews, pago.Page, pago.PageSize, len(reviews))
 }
 
 func (h *JobHandler) GetAllReviews(w http.ResponseWriter, r *http.Request) {
@@ -185,8 +185,8 @@ func (h *JobHandler) GetAllReviews(w http.ResponseWriter, r *http.Request) {
 		apperror.RespondError(w, err)
 		return
 	}
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, reviews, page, pageSize, len(reviews))
+	pago := apperror.ParsePagination(r)
+	apperror.RespondList(w, reviews, pago.Page, pago.PageSize, len(reviews))
 }
 
 func (h *JobHandler) CreateReview(w http.ResponseWriter, r *http.Request) {

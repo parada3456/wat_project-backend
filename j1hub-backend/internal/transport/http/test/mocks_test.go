@@ -93,12 +93,12 @@ type MockManageExpenseUC struct {
 	mock.Mock
 }
 
-func (m *MockManageExpenseUC) ListExpenses(ctx context.Context, userID string) ([]expensedomain.ExpenseTransaction, error) {
-	args := m.Called(ctx, userID)
+func (m *MockManageExpenseUC) ListExpenses(ctx context.Context, userID string, page, pageSize int) ([]expensedomain.ExpenseTransaction, int, error) {
+	args := m.Called(ctx, userID, page, pageSize)
 	if args.Get(0) == nil {
-		return nil, args.Error(1)
+		return nil, args.Int(1), args.Error(2)
 	}
-	return args.Get(0).([]expensedomain.ExpenseTransaction), args.Error(1)
+	return args.Get(0).([]expensedomain.ExpenseTransaction), args.Int(1), args.Error(2)
 }
 
 func (m *MockManageExpenseUC) CreateExpense(ctx context.Context, userID string, cmd expenseusecase.CreateExpenseCmd) error {
@@ -122,12 +122,12 @@ func (m *MockManageExpenseUC) DeleteExpense(ctx context.Context, userID, id stri
 	return m.Called(ctx, userID, id).Error(0)
 }
 
-func (m *MockManageExpenseUC) ListPendingExpenses(ctx context.Context, userID string) ([]expensedomain.ExpenseSplit, error) {
-	args := m.Called(ctx, userID)
+func (m *MockManageExpenseUC) ListPendingExpenses(ctx context.Context, userID string, page, pageSize int) ([]expensedomain.ExpenseSplit, int, error) {
+	args := m.Called(ctx, userID, page, pageSize)
 	if args.Get(0) == nil {
-		return nil, args.Error(1)
+		return nil, args.Int(1), args.Error(2)
 	}
-	return args.Get(0).([]expensedomain.ExpenseSplit), args.Error(1)
+	return args.Get(0).([]expensedomain.ExpenseSplit), args.Int(1), args.Error(2)
 }
 
 func (m *MockManageExpenseUC) SubmitSlip(ctx context.Context, debtorID, splitID string, file io.Reader, contentType string) error {
@@ -147,24 +147,24 @@ func (m *MockFriendshipUC) SendRequest(ctx context.Context, senderID, targetID s
 	return m.Called(ctx, senderID, targetID).Error(0)
 }
 
-func (m *MockFriendshipUC) ListPendingRequests(ctx context.Context, userID string) ([]frienddomain.Friendship, error) {
-	args := m.Called(ctx, userID)
+func (m *MockFriendshipUC) ListPendingRequests(ctx context.Context, userID string, page, pageSize int) ([]frienddomain.Friendship, int, error) {
+	args := m.Called(ctx, userID, page, pageSize)
 	if args.Get(0) == nil {
-		return nil, args.Error(1)
+		return nil, args.Int(1), args.Error(2)
 	}
-	return args.Get(0).([]frienddomain.Friendship), args.Error(1)
+	return args.Get(0).([]frienddomain.Friendship), args.Int(1), args.Error(2)
 }
 
 func (m *MockFriendshipUC) RespondToRequest(ctx context.Context, userID, friendshipID string, accept bool) error {
 	return m.Called(ctx, userID, friendshipID, accept).Error(0)
 }
 
-func (m *MockFriendshipUC) ListFriends(ctx context.Context, userID string) ([]frienddomain.Friendship, error) {
-	args := m.Called(ctx, userID)
+func (m *MockFriendshipUC) ListFriends(ctx context.Context, userID string, page, pageSize int) ([]frienddomain.Friendship, int, error) {
+	args := m.Called(ctx, userID, page, pageSize)
 	if args.Get(0) == nil {
-		return nil, args.Error(1)
+		return nil, args.Int(1), args.Error(2)
 	}
-	return args.Get(0).([]frienddomain.Friendship), args.Error(1)
+	return args.Get(0).([]frienddomain.Friendship), args.Int(1), args.Error(2)
 }
 
 func (m *MockFriendshipUC) RemoveFriend(ctx context.Context, userID, friendID string) error {
@@ -189,12 +189,12 @@ type MockJobUC struct {
 	mock.Mock
 }
 
-func (m *MockJobUC) ListJobs(ctx context.Context, filters map[string]interface{}) ([]jobdomain.JobPosting, error) {
-	args := m.Called(ctx, filters)
+func (m *MockJobUC) ListJobs(ctx context.Context, filters map[string]interface{}, page, pageSize int) ([]jobdomain.JobPosting, int, error) {
+	args := m.Called(ctx, filters, page, pageSize)
 	if args.Get(0) == nil {
-		return nil, args.Error(1)
+		return nil, args.Int(1), args.Error(2)
 	}
-	return args.Get(0).([]jobdomain.JobPosting), args.Error(1)
+	return args.Get(0).([]jobdomain.JobPosting), args.Int(1), args.Error(2)
 }
 
 func (m *MockJobUC) GetJobDetail(ctx context.Context, id string) (*jobdomain.JobPosting, []jobdomain.JobHousing, *jobdomain.JobOverallRating, error) {
@@ -309,12 +309,12 @@ type MockNotificationUC struct {
 	mock.Mock
 }
 
-func (m *MockNotificationUC) ListNotifications(ctx context.Context, userID string) ([]notificationdomain.Notification, error) {
-	args := m.Called(ctx, userID)
+func (m *MockNotificationUC) ListNotifications(ctx context.Context, userID string, isRead *bool, page, pageSize int) ([]notificationdomain.Notification, int, error) {
+	args := m.Called(ctx, userID, isRead, page, pageSize)
 	if args.Get(0) == nil {
-		return nil, args.Error(1)
+		return nil, args.Int(1), args.Error(2)
 	}
-	return args.Get(0).([]notificationdomain.Notification), args.Error(1)
+	return args.Get(0).([]notificationdomain.Notification), args.Int(1), args.Error(2)
 }
 
 func (m *MockNotificationUC) MarkRead(ctx context.Context, id string) error {

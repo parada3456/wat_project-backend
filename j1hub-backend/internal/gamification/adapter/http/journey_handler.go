@@ -12,8 +12,8 @@ import (
 	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
 
 	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
 	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
+	"github.com/j1hub/backend/internal/transport/http/middleware"
 	"github.com/j1hub/backend/pkg/apperror"
 )
 
@@ -65,8 +65,8 @@ func (h *JourneyHandler) ListPhases(w http.ResponseWriter, r *http.Request) {
 		apperror.RespondError(w, err)
 		return
 	}
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, phases, page, pageSize, len(phases))
+	pago := apperror.ParsePagination(r)
+	apperror.RespondList(w, phases, pago.Page, pago.PageSize, len(phases))
 }
 
 func (h *JourneyHandler) AdvancePhase(w http.ResponseWriter, r *http.Request) {
@@ -101,8 +101,8 @@ func (h *JourneyHandler) GetHistory(w http.ResponseWriter, r *http.Request) {
 		apperror.RespondError(w, err)
 		return
 	}
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, history, page, pageSize, len(history))
+	pago := apperror.ParsePagination(r)
+	apperror.RespondList(w, history, pago.Page, pago.PageSize, len(history))
 }
 
 func (h *JourneyHandler) GetLeaderboard(w http.ResponseWriter, r *http.Request) {
@@ -115,8 +115,8 @@ func (h *JourneyHandler) GetLeaderboard(w http.ResponseWriter, r *http.Request) 
 		apperror.RespondError(w, err)
 		return
 	}
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, entries, page, pageSize, len(entries))
+	pago := apperror.ParsePagination(r)
+	apperror.RespondList(w, entries, pago.Page, pago.PageSize, len(entries))
 }
 
 func (h *JourneyHandler) ListBadges(w http.ResponseWriter, r *http.Request) {
@@ -132,8 +132,8 @@ func (h *JourneyHandler) ListBadges(w http.ResponseWriter, r *http.Request) {
 		apperror.RespondError(w, err)
 		return
 	}
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, badges, page, pageSize, len(badges))
+	pago := apperror.ParsePagination(r)
+	apperror.RespondList(w, badges, pago.Page, pago.PageSize, len(badges))
 }
 
 func (h *JourneyHandler) GetCreditHistory(w http.ResponseWriter, r *http.Request) {
@@ -149,8 +149,8 @@ func (h *JourneyHandler) GetCreditHistory(w http.ResponseWriter, r *http.Request
 		apperror.RespondError(w, err)
 		return
 	}
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, history, page, pageSize, len(history))
+	pago := apperror.ParsePagination(r)
+	apperror.RespondList(w, history, pago.Page, pago.PageSize, len(history))
 }
 
 func (h *JourneyHandler) GetPointsLedger(w http.ResponseWriter, r *http.Request) {
@@ -166,6 +166,6 @@ func (h *JourneyHandler) GetPointsLedger(w http.ResponseWriter, r *http.Request)
 		apperror.RespondError(w, err)
 		return
 	}
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, ledger, page, pageSize, len(ledger))
+	pago := apperror.ParsePagination(r)
+	apperror.RespondList(w, ledger, pago.Page, pago.PageSize, len(ledger))
 }

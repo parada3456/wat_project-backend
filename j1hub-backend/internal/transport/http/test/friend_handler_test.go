@@ -64,7 +64,7 @@ func TestFriendHandler_ListPendingRequests(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	friendshipUC.On("ListPendingRequests", mock.Anything, "usr_1").Return([]frienddomain.Friendship{}, nil).Once()
+	friendshipUC.On("ListPendingRequests", mock.Anything, "usr_1", 1, 10).Return([]frienddomain.Friendship{}, 0, nil).Once()
 	req = httptest.NewRequest("GET", "/friends/requests/pending", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -72,7 +72,7 @@ func TestFriendHandler_ListPendingRequests(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// error
-	friendshipUC.On("ListPendingRequests", mock.Anything, "usr_1").Return(nil, errors.New("err")).Once()
+	friendshipUC.On("ListPendingRequests", mock.Anything, "usr_1", 1, 10).Return(nil, 0, errors.New("err")).Once()
 	req = httptest.NewRequest("GET", "/friends/requests/pending", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -129,7 +129,7 @@ func TestFriendHandler_ListFriends(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	friendshipUC.On("ListFriends", mock.Anything, "usr_1").Return([]frienddomain.Friendship{}, nil).Once()
+	friendshipUC.On("ListFriends", mock.Anything, "usr_1", 1, 10).Return([]frienddomain.Friendship{}, 0, nil).Once()
 	req = httptest.NewRequest("GET", "/friends", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -137,7 +137,7 @@ func TestFriendHandler_ListFriends(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// error
-	friendshipUC.On("ListFriends", mock.Anything, "usr_1").Return(nil, errors.New("err")).Once()
+	friendshipUC.On("ListFriends", mock.Anything, "usr_1", 1, 10).Return(nil, 0, errors.New("err")).Once()
 	req = httptest.NewRequest("GET", "/friends", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()

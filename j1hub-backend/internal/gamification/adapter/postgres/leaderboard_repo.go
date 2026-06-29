@@ -23,8 +23,9 @@ func NewLeaderboardRepository(pool *pgxpool.Pool) port.LeaderboardRepository {
 func (r *leaderboardRepo) FindByScope(ctx context.Context, scope, jobID string) ([]userdomain.User, error) {
 	log.Println("debugprint: entering (*leaderboardRepo).FindByScope")
 	query := `
-		SELECT u.user_id, u.email, u.first_name, u.last_name, u.current_phase_id, u.total_lifetime_points, u.current_phase_points, u.mission_streak, u.arrival_date, u.job_start_date, u.created_at, u.updated_at
-		FROM users u`
+		SELECT u.user_id, u.email, COALESCE(p.first_name, ''), COALESCE(p.last_name, ''), u.current_phase_id, u.total_lifetime_points, u.current_phase_points, u.mission_streak, u.arrival_date, u.job_start_date, u.created_at, u.updated_at
+		FROM users u
+		LEFT JOIN profiles p ON u.user_id = p.user_id`
 
 	var args []interface{}
 	if scope == "employer" && jobID != "" {
@@ -46,7 +47,7 @@ func (r *leaderboardRepo) FindByScope(ctx context.Context, scope, jobID string) 
 		var arrivalDate *time.Time
 		var jobStartDate *time.Time
 		if err := rows.Scan(
-			&u.UserID, &u.Email, &u.FirstName, &u.LastName,
+			&u.UserID, &u.Email,
 			&currentPhaseID, &u.TotalLifetimePoints, &u.CurrentPhasePoints,
 			&u.MissionStreak, &arrivalDate, &jobStartDate, &u.CreatedAt, &u.UpdatedAt,
 		); err != nil {

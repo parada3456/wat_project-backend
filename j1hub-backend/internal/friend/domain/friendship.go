@@ -8,9 +8,9 @@ import (
 type FriendshipStatus string
 
 const (
-	FriendshipPending  FriendshipStatus = "Pending"
-	FriendshipAccepted FriendshipStatus = "Accepted"
-	FriendshipBlocked  FriendshipStatus = "Blocked"
+	FriendshipPending  FriendshipStatus = "pending"
+	FriendshipAccepted FriendshipStatus = "accepted"
+	FriendshipBlocked  FriendshipStatus = "blocked"
 )
 
 func (s FriendshipStatus) Valid() bool {

@@ -121,6 +121,18 @@ func setupTestDB(t *testing.T) (*pgxpool.Pool, func()) {
 	pool, err := pgxpool.New(ctx, dbURL)
 	require.NoError(t, err)
 
+	// Truncate tables to ensure tests start with a clean slate (no seeded mock data)
+	tables := []string{
+		"users", "profiles", "friendships", "journey_phases",
+		"user_phase_history", "missions", "user_missions",
+		"tasks", "user_tasks", "point_ledger", "badges",
+		"user_badges", "credit_scores", "expense_splits", "expense_transactions",
+		"user_carts", "job_reviews", "job_overall_ratings", "job_housings", "job_postings",
+	}
+	query := fmt.Sprintf("TRUNCATE TABLE %s CASCADE", strings.Join(tables, ", "))
+	_, err = pool.Exec(ctx, query)
+	require.NoError(t, err)
+
 	cleanup := func() {
 		// Truncate tables to clean up
 		tables := []string{
@@ -156,8 +168,6 @@ func TestUserRepository(t *testing.T) {
 		UserID:              "usr_1",
 		Email:               "user1@test.com",
 		PasswordHash:        "hash1",
-		FirstName:           "First",
-		LastName:            "Last",
 		CurrentPhaseID:      "phase_1",
 		TotalLifetimePoints: 10,
 		CurrentPhasePoints:  5,
@@ -168,15 +178,30 @@ func TestUserRepository(t *testing.T) {
 		UpdatedAt:           time.Now().Truncate(time.Second),
 	}
 
-	// Create
+	profileRepo := userpostgres.NewProfileRepository(pool)
+	// Create user
 	err = repo.Create(ctx, u)
+	assert.NoError(t, err)
+
+	// Create profile for user
+	err = profileRepo.Create(ctx, &userdomain.Profile{
+		ProfileID:       "prf_1",
+		UserID:          "usr_1",
+		FirstName:       "First",
+		LastName:        "Last",
+		RadarVisibility: userdomain.VisibilityShowAnonymous,
+		UpdatedAt:       time.Now(),
+	})
 	assert.NoError(t, err)
 
 	// FindByID
 	found, err := repo.FindByID(ctx, "usr_1")
 	assert.NoError(t, err)
 	assert.Equal(t, u.Email, found.Email)
-	assert.Equal(t, u.FirstName, found.FirstName)
+
+	foundProfile, err := profileRepo.FindByUserID(ctx, "usr_1")
+	assert.NoError(t, err)
+	assert.Equal(t, "First", foundProfile.FirstName)
 
 	// FindByEmail
 	foundEmail, err := repo.FindByEmail(ctx, "user1@test.com")
@@ -184,12 +209,18 @@ func TestUserRepository(t *testing.T) {
 	assert.Equal(t, u.UserID, foundEmail.UserID)
 
 	// Update
-	u.FirstName = "Updated"
 	err = repo.Update(ctx, u)
 	assert.NoError(t, err)
-	foundUpdated, err := repo.FindByID(ctx, "usr_1")
+
+	p, err := profileRepo.FindByUserID(ctx, "usr_1")
 	assert.NoError(t, err)
-	assert.Equal(t, "Updated", foundUpdated.FirstName)
+	p.FirstName = "Updated"
+	err = profileRepo.Update(ctx, p)
+	assert.NoError(t, err)
+
+	foundUpdatedProfile, err := profileRepo.FindByUserID(ctx, "usr_1")
+	assert.NoError(t, err)
+	assert.Equal(t, "Updated", foundUpdatedProfile.FirstName)
 
 	// IncrementPoints
 	err = repo.IncrementPoints(ctx, "usr_1", 20, 15)
@@ -237,8 +268,6 @@ func TestProfileRepository(t *testing.T) {
 		UserID:         "usr_1",
 		Email:          "user1@test.com",
 		PasswordHash:   "hash",
-		FirstName:      "First",
-		LastName:       "Last",
 		CurrentPhaseID: "phase_1",
 	}
 	err = userRepo.Create(ctx, u)
@@ -247,6 +276,8 @@ func TestProfileRepository(t *testing.T) {
 	p := &userdomain.Profile{
 		ProfileID:         "prof_1",
 		UserID:            "usr_1",
+		FirstName:         "First",
+		LastName:          "Last",
 		PhoneNumber:       "123456",
 		Bio:               "My bio",
 		AvatarURL:         "avatar.jpg",
@@ -329,7 +360,7 @@ func TestFriendshipRepository(t *testing.T) {
 	err = repo.UpdateStatus(ctx, "fr_1", frienddomain.FriendshipAccepted)
 	assert.NoError(t, err)
 
-	friends, err := repo.FindFriendsOf(ctx, "usr_1")
+	friends, _, err := repo.FindFriendsOf(ctx, "usr_1", 10, 0)
 	assert.NoError(t, err)
 	assert.Len(t, friends, 1)
 }
@@ -338,22 +369,35 @@ func TestNotificationRepository(t *testing.T) {
 	pool, cleanup := setupTestDB(t)
 	defer cleanup()
 	repo := notificationpostgres.NewNotificationRepository(pool)
+	userRepo := userpostgres.NewUserRepository(pool)
 	ctx := context.Background()
 
-	err := repo.Insert(ctx, &notificationdomain.Notification{})
+	u1 := &userdomain.User{UserID: "usr_1", Email: "u1@t.com"}
+	require.NoError(t, userRepo.Create(ctx, u1))
+
+	n := &notificationdomain.Notification{
+		NotificationID: "n_1",
+		UserID:         "usr_1",
+		Title:          "Test Notif",
+		Body:           "Body of notif",
+		IsRead:         false,
+		CreatedAt:      time.Now().Truncate(time.Second),
+	}
+	err := repo.Insert(ctx, n)
 	assert.NoError(t, err)
 
-	list, err := repo.FindByUser(ctx, "user")
-	assert.Nil(t, list)
+	list, total, err := repo.FindByUser(ctx, "usr_1", nil, 10, 0)
+	assert.Len(t, list, 1)
+	assert.Equal(t, 1, total)
 	assert.NoError(t, err)
 
-	err = repo.MarkAsRead(ctx, "123")
+	err = repo.MarkAsRead(ctx, "n_1")
 	assert.NoError(t, err)
 
-	err = repo.MarkAllAsRead(ctx, "user")
+	err = repo.MarkAllAsRead(ctx, "usr_1")
 	assert.NoError(t, err)
 
-	err = repo.Delete(ctx, "123")
+	err = repo.Delete(ctx, "n_1")
 	assert.NoError(t, err)
 }
 
@@ -548,9 +592,10 @@ func TestJobRepository(t *testing.T) {
 		)`)
 	require.NoError(t, err)
 
-	jobs, err := jobRepo.FindWithFilters(ctx, map[string]interface{}{"position_type": "Full-Time"})
+	jobs, totalCount, err := jobRepo.FindWithFilters(ctx, map[string]interface{}{"position_type": "Full-Time"}, 10, 0)
 	assert.NoError(t, err)
 	assert.Len(t, jobs, 1)
+	assert.Equal(t, 1, totalCount)
 	assert.Equal(t, "job_1", jobs[0].JobID)
 
 	job, err := jobRepo.FindByID(ctx, "job_1")
@@ -664,7 +709,7 @@ func TestMissionRepository(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 50, foundHist.PhasePointsEarned)
 
-	_, err = pool.Exec(ctx, `INSERT INTO missions (mission_id, phase_id, title, description, location, base_points, is_mandatory, verification_type, due_date_type, fixed_due_date, relative_trigger_event, relative_days_offset, created_at, updated_at) VALUES ('m_1', 'phase_1', 'M1', 'Desc', 'Loc', 100, true, 'None', 'Relative', NULL, 'arrival_date', 5, NOW(), NOW())`)
+	_, err = pool.Exec(ctx, `INSERT INTO missions (mission_id, phase_id, title, description, location, base_points, is_mandatory, verification_type, due_date_type, fixed_due_date, relative_trigger_event, relative_days_offset, created_at, updated_at) VALUES ('m_1', 'phase_1', 'M1', 'Desc', 'Loc', 100, true, 'none', 'relative', NULL, 'arrival_date', 5, NOW(), NOW())`)
 	require.NoError(t, err)
 
 	missions, err := missionRepo.FindByPhase(ctx, "phase_1")
@@ -775,7 +820,10 @@ func TestGamificationRepository(t *testing.T) {
 	assert.NoError(t, ledgerRepo.InsertBatch(ctx, []gamificationdomain.PointLedger{*l2}))
 
 	// Test BadgeRepository and UserBadgeRepository
-	_, err := pool.Exec(ctx, `INSERT INTO badges (badge_id, title, description, trigger_type, icon_url) VALUES ('badge_1', 'Badge 1', 'Desc', 'Speed', 'icon_1')`)
+	_, err := pool.Exec(ctx, `DELETE FROM user_badges; DELETE FROM badges;`)
+	require.NoError(t, err)
+
+	_, err = pool.Exec(ctx, `INSERT INTO badges (badge_id, title, description, trigger_type, icon_url) VALUES ('badge_1', 'Badge 1', 'Desc', 'speed', 'icon_1')`)
 	require.NoError(t, err)
 
 	badges, err := badgeRepo.FindByTriggerType(ctx, gamificationdomain.TriggerSpeed)

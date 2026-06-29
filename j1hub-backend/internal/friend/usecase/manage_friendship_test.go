@@ -135,23 +135,94 @@ func TestManageFriendshipUseCase_ListFriends_Success(t *testing.T) {
 		{FriendshipID: "frn_1", UserID1: "usr_aaa", UserID2: "usr_bbb", Status: frienddomain.FriendshipAccepted},
 	}
 
-	friendRepo.On("FindFriendsOf", ctx, userID).Return(mockFriends, nil)
+	friendRepo.On("FindFriendsOf", ctx, userID, 10, 0).Return(mockFriends, 1, nil)
 
-	res, err := uc.ListFriends(ctx, userID)
+	res, totalCount, err := uc.ListFriends(ctx, userID, 1, 10)
 
 	assert.NoError(t, err)
 	assert.Equal(t, mockFriends, res)
+	assert.Equal(t, 1, totalCount)
 }
 
-func TestManageFriendshipUseCase_ListPendingRequests_Stub(t *testing.T) {
-	uc := friendusecase.NewManageFriendshipUseCase(nil, nil, nil, &MockClock{})
-	res, err := uc.ListPendingRequests(context.Background(), "usr_aaa")
-	assert.Nil(t, res)
+func TestManageFriendshipUseCase_ListPendingRequests_Success(t *testing.T) {
+	friendRepo := new(MockFriendshipRepository)
+	uc := friendusecase.NewManageFriendshipUseCase(friendRepo, nil, nil, &MockClock{})
+
+	ctx := context.Background()
+	userID := "usr_aaa"
+	mockPending := []frienddomain.Friendship{
+		{FriendshipID: "frn_1", UserID1: "usr_aaa", UserID2: "usr_bbb", Status: frienddomain.FriendshipPending},
+	}
+
+	friendRepo.On("FindPendingFor", ctx, userID, 10, 0).Return(mockPending, 1, nil)
+
+	res, totalCount, err := uc.ListPendingRequests(ctx, userID, 1, 10)
+
 	assert.NoError(t, err)
+	assert.Equal(t, mockPending, res)
+	assert.Equal(t, 1, totalCount)
+	friendRepo.AssertExpectations(t)
 }
 
-func TestManageFriendshipUseCase_RemoveFriend_Stub(t *testing.T) {
-	uc := friendusecase.NewManageFriendshipUseCase(nil, nil, nil, &MockClock{})
-	err := uc.RemoveFriend(context.Background(), "usr_aaa", "frn_1")
+func TestManageFriendshipUseCase_RemoveFriend_Success(t *testing.T) {
+	friendRepo := new(MockFriendshipRepository)
+	uc := friendusecase.NewManageFriendshipUseCase(friendRepo, nil, nil, &MockClock{})
+
+	ctx := context.Background()
+	userID := "usr_aaa"
+	friendshipID := "frn_1"
+	mockFriendship := &frienddomain.Friendship{
+		FriendshipID: friendshipID,
+		UserID1:      "usr_aaa",
+		UserID2:      "usr_bbb",
+		Status:       frienddomain.FriendshipAccepted,
+	}
+
+	friendRepo.On("FindByID", ctx, friendshipID).Return(mockFriendship, nil)
+	friendRepo.On("Delete", ctx, friendshipID).Return(nil)
+
+	err := uc.RemoveFriend(ctx, userID, friendshipID)
+
 	assert.NoError(t, err)
+	friendRepo.AssertExpectations(t)
+}
+
+func TestManageFriendshipUseCase_RemoveFriend_Forbidden(t *testing.T) {
+	friendRepo := new(MockFriendshipRepository)
+	uc := friendusecase.NewManageFriendshipUseCase(friendRepo, nil, nil, &MockClock{})
+
+	ctx := context.Background()
+	userID := "usr_ccc" // not aaa or bbb
+	friendshipID := "frn_1"
+	mockFriendship := &frienddomain.Friendship{
+		FriendshipID: friendshipID,
+		UserID1:      "usr_aaa",
+		UserID2:      "usr_bbb",
+		Status:       frienddomain.FriendshipAccepted,
+	}
+
+	friendRepo.On("FindByID", ctx, friendshipID).Return(mockFriendship, nil)
+
+	err := uc.RemoveFriend(ctx, userID, friendshipID)
+
+	assert.Error(t, err)
+	assert.Equal(t, domain.ErrForbidden, err)
+	friendRepo.AssertExpectations(t)
+}
+
+func TestManageFriendshipUseCase_RemoveFriend_NotFound(t *testing.T) {
+	friendRepo := new(MockFriendshipRepository)
+	uc := friendusecase.NewManageFriendshipUseCase(friendRepo, nil, nil, &MockClock{})
+
+	ctx := context.Background()
+	userID := "usr_aaa"
+	friendshipID := "frn_1"
+
+	friendRepo.On("FindByID", ctx, friendshipID).Return((*frienddomain.Friendship)(nil), domain.ErrNotFound)
+
+	err := uc.RemoveFriend(ctx, userID, friendshipID)
+
+	assert.Error(t, err)
+	assert.Equal(t, domain.ErrNotFound, err)
+	friendRepo.AssertExpectations(t)
 }

@@ -6,12 +6,16 @@ import (
 
 type ExpenseDetailResponse struct {
 	Transaction *expensedomain.ExpenseTransaction `json:"transaction"`
-	Splits      []expensedomain.ExpenseSplit      `json:"splits"`
+	Splits      []string                          `json:"splits"`
 }
 
 func NewExpenseDetailResponse(txn *expensedomain.ExpenseTransaction, splits []expensedomain.ExpenseSplit) *ExpenseDetailResponse {
+	splitIDs := make([]string, len(splits))
+	for i, s := range splits {
+		splitIDs[i] = s.SplitID
+	}
 	return &ExpenseDetailResponse{
 		Transaction: txn,
-		Splits:      splits,
+		Splits:      splitIDs,
 	}
 }

@@ -15,63 +15,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// Mocks
-
-type MockExpenseTransactionRepository struct {
-	mock.Mock
-}
-
-func (m *MockExpenseTransactionRepository) Insert(ctx context.Context, t *expensedomain.ExpenseTransaction) error {
-	args := m.Called(ctx, t)
-	return args.Error(0)
-}
-func (m *MockExpenseTransactionRepository) FindByID(ctx context.Context, id string) (*expensedomain.ExpenseTransaction, error) {
-	args := m.Called(ctx, id)
-	if args.Get(0) != nil {
-		return args.Get(0).(*expensedomain.ExpenseTransaction), args.Error(1)
-	}
-	return nil, args.Error(1)
-}
-func (m *MockExpenseTransactionRepository) MarkSettled(ctx context.Context, id string) error {
-	args := m.Called(ctx, id)
-	return args.Error(0)
-}
-
-type MockExpenseSplitRepository struct {
-	mock.Mock
-}
-
-func (m *MockExpenseSplitRepository) BulkInsert(ctx context.Context, splits []expensedomain.ExpenseSplit) error {
-	args := m.Called(ctx, splits)
-	return args.Error(0)
-}
-func (m *MockExpenseSplitRepository) FindByID(ctx context.Context, id string) (*expensedomain.ExpenseSplit, error) {
-	args := m.Called(ctx, id)
-	if args.Get(0) != nil {
-		return args.Get(0).(*expensedomain.ExpenseSplit), args.Error(1)
-	}
-	return nil, args.Error(1)
-}
-func (m *MockExpenseSplitRepository) UpdatePaymentStatus(ctx context.Context, id string, status expensedomain.PaymentStatus, slipURL string) error {
-	args := m.Called(ctx, id, status, slipURL)
-	return args.Error(0)
-}
-func (m *MockExpenseSplitRepository) UpdateApproval(ctx context.Context, id string, status expensedomain.ApprovalStatus, settledAt *time.Time) error {
-	args := m.Called(ctx, id, status, settledAt)
-	return args.Error(0)
-}
-func (m *MockExpenseSplitRepository) FindOverdue(ctx context.Context) ([]expensedomain.ExpenseSplit, error) {
-	args := m.Called(ctx)
-	if args.Get(0) != nil {
-		return args.Get(0).([]expensedomain.ExpenseSplit), args.Error(1)
-	}
-	return nil, args.Error(1)
-}
-func (m *MockExpenseSplitRepository) CountUnsettled(ctx context.Context, transactionID string) (int, error) {
-	args := m.Called(ctx, transactionID)
-	return args.Int(0), args.Error(1)
-}
-
 type MockStoragePort struct {
 	mock.Mock
 }
@@ -327,47 +270,199 @@ func TestManageExpenseUseCase_ApproveSplit(t *testing.T) {
 }
 
 func TestManageExpenseUseCase_ListExpenses(t *testing.T) {
-	uc := expenseusecase.NewManageExpenseUseCase(nil, nil, nil, nil, &MockClock{})
-	res, err := uc.ListExpenses(context.Background(), "usr_1")
-	assert.Nil(t, res)
-	assert.NoError(t, err)
-}
-
-func TestManageExpenseUseCase_GetExpenseDetail(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("Success", func(t *testing.T) {
 		txnRepo := new(MockExpenseTransactionRepository)
 		uc := expenseusecase.NewManageExpenseUseCase(txnRepo, nil, nil, nil, &MockClock{})
-		mockTxn := &expensedomain.ExpenseTransaction{TransactionID: "txn_1"}
-		txnRepo.On("FindByID", ctx, "txn_1").Return(mockTxn, nil)
-		txn, splits, err := uc.GetExpenseDetail(ctx, "usr_1", "txn_1")
+
+		mockTxns := []expensedomain.ExpenseTransaction{
+			{TransactionID: "txn_1", PaidByUserID: "usr_1", Title: "Rent"},
+			{TransactionID: "txn_2", PaidByUserID: "usr_1", Title: "Food"},
+		}
+		txnRepo.On("FindByUser", ctx, "usr_1", 10, 0).Return(mockTxns, 2, nil)
+
+		res, totalCount, err := uc.ListExpenses(ctx, "usr_1", 1, 10)
 		assert.NoError(t, err)
-		assert.Equal(t, mockTxn, txn)
-		assert.Nil(t, splits)
+		assert.Equal(t, mockTxns, res)
+		assert.Equal(t, 2, totalCount)
+		txnRepo.AssertExpectations(t)
 	})
 
 	t.Run("Error", func(t *testing.T) {
 		txnRepo := new(MockExpenseTransactionRepository)
 		uc := expenseusecase.NewManageExpenseUseCase(txnRepo, nil, nil, nil, &MockClock{})
-		expectedErr := errors.New("not found")
-		txnRepo.On("FindByID", ctx, "txn_1").Return(nil, expectedErr)
-		txn, splits, err := uc.GetExpenseDetail(ctx, "usr_1", "txn_1")
+
+		expectedErr := errors.New("db error")
+		txnRepo.On("FindByUser", ctx, "usr_1", 10, 0).Return(nil, 0, expectedErr)
+
+		res, totalCount, err := uc.ListExpenses(ctx, "usr_1", 1, 10)
 		assert.Equal(t, expectedErr, err)
+		assert.Nil(t, res)
+		assert.Equal(t, 0, totalCount)
+		txnRepo.AssertExpectations(t)
+	})
+}
+
+func TestManageExpenseUseCase_GetExpenseDetail(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("Success as Payer", func(t *testing.T) {
+		txnRepo := new(MockExpenseTransactionRepository)
+		splitRepo := new(MockExpenseSplitRepository)
+		uc := expenseusecase.NewManageExpenseUseCase(txnRepo, splitRepo, nil, nil, &MockClock{})
+
+		mockTxn := &expensedomain.ExpenseTransaction{TransactionID: "txn_1", PaidByUserID: "usr_1"}
+		mockSplits := []expensedomain.ExpenseSplit{
+			{SplitID: "spl_1", TransactionID: "txn_1", UserID: "usr_2"},
+		}
+
+		txnRepo.On("FindByID", ctx, "txn_1").Return(mockTxn, nil)
+		splitRepo.On("FindByTransactionID", ctx, "txn_1").Return(mockSplits, nil)
+
+		txn, splits, err := uc.GetExpenseDetail(ctx, "usr_1", "txn_1")
+		assert.NoError(t, err)
+		assert.Equal(t, mockTxn, txn)
+		assert.Equal(t, mockSplits, splits)
+		txnRepo.AssertExpectations(t)
+		splitRepo.AssertExpectations(t)
+	})
+
+	t.Run("Success as Debtor", func(t *testing.T) {
+		txnRepo := new(MockExpenseTransactionRepository)
+		splitRepo := new(MockExpenseSplitRepository)
+		uc := expenseusecase.NewManageExpenseUseCase(txnRepo, splitRepo, nil, nil, &MockClock{})
+
+		mockTxn := &expensedomain.ExpenseTransaction{TransactionID: "txn_1", PaidByUserID: "other"}
+		mockSplits := []expensedomain.ExpenseSplit{
+			{SplitID: "spl_1", TransactionID: "txn_1", UserID: "usr_1"},
+		}
+
+		txnRepo.On("FindByID", ctx, "txn_1").Return(mockTxn, nil)
+		splitRepo.On("FindByTransactionID", ctx, "txn_1").Return(mockSplits, nil)
+
+		txn, splits, err := uc.GetExpenseDetail(ctx, "usr_1", "txn_1")
+		assert.NoError(t, err)
+		assert.Equal(t, mockTxn, txn)
+		assert.Equal(t, mockSplits, splits)
+		txnRepo.AssertExpectations(t)
+		splitRepo.AssertExpectations(t)
+	})
+
+	t.Run("Error Forbidden", func(t *testing.T) {
+		txnRepo := new(MockExpenseTransactionRepository)
+		splitRepo := new(MockExpenseSplitRepository)
+		uc := expenseusecase.NewManageExpenseUseCase(txnRepo, splitRepo, nil, nil, &MockClock{})
+
+		mockTxn := &expensedomain.ExpenseTransaction{TransactionID: "txn_1", PaidByUserID: "other"}
+		mockSplits := []expensedomain.ExpenseSplit{
+			{SplitID: "spl_1", TransactionID: "txn_1", UserID: "other_debtor"},
+		}
+
+		txnRepo.On("FindByID", ctx, "txn_1").Return(mockTxn, nil)
+		splitRepo.On("FindByTransactionID", ctx, "txn_1").Return(mockSplits, nil)
+
+		txn, splits, err := uc.GetExpenseDetail(ctx, "usr_1", "txn_1")
+		assert.Equal(t, domain.ErrForbidden, err)
 		assert.Nil(t, txn)
 		assert.Nil(t, splits)
+		txnRepo.AssertExpectations(t)
+		splitRepo.AssertExpectations(t)
+	})
+
+	t.Run("Error Transaction Not Found", func(t *testing.T) {
+		txnRepo := new(MockExpenseTransactionRepository)
+		uc := expenseusecase.NewManageExpenseUseCase(txnRepo, nil, nil, nil, &MockClock{})
+
+		txnRepo.On("FindByID", ctx, "txn_1").Return(nil, domain.ErrNotFound)
+
+		txn, splits, err := uc.GetExpenseDetail(ctx, "usr_1", "txn_1")
+		assert.Equal(t, domain.ErrNotFound, err)
+		assert.Nil(t, txn)
+		assert.Nil(t, splits)
+		txnRepo.AssertExpectations(t)
 	})
 }
 
 func TestManageExpenseUseCase_DeleteExpense(t *testing.T) {
-	uc := expenseusecase.NewManageExpenseUseCase(nil, nil, nil, nil, &MockClock{})
-	err := uc.DeleteExpense(context.Background(), "usr_1", "txn_1")
-	assert.NoError(t, err)
+	ctx := context.Background()
+
+	t.Run("Success", func(t *testing.T) {
+		txnRepo := new(MockExpenseTransactionRepository)
+		splitRepo := new(MockExpenseSplitRepository)
+		uc := expenseusecase.NewManageExpenseUseCase(txnRepo, splitRepo, nil, nil, &MockClock{})
+
+		mockTxn := &expensedomain.ExpenseTransaction{TransactionID: "txn_1", PaidByUserID: "usr_1"}
+
+		txnRepo.On("FindByID", ctx, "txn_1").Return(mockTxn, nil)
+		splitRepo.On("DeleteByTransactionID", ctx, "txn_1").Return(nil)
+		txnRepo.On("Delete", ctx, "txn_1").Return(nil)
+
+		err := uc.DeleteExpense(ctx, "usr_1", "txn_1")
+		assert.NoError(t, err)
+		txnRepo.AssertExpectations(t)
+		splitRepo.AssertExpectations(t)
+	})
+
+	t.Run("Forbidden", func(t *testing.T) {
+		txnRepo := new(MockExpenseTransactionRepository)
+		uc := expenseusecase.NewManageExpenseUseCase(txnRepo, nil, nil, nil, &MockClock{})
+
+		mockTxn := &expensedomain.ExpenseTransaction{TransactionID: "txn_1", PaidByUserID: "other"}
+
+		txnRepo.On("FindByID", ctx, "txn_1").Return(mockTxn, nil)
+
+		err := uc.DeleteExpense(ctx, "usr_1", "txn_1")
+		assert.Equal(t, domain.ErrForbidden, err)
+		txnRepo.AssertExpectations(t)
+	})
+
+	t.Run("Not Found", func(t *testing.T) {
+		txnRepo := new(MockExpenseTransactionRepository)
+		uc := expenseusecase.NewManageExpenseUseCase(txnRepo, nil, nil, nil, &MockClock{})
+
+		txnRepo.On("FindByID", ctx, "txn_1").Return(nil, domain.ErrNotFound)
+
+		err := uc.DeleteExpense(ctx, "usr_1", "txn_1")
+		assert.Equal(t, domain.ErrNotFound, err)
+		txnRepo.AssertExpectations(t)
+	})
 }
 
 func TestManageExpenseUseCase_ListPendingExpenses(t *testing.T) {
-	uc := expenseusecase.NewManageExpenseUseCase(nil, nil, nil, nil, &MockClock{})
-	res, err := uc.ListPendingExpenses(context.Background(), "usr_1")
-	assert.Nil(t, res)
-	assert.NoError(t, err)
+	ctx := context.Background()
+
+	t.Run("Success", func(t *testing.T) {
+		splitRepo := new(MockExpenseSplitRepository)
+		uc := expenseusecase.NewManageExpenseUseCase(nil, splitRepo, nil, nil, &MockClock{})
+
+		mockPendingSplits := []expensedomain.ExpenseSplit{
+			{SplitID: "spl_1", PaymentStatus: expensedomain.PaymentPending},
+			{SplitID: "spl_3", PaymentStatus: expensedomain.PaymentSubmitted},
+		}
+
+		splitRepo.On("FindPendingByUser", ctx, "usr_1", 10, 0).Return(mockPendingSplits, 2, nil)
+
+		res, totalCount, err := uc.ListPendingExpenses(ctx, "usr_1", 1, 10)
+		assert.NoError(t, err)
+		assert.Len(t, res, 2)
+		assert.Equal(t, "spl_1", res[0].SplitID)
+		assert.Equal(t, "spl_3", res[1].SplitID)
+		assert.Equal(t, 2, totalCount)
+		splitRepo.AssertExpectations(t)
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		splitRepo := new(MockExpenseSplitRepository)
+		uc := expenseusecase.NewManageExpenseUseCase(nil, splitRepo, nil, nil, &MockClock{})
+
+		expectedErr := errors.New("db error")
+		splitRepo.On("FindPendingByUser", ctx, "usr_1", 10, 0).Return(nil, 0, expectedErr)
+
+		res, totalCount, err := uc.ListPendingExpenses(ctx, "usr_1", 1, 10)
+		assert.Equal(t, expectedErr, err)
+		assert.Nil(t, res)
+		assert.Equal(t, 0, totalCount)
+		splitRepo.AssertExpectations(t)
+	})
 }

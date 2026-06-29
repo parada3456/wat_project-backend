@@ -47,7 +47,7 @@ func scanUser(row pgx.Row) (*userdomain.User, error) {
 	var jobStartDate *time.Time
 
 	err := row.Scan(
-		&u.UserID, &u.Email, &u.PasswordHash, &u.FirstName, &u.LastName,
+		&u.UserID, &u.Email, &u.PasswordHash,
 		&currentPhaseID, &u.TotalLifetimePoints, &u.CurrentPhasePoints,
 		&u.MissionStreak, &arrivalDate, &jobStartDate, &u.CreatedAt, &u.UpdatedAt,
 	)
@@ -72,13 +72,13 @@ func (r *userRepo) Create(ctx context.Context, u *userdomain.User) error {
 	log.Println("debugprint: entering (*userRepo).Create")
 	query := `
 		INSERT INTO users (
-			user_id, email, password_hash, first_name, last_name, 
+			user_id, email, password_hash, 
 			current_phase_id, total_lifetime_points, current_phase_points, 
 			mission_streak, arrival_date, job_start_date, created_at, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
 
 	_, err := r.pool.Exec(ctx, query,
-		u.UserID, u.Email, u.PasswordHash, u.FirstName, u.LastName,
+		u.UserID, u.Email, u.PasswordHash,
 		stringToNull(u.CurrentPhaseID), u.TotalLifetimePoints, u.CurrentPhasePoints,
 		u.MissionStreak, timeToNull(u.ArrivalDate), timeToNull(u.JobStartDate), u.CreatedAt, u.UpdatedAt,
 	)
@@ -92,7 +92,7 @@ func (r *userRepo) FindByID(ctx context.Context, id string) (*userdomain.User, e
 	log.Println("debugprint: entering (*userRepo).FindByID")
 	query := `
 		SELECT 
-			user_id, email, password_hash, first_name, last_name, 
+			user_id, email, password_hash, 
 			current_phase_id, total_lifetime_points, current_phase_points, 
 			mission_streak, arrival_date, job_start_date, created_at, updated_at
 		FROM users WHERE user_id = $1`
@@ -112,7 +112,7 @@ func (r *userRepo) FindByEmail(ctx context.Context, email string) (*userdomain.U
 	log.Println("debugprint: entering (*userRepo).FindByEmail")
 	query := `
 		SELECT 
-			user_id, email, password_hash, first_name, last_name, 
+			user_id, email, password_hash, 
 			current_phase_id, total_lifetime_points, current_phase_points, 
 			mission_streak, arrival_date, job_start_date, created_at, updated_at
 		FROM users WHERE email = $1`
@@ -132,13 +132,13 @@ func (r *userRepo) Update(ctx context.Context, u *userdomain.User) error {
 	log.Println("debugprint: entering (*userRepo).Update")
 	query := `
 		UPDATE users SET 
-			email = $1, password_hash = $2, first_name = $3, last_name = $4, 
-			current_phase_id = $5, total_lifetime_points = $6, current_phase_points = $7, 
-			mission_streak = $8, arrival_date = $9, job_start_date = $10, updated_at = $11
-		WHERE user_id = $12`
+			email = $1, password_hash = $2, 
+			current_phase_id = $3, total_lifetime_points = $4, current_phase_points = $5, 
+			mission_streak = $6, arrival_date = $7, job_start_date = $8, updated_at = $9
+		WHERE user_id = $10`
 
 	_, err := r.pool.Exec(ctx, query,
-		u.Email, u.PasswordHash, u.FirstName, u.LastName,
+		u.Email, u.PasswordHash,
 		stringToNull(u.CurrentPhaseID), u.TotalLifetimePoints, u.CurrentPhasePoints,
 		u.MissionStreak, timeToNull(u.ArrivalDate), timeToNull(u.JobStartDate), u.UpdatedAt, u.UserID,
 	)
@@ -266,4 +266,3 @@ func (r *userRepo) AssignJob(ctx context.Context, userID, jobID string, isMain b
 
 	return tx.Commit(ctx)
 }
-

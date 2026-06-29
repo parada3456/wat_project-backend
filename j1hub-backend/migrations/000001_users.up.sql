@@ -4,8 +4,6 @@ CREATE TABLE users (
     user_id TEXT PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
     current_phase_id TEXT, -- FK added later to avoid circular dep
     total_lifetime_points INT NOT NULL DEFAULT 0,
     current_phase_points INT NOT NULL DEFAULT 0,

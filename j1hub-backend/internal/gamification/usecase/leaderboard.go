@@ -38,13 +38,19 @@ func (uc *LeaderboardUseCase) GetLeaderboard(ctx context.Context, scope, jobID s
 	var results []LeaderboardEntry
 	for i, u := range users {
 		p, _ := uc.profileRepo.FindByUserID(ctx, u.UserID)
+		firstName := ""
+		lastName := ""
+		if p != nil {
+			firstName = p.FirstName
+			lastName = p.LastName
+		}
 
 		lastNameInitial := ""
-		if len(u.LastName) > 0 {
-			lastNameInitial = " " + string(u.LastName[0]) + "."
+		if len(lastName) > 0 {
+			lastNameInitial = " " + string(lastName[0]) + "."
 		}
-		name := fmt.Sprintf("%s%s", u.FirstName, lastNameInitial)
-		if p != nil && p.RadarVisibility == "Hidden" {
+		name := fmt.Sprintf("%s%s", firstName, lastNameInitial)
+		if p != nil && p.RadarVisibility == "hidden" {
 			name = fmt.Sprintf("J1 Student #%d", i+1)
 		}
 

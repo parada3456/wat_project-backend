@@ -12,12 +12,14 @@ import (
 type JourneyPhaseRepository interface {
 	FindByNumber(ctx context.Context, number int) (*missiondomain.JourneyPhase, error)
 	FindByID(ctx context.Context, id string) (*missiondomain.JourneyPhase, error)
+	ListAll(ctx context.Context) ([]missiondomain.JourneyPhase, error)
 }
 
 type UserPhaseHistoryRepository interface {
 	Insert(ctx context.Context, h *missiondomain.UserPhaseHistory) error
 	CompleteCurrentPhase(ctx context.Context, userID string, points int, completedAt time.Time) error
 	FindByUserAndPhase(ctx context.Context, userID, phaseID string) (*missiondomain.UserPhaseHistory, error)
+	FindByUser(ctx context.Context, userID string) ([]missiondomain.UserPhaseHistory, error)
 }
 
 type MissionRepository interface {
@@ -42,6 +44,7 @@ type TaskRepository interface {
 type UserTaskRepository interface {
 	Upsert(ctx context.Context, ut *missiondomain.UserTask) error
 	FindByUserMission(ctx context.Context, userMissionID string) ([]missiondomain.UserTask, error)
+	FindByID(ctx context.Context, id string) (*missiondomain.UserTask, error)
 }
 
 type UserRepository interface {

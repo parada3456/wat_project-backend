@@ -96,8 +96,8 @@ func TestUserHandler_GetProfile_Success(t *testing.T) {
 	var resp dto.GetProfileResponse
 	err := json.Unmarshal(w.Body.Bytes(), &resp)
 	assert.NoError(t, err)
-	assert.Equal(t, "john@example.com", resp.Email)
-	assert.Equal(t, "Hello world", resp.Bio)
+	assert.Equal(t, "john@example.com", resp.User.Email)
+	assert.Equal(t, "Hello world", resp.User.Bio)
 }
 
 func TestUserHandler_GetProfile_Unauthorized(t *testing.T) {
@@ -144,8 +144,8 @@ func TestUserHandler_GetPublicProfile_Success(t *testing.T) {
 	h := userhandler.NewUserHandler(userUC)
 
 	userUC.On("GetPublicProfile", mock.Anything, "usr_1", "usr_2").Return(
-		&userdomain.User{UserID: "usr_2", FirstName: "Somchai", LastName: "Deejai"},
-		&userdomain.Profile{UserID: "usr_2", AvatarURL: "somchai.png"},
+		&userdomain.User{UserID: "usr_2"},
+		&userdomain.Profile{UserID: "usr_2", FirstName: "Somchai", LastName: "Deejai", AvatarURL: "somchai.png"},
 		nil,
 	)
 

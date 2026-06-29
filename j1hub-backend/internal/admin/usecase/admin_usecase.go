@@ -21,6 +21,7 @@ type adminUseCase struct {
 	pool         port.TxBeginner
 	adminRepo    port.AdminRepository
 	userRepo     port.UserRepository
+	profileRepo  port.ProfileRepository
 	umRepo       port.UserMissionRepository
 	missionRepo  port.MissionRepository
 	ledgerRepo   port.PointLedgerRepository
@@ -33,6 +34,7 @@ func NewAdminUseCase(
 	pool port.TxBeginner,
 	adminRepo port.AdminRepository,
 	userRepo port.UserRepository,
+	profileRepo port.ProfileRepository,
 	umRepo port.UserMissionRepository,
 	missionRepo port.MissionRepository,
 	ledgerRepo port.PointLedgerRepository,
@@ -45,6 +47,7 @@ func NewAdminUseCase(
 		pool:         pool,
 		adminRepo:    adminRepo,
 		userRepo:     userRepo,
+		profileRepo:  profileRepo,
 		umRepo:       umRepo,
 		missionRepo:  missionRepo,
 		ledgerRepo:   ledgerRepo,
@@ -59,19 +62,37 @@ func (u *adminUseCase) GetDashboardStats(ctx context.Context) (*port.AdminStats,
 	return u.adminRepo.GetStats(ctx)
 }
 
-func (u *adminUseCase) ListPendingVerifications(ctx context.Context) ([]missiondomain.UserMission, error) {
+func (u *adminUseCase) ListPendingVerifications(ctx context.Context, page, pageSize int) ([]missiondomain.UserMission, int, error) {
 	log.Println("debugprint: entering (*adminUseCase).ListPendingVerifications")
-	return u.adminRepo.ListPendingVerifications(ctx)
+	limit := pageSize
+	offset := (page - 1) * pageSize
+	return u.adminRepo.ListPendingVerifications(ctx, limit, offset)
 }
 
-func (u *adminUseCase) ListUsers(ctx context.Context, search string) ([]userdomain.User, error) {
+func (u *adminUseCase) ListUsers(ctx context.Context, search string, page, pageSize int) ([]port.UserWithProfile, int, error) {
 	log.Println("debugprint: entering (*adminUseCase).ListUsers")
-	return u.adminRepo.SearchUsers(ctx, search)
+	limit := pageSize
+	offset := (page - 1) * pageSize
+	return u.adminRepo.SearchUsers(ctx, search, limit, offset)
 }
 
-func (u *adminUseCase) GetUserDetail(ctx context.Context, id string) (*userdomain.User, error) {
+func (u *adminUseCase) GetUserDetail(ctx context.Context, id string) (*port.UserWithProfile, error) {
 	log.Println("debugprint: entering (*adminUseCase).GetUserDetail")
-	return u.userRepo.FindByID(ctx, id)
+	user, err := u.userRepo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	profile, err := u.profileRepo.FindByUserID(ctx, id)
+	if err != nil && err != domain.ErrNotFound {
+		return nil, err
+	}
+	res := &port.UserWithProfile{
+		User: *user,
+	}
+	if profile != nil {
+		res.Profile = *profile
+	}
+	return res, nil
 }
 
 func (u *adminUseCase) AdjustPoints(ctx context.Context, userID string, delta int, reason string) (*port.PointsAdjustmentResult, error) {
@@ -212,9 +233,9 @@ func (u *adminUseCase) VerifyMission(ctx context.Context, adminID, userMissionID
 	var user userdomain.User
 	var curPhaseID *string
 	err = tx.QueryRow(ctx, `
-		SELECT user_id, email, password_hash, first_name, last_name, current_phase_id, total_lifetime_points, current_phase_points, mission_streak
+		SELECT user_id, email, password_hash, current_phase_id, total_lifetime_points, current_phase_points, mission_streak
 		FROM users WHERE user_id = $1 FOR UPDATE`, um.UserID).Scan(
-		&user.UserID, &user.Email, &user.PasswordHash, &user.FirstName, &user.LastName,
+		&user.UserID, &user.Email, &user.PasswordHash,
 		&curPhaseID, &user.TotalLifetimePoints, &user.CurrentPhasePoints, &user.MissionStreak,
 	)
 	if err != nil {

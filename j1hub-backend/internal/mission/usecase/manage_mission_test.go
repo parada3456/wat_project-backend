@@ -11,6 +11,7 @@ import (
 
 	"github.com/j1hub/backend/internal/domain"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestMissionUseCase_ListAvailableMissions_Success(t *testing.T) {
@@ -99,8 +100,79 @@ func TestMissionUseCase_GetMissionDetail_Forbidden(t *testing.T) {
 	assert.Equal(t, domain.ErrForbidden, err)
 }
 
-func TestMissionUseCase_ToggleTask_Stub(t *testing.T) {
-	uc := missionusecase.NewMissionUseCase(nil, nil, nil, nil, nil)
-	err := uc.ToggleTask(context.Background(), "usr_123", "ut_1", true)
+func TestMissionUseCase_ToggleTask_Success(t *testing.T) {
+	missionRepo := new(MockMissionRepository)
+	umRepo := new(MockUserMissionRepository)
+	taskRepo := new(MockTaskRepository)
+	utRepo := new(MockUserTaskRepository)
+	userRepo := new(MockUserRepository)
+
+	uc := missionusecase.NewMissionUseCase(missionRepo, umRepo, taskRepo, utRepo, userRepo)
+
+	ctx := context.Background()
+	userID := "usr_123"
+	userTaskID := "ut_1"
+
+	mockUT := &missiondomain.UserTask{
+		UserTaskID:    userTaskID,
+		UserID:        userID,
+		TaskID:        "t_1",
+		UserMissionID: "ums_1",
+		IsCompleted:   false,
+	}
+
+	utRepo.On("FindByID", ctx, userTaskID).Return(mockUT, nil)
+	utRepo.On("Upsert", ctx, mock.MatchedBy(func(ut *missiondomain.UserTask) bool {
+		return ut.UserTaskID == userTaskID && ut.IsCompleted == true && ut.CompletedAt != nil
+	})).Return(nil)
+
+	err := uc.ToggleTask(ctx, userID, userTaskID, true)
 	assert.NoError(t, err)
+}
+
+func TestMissionUseCase_ToggleTask_Forbidden(t *testing.T) {
+	missionRepo := new(MockMissionRepository)
+	umRepo := new(MockUserMissionRepository)
+	taskRepo := new(MockTaskRepository)
+	utRepo := new(MockUserTaskRepository)
+	userRepo := new(MockUserRepository)
+
+	uc := missionusecase.NewMissionUseCase(missionRepo, umRepo, taskRepo, utRepo, userRepo)
+
+	ctx := context.Background()
+	userID := "usr_123"
+	userTaskID := "ut_1"
+
+	// Belongs to usr_999
+	mockUT := &missiondomain.UserTask{
+		UserTaskID:    userTaskID,
+		UserID:        "usr_999",
+		TaskID:        "t_1",
+		UserMissionID: "ums_1",
+		IsCompleted:   false,
+	}
+
+	utRepo.On("FindByID", ctx, userTaskID).Return(mockUT, nil)
+
+	err := uc.ToggleTask(ctx, userID, userTaskID, true)
+	assert.Equal(t, domain.ErrForbidden, err)
+}
+
+func TestMissionUseCase_ToggleTask_NotFound(t *testing.T) {
+	missionRepo := new(MockMissionRepository)
+	umRepo := new(MockUserMissionRepository)
+	taskRepo := new(MockTaskRepository)
+	utRepo := new(MockUserTaskRepository)
+	userRepo := new(MockUserRepository)
+
+	uc := missionusecase.NewMissionUseCase(missionRepo, umRepo, taskRepo, utRepo, userRepo)
+
+	ctx := context.Background()
+	userID := "usr_123"
+	userTaskID := "ut_1"
+
+	utRepo.On("FindByID", ctx, userTaskID).Return(nil, domain.ErrNotFound)
+
+	err := uc.ToggleTask(ctx, userID, userTaskID, true)
+	assert.Equal(t, domain.ErrNotFound, err)
 }

@@ -111,6 +111,13 @@ func (m *MockJourneyPhaseRepository) FindByID(ctx context.Context, id string) (*
 	}
 	return args.Get(0).(*missiondomain.JourneyPhase), args.Error(1)
 }
+func (m *MockJourneyPhaseRepository) ListAll(ctx context.Context) ([]missiondomain.JourneyPhase, error) {
+	args := m.Called(ctx)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]missiondomain.JourneyPhase), args.Error(1)
+}
 
 // MockUserPhaseHistoryRepository
 type MockUserPhaseHistoryRepository struct{ mock.Mock }
@@ -127,6 +134,13 @@ func (m *MockUserPhaseHistoryRepository) FindByUserAndPhase(ctx context.Context,
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*missiondomain.UserPhaseHistory), args.Error(1)
+}
+func (m *MockUserPhaseHistoryRepository) FindByUser(ctx context.Context, userID string) ([]missiondomain.UserPhaseHistory, error) {
+	args := m.Called(ctx, userID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]missiondomain.UserPhaseHistory), args.Error(1)
 }
 
 // MockMissionRepository
@@ -225,6 +239,13 @@ func (m *MockPointLedgerRepository) FindByUser(ctx context.Context, userID strin
 	}
 	return args.Get(0).([]gamificationdomain.PointLedger), args.Error(1)
 }
+func (m *MockPointLedgerRepository) FindByUserAndSourceType(ctx context.Context, userID string, sourceType gamificationdomain.SourceType) ([]gamificationdomain.PointLedger, error) {
+	args := m.Called(ctx, userID, sourceType)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]gamificationdomain.PointLedger), args.Error(1)
+}
 
 // MockBadgeRepository
 type MockBadgeRepository struct{ mock.Mock }
@@ -281,12 +302,22 @@ func (m *MockFriendshipRepository) FindByID(ctx context.Context, id string) (*fr
 func (m *MockFriendshipRepository) UpdateStatus(ctx context.Context, id string, status frienddomain.FriendshipStatus) error {
 	return m.Called(ctx, id, status).Error(0)
 }
-func (m *MockFriendshipRepository) FindFriendsOf(ctx context.Context, userID string) ([]frienddomain.Friendship, error) {
-	args := m.Called(ctx, userID)
+func (m *MockFriendshipRepository) FindFriendsOf(ctx context.Context, userID string, limit, offset int) ([]frienddomain.Friendship, int, error) {
+	args := m.Called(ctx, userID, limit, offset)
 	if args.Get(0) == nil {
-		return nil, args.Error(1)
+		return nil, args.Int(1), args.Error(2)
 	}
-	return args.Get(0).([]frienddomain.Friendship), args.Error(1)
+	return args.Get(0).([]frienddomain.Friendship), args.Int(1), args.Error(2)
+}
+func (m *MockFriendshipRepository) FindPendingFor(ctx context.Context, userID string, limit, offset int) ([]frienddomain.Friendship, int, error) {
+	args := m.Called(ctx, userID, limit, offset)
+	if args.Get(0) == nil {
+		return nil, args.Int(1), args.Error(2)
+	}
+	return args.Get(0).([]frienddomain.Friendship), args.Int(1), args.Error(2)
+}
+func (m *MockFriendshipRepository) Delete(ctx context.Context, id string) error {
+	return m.Called(ctx, id).Error(0)
 }
 
 // MockExpenseTransactionRepository
