@@ -15,7 +15,7 @@ import (
 )
 
 type NotificationUC interface {
-	ListNotifications(ctx context.Context, userID string) ([]notificationdomain.Notification, error)
+	ListNotifications(ctx context.Context, userID string, isRead *bool, page, pageSize int) ([]notificationdomain.Notification, int, error)
 	MarkRead(ctx context.Context, id string) error
 	MarkAllRead(ctx context.Context, userID string) error
 	Delete(ctx context.Context, id string) error
@@ -38,30 +38,26 @@ func (h *NotificationHandler) ListNotifications(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	notifs, err := h.notifUC.ListNotifications(r.Context(), claims.UserID)
-	if err != nil {
-		apperror.RespondError(w, err)
-		return
-	}
+	pago := apperror.ParsePagination(r)
 
+	var isReadFilter *bool
 	isReadStr := r.URL.Query().Get("isRead")
 	if isReadStr == "" {
 		isReadStr = r.URL.Query().Get("is_read")
 	}
 	if isReadStr != "" {
 		if isRead, err := strconv.ParseBool(isReadStr); err == nil {
-			var filtered []notificationdomain.Notification
-			for _, n := range notifs {
-				if n.IsRead == isRead {
-					filtered = append(filtered, n)
-				}
-			}
-			notifs = filtered
+			isReadFilter = &isRead
 		}
 	}
 
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, notifs, page, pageSize, len(notifs))
+	notifs, totalCount, err := h.notifUC.ListNotifications(r.Context(), claims.UserID, isReadFilter, pago.Page, pago.PageSize)
+	if err != nil {
+		apperror.RespondError(w, err)
+		return
+	}
+
+	apperror.RespondList(w, notifs, pago.Page, pago.PageSize, totalCount)
 }
 
 func (h *NotificationHandler) MarkRead(w http.ResponseWriter, r *http.Request) {

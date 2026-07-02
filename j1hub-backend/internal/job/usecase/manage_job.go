@@ -73,9 +73,11 @@ func (uc *ManageJobUseCase) WriteReview(ctx context.Context, userID, jobID strin
 	return uc.ratingRepo.Recalculate(ctx, jobID)
 }
 
-func (uc *ManageJobUseCase) ListJobs(ctx context.Context, filters map[string]interface{}) ([]jobdomain.JobPosting, error) {
+func (uc *ManageJobUseCase) ListJobs(ctx context.Context, filters map[string]interface{}, page, pageSize int) ([]jobdomain.JobPosting, int, error) {
 	log.Println("debugprint: entering (*ManageJobUseCase).ListJobs")
-	return uc.jobRepo.FindWithFilters(ctx, filters)
+	limit := pageSize
+	offset := (page - 1) * pageSize
+	return uc.jobRepo.FindWithFilters(ctx, filters, limit, offset)
 }
 
 func (uc *ManageJobUseCase) GetJobDetail(ctx context.Context, jobID string) (*jobdomain.JobPosting, []jobdomain.JobHousing, *jobdomain.JobOverallRating, error) {

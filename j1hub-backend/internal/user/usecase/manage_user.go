@@ -92,23 +92,13 @@ type UpdateProfileCommand struct {
 
 func (uc *UserUseCase) UpdateProfile(ctx context.Context, userID string, cmd UpdateProfileCommand) error {
 	log.Println("debugprint: entering (*UserUseCase).UpdateProfile")
-	user, err := uc.userRepo.FindByID(ctx, userID)
-	if err != nil {
-		return err
-	}
-
-	user.FirstName = cmd.FirstName
-	user.LastName = cmd.LastName
-
-	if err := uc.userRepo.Update(ctx, user); err != nil {
-		return err
-	}
-
 	profile, err := uc.profileRepo.FindByUserID(ctx, userID)
 	if err != nil {
 		return err
 	}
 
+	profile.FirstName = cmd.FirstName
+	profile.LastName = cmd.LastName
 	profile.Bio = cmd.Bio
 	profile.AvatarURL = cmd.AvatarURL
 

@@ -31,9 +31,9 @@ import (
 	"github.com/j1hub/backend/internal/infrastructure/security"
 	"github.com/j1hub/backend/internal/infrastructure/storage"
 	jobhandler "github.com/j1hub/backend/internal/job/adapter/http"
-	"github.com/j1hub/backend/internal/media"
 	jobpostgres "github.com/j1hub/backend/internal/job/adapter/postgres"
 	jobusecase "github.com/j1hub/backend/internal/job/usecase"
+	"github.com/j1hub/backend/internal/media"
 	missionhandler "github.com/j1hub/backend/internal/mission/adapter/http"
 	missionpostgres "github.com/j1hub/backend/internal/mission/adapter/postgres"
 	missionusecase "github.com/j1hub/backend/internal/mission/usecase"
@@ -89,7 +89,7 @@ func main() {
 	// Usecases
 	rewardEngine := gamificationusecase.NewRewardEngine(cfg, userRepo, umRepo)
 	registerUC := authusecase.NewRegisterUserUseCase(pool, userRepo, profileRepo, creditRepo, phaseRepo, historyRepo, missionRepo, umRepo, hasher, issuer, clock)
-	loginUC := authusecase.NewLoginUseCase(userRepo, hasher, issuer)
+	loginUC := authusecase.NewLoginUseCase(userRepo, profileRepo, hasher, issuer)
 	userUC := userusecase.NewUserUseCase(userRepo, profileRepo, creditRepo, friendRepo, hasher)
 
 	taskRepo := missionpostgres.NewTaskRepository(pool)
@@ -115,7 +115,7 @@ func main() {
 
 	notifRepo := notificationpostgres.NewNotificationRepository(pool)
 	notifUC := notificationusecase.NewNotificationUseCase(notifRepo)
-	adminUC := adminusecase.NewAdminUseCase(pool, adminRepo, userRepo, umRepo, missionRepo, ledgerRepo, notifier, rewardEngine, clock)
+	adminUC := adminusecase.NewAdminUseCase(pool, adminRepo, userRepo, profileRepo, umRepo, missionRepo, taskRepo, ledgerRepo, notifier, rewardEngine, clock)
 
 	jobRepo := jobpostgres.NewJobRepository(pool)
 	housingRepo := jobpostgres.NewJobHousingRepository(pool)

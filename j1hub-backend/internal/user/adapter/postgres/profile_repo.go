@@ -27,12 +27,12 @@ func (r *profileRepo) Create(ctx context.Context, p *userdomain.Profile) error {
 	log.Println("debugprint: entering (*profileRepo).Create")
 	query := `
 		INSERT INTO profiles (
-			profile_id, user_id, phone_number, bio, avatar_url, 
+			profile_id, user_id, username, first_name, last_name, phone_number, bio, avatar_url, 
 			radar_visibility, current_coordinates, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, ST_SetSRID(ST_MakePoint($7, $8), 4326), $9)`
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, ST_SetSRID(ST_MakePoint($10, $11), 4326), $12)`
 
 	_, err := r.pool.Exec(ctx, query,
-		p.ProfileID, p.UserID, p.PhoneNumber, p.Bio, p.AvatarURL,
+		p.ProfileID, p.UserID, p.Username, p.FirstName, p.LastName, p.PhoneNumber, p.Bio, p.AvatarURL,
 		p.RadarVisibility, p.Lng, p.Lat, p.UpdatedAt,
 	)
 	if err != nil {
@@ -45,8 +45,8 @@ func (r *profileRepo) FindByUserID(ctx context.Context, userID string) (*userdom
 	log.Println("debugprint: entering (*profileRepo).FindByUserID")
 	query := `
 		SELECT 
-			profile_id, user_id, phone_number, bio, avatar_url, 
-			radar_visibility, ST_X(current_coordinates), ST_Y(current_coordinates), 
+			profile_id, user_id, username, first_name, last_name, phone_number, bio, avatar_url, 
+			radar_visibility, ST_X(current_coordinates::geometry), ST_Y(current_coordinates::geometry), 
 			location_updated_at, updated_at
 		FROM profiles WHERE user_id = $1`
 
@@ -54,7 +54,7 @@ func (r *profileRepo) FindByUserID(ctx context.Context, userID string) (*userdom
 	var p userdomain.Profile
 	var locUpdated *time.Time
 	err := row.Scan(
-		&p.ProfileID, &p.UserID, &p.PhoneNumber, &p.Bio, &p.AvatarURL,
+		&p.ProfileID, &p.UserID, &p.Username, &p.FirstName, &p.LastName, &p.PhoneNumber, &p.Bio, &p.AvatarURL,
 		&p.RadarVisibility, &p.Lng, &p.Lat, &locUpdated, &p.UpdatedAt,
 	)
 	if err == nil && locUpdated != nil {
@@ -73,12 +73,12 @@ func (r *profileRepo) Update(ctx context.Context, p *userdomain.Profile) error {
 	log.Println("debugprint: entering (*profileRepo).Update")
 	query := `
 		UPDATE profiles SET 
-			phone_number = $1, bio = $2, avatar_url = $3, 
-			radar_visibility = $4, updated_at = NOW()
-		WHERE profile_id = $5`
+			first_name = $1, last_name = $2, phone_number = $3, bio = $4, avatar_url = $5, 
+			radar_visibility = $6, updated_at = NOW()
+		WHERE profile_id = $7`
 
 	_, err := r.pool.Exec(ctx, query,
-		p.PhoneNumber, p.Bio, p.AvatarURL, p.RadarVisibility, p.ProfileID,
+		p.FirstName, p.LastName, p.PhoneNumber, p.Bio, p.AvatarURL, p.RadarVisibility, p.ProfileID,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to update profile: %w", err)

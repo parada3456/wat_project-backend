@@ -110,12 +110,13 @@ func TestManageJobUseCase_ListJobs_Success(t *testing.T) {
 	filters := map[string]interface{}{"agency": "InterExchange"}
 	mockJobs := []jobdomain.JobPosting{{JobID: "job_1"}}
 
-	jobRepo.On("FindWithFilters", ctx, filters).Return(mockJobs, nil)
+	jobRepo.On("FindWithFilters", ctx, filters, 10, 0).Return(mockJobs, 1, nil)
 
-	res, err := uc.ListJobs(ctx, filters)
+	res, totalCount, err := uc.ListJobs(ctx, filters, 1, 10)
 
 	assert.NoError(t, err)
 	assert.Equal(t, mockJobs, res)
+	assert.Equal(t, 1, totalCount)
 }
 
 func TestManageJobUseCase_GetJobDetail_Success(t *testing.T) {

@@ -20,11 +20,11 @@ import (
 )
 
 type ManageExpenseUC interface {
-	ListExpenses(ctx context.Context, userID string) ([]expensedomain.ExpenseTransaction, error)
+	ListExpenses(ctx context.Context, userID string, page, pageSize int) ([]expensedomain.ExpenseTransaction, int, error)
 	CreateExpense(ctx context.Context, userID string, cmd expenseusecase.CreateExpenseCmd) error
 	GetExpenseDetail(ctx context.Context, userID string, id string) (*expensedomain.ExpenseTransaction, []expensedomain.ExpenseSplit, error)
 	DeleteExpense(ctx context.Context, userID string, id string) error
-	ListPendingExpenses(ctx context.Context, userID string) ([]expensedomain.ExpenseSplit, error)
+	ListPendingExpenses(ctx context.Context, userID string, page, pageSize int) ([]expensedomain.ExpenseSplit, int, error)
 	SubmitSlip(ctx context.Context, debtorID, splitID string, file io.Reader, contentType string) error
 	ApproveSplit(ctx context.Context, userID string, id string) error
 }
@@ -47,13 +47,13 @@ func (h *ExpenseHandler) ListExpenses(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	expenses, err := h.expenseUC.ListExpenses(r.Context(), claims.UserID)
+	pago := apperror.ParsePagination(r)
+	expenses, totalCount, err := h.expenseUC.ListExpenses(r.Context(), claims.UserID, pago.Page, pago.PageSize)
 	if err != nil {
 		apperror.RespondError(w, err)
 		return
 	}
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, expenses, page, pageSize, len(expenses))
+	apperror.RespondList(w, expenses, pago.Page, pago.PageSize, totalCount)
 }
 
 func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
@@ -145,13 +145,13 @@ func (h *ExpenseHandler) ListPending(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pending, err := h.expenseUC.ListPendingExpenses(r.Context(), claims.UserID)
+	pago := apperror.ParsePagination(r)
+	pending, totalCount, err := h.expenseUC.ListPendingExpenses(r.Context(), claims.UserID, pago.Page, pago.PageSize)
 	if err != nil {
 		apperror.RespondError(w, err)
 		return
 	}
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, pending, page, pageSize, len(pending))
+	apperror.RespondList(w, pending, pago.Page, pago.PageSize, totalCount)
 }
 
 func (h *ExpenseHandler) UpdateSplit(w http.ResponseWriter, r *http.Request) {

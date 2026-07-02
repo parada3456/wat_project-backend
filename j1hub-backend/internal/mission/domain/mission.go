@@ -8,11 +8,11 @@ import (
 type UserMissionStatus string
 
 const (
-	StatusNotStarted          UserMissionStatus = "Not_Started"
-	StatusInProgress          UserMissionStatus = "In_Progress"
-	StatusPendingVerification UserMissionStatus = "Pending_Verification"
-	StatusCompleted           UserMissionStatus = "Completed"
-	StatusOverdue             UserMissionStatus = "Overdue"
+	StatusNotStarted          UserMissionStatus = "not_started"
+	StatusInProgress          UserMissionStatus = "in_progress"
+	StatusPendingVerification UserMissionStatus = "pending_verification"
+	StatusCompleted           UserMissionStatus = "completed"
+	StatusOverdue             UserMissionStatus = "overdue"
 )
 
 func (s UserMissionStatus) Valid() bool {
@@ -27,9 +27,9 @@ func (s UserMissionStatus) Valid() bool {
 type VerificationType string
 
 const (
-	VerificationNone   VerificationType = "None"
-	VerificationUpload VerificationType = "Upload"
-	VerificationAdmin  VerificationType = "Admin"
+	VerificationNone   VerificationType = "none"
+	VerificationUpload VerificationType = "upload"
+	VerificationAdmin  VerificationType = "admin"
 )
 
 func (v VerificationType) Valid() bool {
@@ -78,7 +78,7 @@ type Mission struct {
 
 func (m *Mission) CalculateDueDate(triggerDate time.Time) time.Time {
 	log.Println("debugprint: entering (*Mission).CalculateDueDate")
-	if m.DueDateType == "Fixed" && m.FixedDueDate != nil {
+	if m.DueDateType == "fixed" && m.FixedDueDate != nil {
 		return *m.FixedDueDate
 	}
 	return triggerDate.AddDate(0, 0, m.RelativeDaysOffset)

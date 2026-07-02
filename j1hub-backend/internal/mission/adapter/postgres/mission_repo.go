@@ -87,6 +87,34 @@ func (r *missionRepo) FindByID(ctx context.Context, id string) (*missiondomain.M
 	return &m, err
 }
 
+func (r *missionRepo) Insert(ctx context.Context, m *missiondomain.Mission) error {
+	log.Println("debugprint: entering (*missionRepo).Insert")
+	var desc *string
+	if m.Description != "" {
+		desc = &m.Description
+	}
+	var loc *string
+	if m.Location != "" {
+		loc = &m.Location
+	}
+	var triggerEvent *string
+	if m.RelativeTriggerEvent != "" {
+		triggerEvent = &m.RelativeTriggerEvent
+	}
+	var daysOffset *int
+	if m.RelativeDaysOffset != 0 {
+		daysOffset = &m.RelativeDaysOffset
+	}
+	_, err := r.pool.Exec(ctx,
+		`INSERT INTO missions (mission_id, phase_id, title, description, location, base_points, is_mandatory, verification_type, due_date_type, fixed_due_date, relative_trigger_event, relative_days_offset, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+		m.MissionID, m.PhaseID, m.Title, desc, loc, m.BasePoints, m.IsMandatory,
+		m.VerificationType, m.DueDateType, m.FixedDueDate, triggerEvent, daysOffset,
+		m.CreatedAt, m.UpdatedAt,
+	)
+	return err
+}
+
 type userMissionRepo struct {
 	pool *pgxpool.Pool
 }
@@ -176,7 +204,7 @@ func (r *userMissionRepo) UpdateReward(ctx context.Context, id string, reward *g
 
 func (r *userMissionRepo) FindOverdue(ctx context.Context) ([]missiondomain.UserMission, error) {
 	log.Println("debugprint: entering (*userMissionRepo).FindOverdue")
-	query := `SELECT user_mission_id, user_id, mission_id, status, calculated_due_date, created_at, updated_at FROM user_missions WHERE status IN ('Not_Started', 'In_Progress', 'Pending_Verification') AND calculated_due_date < NOW()`
+	query := `SELECT user_mission_id, user_id, mission_id, status, calculated_due_date, created_at, updated_at FROM user_missions WHERE status IN ('not_started', 'in_progress', 'pending_verification') AND calculated_due_date < NOW()`
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {
 		return nil, err
@@ -224,6 +252,40 @@ func (r *taskRepo) FindByMission(ctx context.Context, missionID string) ([]missi
 	return tasks, nil
 }
 
+func (r *taskRepo) Insert(ctx context.Context, t *missiondomain.Task) error {
+	log.Println("debugprint: entering (*taskRepo).Insert")
+	var desc *string
+	if t.Description != "" {
+		desc = &t.Description
+	}
+	_, err := r.pool.Exec(ctx,
+		`INSERT INTO tasks (task_id, mission_id, title, description, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6)`,
+		t.TaskID, t.MissionID, t.Title, desc, t.CreatedAt, t.UpdatedAt,
+	)
+	return err
+}
+
+func (r *taskRepo) BulkInsert(ctx context.Context, tasks []missiondomain.Task) error {
+	log.Println("debugprint: entering (*taskRepo).BulkInsert")
+	if len(tasks) == 0 {
+		return nil
+	}
+	batch := &pgx.Batch{}
+	for _, t := range tasks {
+		var desc *string
+		if t.Description != "" {
+			desc = &t.Description
+		}
+		batch.Queue(
+			`INSERT INTO tasks (task_id, mission_id, title, description, created_at, updated_at)
+			VALUES ($1, $2, $3, $4, $5, $6)`,
+			t.TaskID, t.MissionID, t.Title, desc, t.CreatedAt, t.UpdatedAt,
+		)
+	}
+	return r.pool.SendBatch(ctx, batch).Close()
+}
+
 type userTaskRepo struct {
 	pool *pgxpool.Pool
 }
@@ -264,6 +326,16 @@ func (r *userTaskRepo) FindByUserMission(ctx context.Context, userMissionID stri
 	return uts, nil
 }
 
+func (r *userTaskRepo) FindByID(ctx context.Context, id string) (*missiondomain.UserTask, error) {
+	log.Println("debugprint: entering (*userTaskRepo).FindByID")
+	var ut missiondomain.UserTask
+	err := r.pool.QueryRow(ctx, `SELECT user_task_id, user_id, task_id, user_mission_id, is_completed, completed_at, updated_at FROM user_tasks WHERE user_task_id = $1`, id).Scan(&ut.UserTaskID, &ut.UserID, &ut.TaskID, &ut.UserMissionID, &ut.IsCompleted, &ut.CompletedAt, &ut.UpdatedAt)
+	if err == pgx.ErrNoRows {
+		return nil, domain.ErrNotFound
+	}
+	return &ut, err
+}
+
 type journeyPhaseRepo struct {
 	pool *pgxpool.Pool
 }
@@ -301,6 +373,28 @@ func (r *journeyPhaseRepo) FindByID(ctx context.Context, id string) (*missiondom
 	return &jp, err
 }
 
+func (r *journeyPhaseRepo) ListAll(ctx context.Context) ([]missiondomain.JourneyPhase, error) {
+	log.Println("debugprint: entering (*journeyPhaseRepo).ListAll")
+	rows, err := r.pool.Query(ctx, `SELECT phase_id, phase_number, title, description, created_at, updated_at FROM journey_phases ORDER BY phase_number ASC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var phases []missiondomain.JourneyPhase
+	for rows.Next() {
+		var jp missiondomain.JourneyPhase
+		var desc *string
+		if err := rows.Scan(&jp.PhaseID, &jp.PhaseNumber, &jp.Title, &desc, &jp.CreatedAt, &jp.UpdatedAt); err != nil {
+			return nil, err
+		}
+		if desc != nil {
+			jp.Description = *desc
+		}
+		phases = append(phases, jp)
+	}
+	return phases, nil
+}
+
 type userPhaseHistoryRepo struct {
 	pool *pgxpool.Pool
 }
@@ -331,4 +425,164 @@ func (r *userPhaseHistoryRepo) FindByUserAndPhase(ctx context.Context, userID, p
 		return nil, domain.ErrNotFound
 	}
 	return &h, err
+}
+
+func (r *userPhaseHistoryRepo) FindByUser(ctx context.Context, userID string) ([]missiondomain.UserPhaseHistory, error) {
+	log.Println("debugprint: entering (*userPhaseHistoryRepo).FindByUser")
+	rows, err := r.pool.Query(ctx, `SELECT history_id, user_id, phase_id, phase_points_earned, entered_at, completed_at FROM user_phase_history WHERE user_id = $1 ORDER BY entered_at DESC`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var history []missiondomain.UserPhaseHistory
+	for rows.Next() {
+		var h missiondomain.UserPhaseHistory
+		if err := rows.Scan(&h.HistoryID, &h.UserID, &h.PhaseID, &h.PhasePointsEarned, &h.EnteredAt, &h.CompletedAt); err != nil {
+			return nil, err
+		}
+		history = append(history, h)
+	}
+	return history, nil
+}
+
+func (r *missionRepo) FindByIDs(ctx context.Context, ids []string) ([]missiondomain.Mission, error) {
+	log.Println("debugprint: entering (*missionRepo).FindByIDs")
+	rows, err := r.pool.Query(ctx, `SELECT mission_id, phase_id, title, description, location, base_points, is_mandatory, verification_type, due_date_type, fixed_due_date, relative_trigger_event, relative_days_offset, created_at, updated_at FROM missions WHERE mission_id = ANY($1)`, ids)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var missions []missiondomain.Mission
+	for rows.Next() {
+		var m missiondomain.Mission
+		var desc *string
+		var loc *string
+		var triggerEvent *string
+		var daysOffset *int
+		err := rows.Scan(&m.MissionID, &m.PhaseID, &m.Title, &desc, &loc, &m.BasePoints, &m.IsMandatory, &m.VerificationType, &m.DueDateType, &m.FixedDueDate, &triggerEvent, &daysOffset, &m.CreatedAt, &m.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		if desc != nil {
+			m.Description = *desc
+		}
+		if loc != nil {
+			m.Location = *loc
+		}
+		if triggerEvent != nil {
+			m.RelativeTriggerEvent = *triggerEvent
+		}
+		if daysOffset != nil {
+			m.RelativeDaysOffset = *daysOffset
+		}
+		missions = append(missions, m)
+	}
+	return missions, nil
+}
+
+func (r *userMissionRepo) FindByIDs(ctx context.Context, ids []string) ([]missiondomain.UserMission, error) {
+	log.Println("debugprint: entering (*userMissionRepo).FindByIDs")
+	query := `SELECT user_mission_id, user_id, mission_id, status, calculated_due_date, proof_url, proof_submitted_at, verified_at, verified_by, base_points_earned, speed_bonus_points, streak_bonus_points, first_completer_bonus_points, total_points_earned, rewarded_at, created_at, updated_at FROM user_missions WHERE user_mission_id = ANY($1)`
+	rows, err := r.pool.Query(ctx, query, ids)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var ums []missiondomain.UserMission
+	for rows.Next() {
+		var um missiondomain.UserMission
+		var proofURL *string
+		var verifiedBy *string
+		if err := rows.Scan(&um.UserMissionID, &um.UserID, &um.MissionID, &um.Status, &um.CalculatedDueDate, &proofURL, &um.ProofSubmittedAt, &um.VerifiedAt, &verifiedBy, &um.BasePointsEarned, &um.SpeedBonusPoints, &um.StreakBonusPoints, &um.FirstCompleterBonusPoints, &um.TotalPointsEarned, &um.RewardedAt, &um.CreatedAt, &um.UpdatedAt); err != nil {
+			return nil, err
+		}
+		if proofURL != nil {
+			um.ProofURL = *proofURL
+		}
+		if verifiedBy != nil {
+			um.VerifiedBy = *verifiedBy
+		}
+		ums = append(ums, um)
+	}
+	return ums, nil
+}
+
+func (r *taskRepo) FindByIDs(ctx context.Context, ids []string) ([]missiondomain.Task, error) {
+	log.Println("debugprint: entering (*taskRepo).FindByIDs")
+	rows, err := r.pool.Query(ctx, `SELECT task_id, mission_id, title, description, created_at, updated_at FROM tasks WHERE task_id = ANY($1)`, ids)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var tasks []missiondomain.Task
+	for rows.Next() {
+		var t missiondomain.Task
+		var desc *string
+		if err := rows.Scan(&t.TaskID, &t.MissionID, &t.Title, &desc, &t.CreatedAt, &t.UpdatedAt); err != nil {
+			return nil, err
+		}
+		if desc != nil {
+			t.Description = *desc
+		}
+		tasks = append(tasks, t)
+	}
+	return tasks, nil
+}
+
+func (r *taskRepo) ListAll(ctx context.Context) ([]missiondomain.Task, error) {
+	log.Println("debugprint: entering (*taskRepo).ListAll")
+	rows, err := r.pool.Query(ctx, `SELECT task_id, mission_id, title, description, created_at, updated_at FROM tasks`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var tasks []missiondomain.Task
+	for rows.Next() {
+		var t missiondomain.Task
+		var desc *string
+		if err := rows.Scan(&t.TaskID, &t.MissionID, &t.Title, &desc, &t.CreatedAt, &t.UpdatedAt); err != nil {
+			return nil, err
+		}
+		if desc != nil {
+			t.Description = *desc
+		}
+		tasks = append(tasks, t)
+	}
+	return tasks, nil
+}
+
+func (r *userTaskRepo) FindByIDs(ctx context.Context, ids []string) ([]missiondomain.UserTask, error) {
+	log.Println("debugprint: entering (*userTaskRepo).FindByIDs")
+	rows, err := r.pool.Query(ctx, `SELECT user_task_id, user_id, task_id, user_mission_id, is_completed, completed_at, updated_at FROM user_tasks WHERE user_task_id = ANY($1)`, ids)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var uts []missiondomain.UserTask
+	for rows.Next() {
+		var ut missiondomain.UserTask
+		if err := rows.Scan(&ut.UserTaskID, &ut.UserID, &ut.TaskID, &ut.UserMissionID, &ut.IsCompleted, &ut.CompletedAt, &ut.UpdatedAt); err != nil {
+			return nil, err
+		}
+		uts = append(uts, ut)
+	}
+	return uts, nil
+}
+
+func (r *userTaskRepo) ListAll(ctx context.Context) ([]missiondomain.UserTask, error) {
+	log.Println("debugprint: entering (*userTaskRepo).ListAll")
+	rows, err := r.pool.Query(ctx, `SELECT user_task_id, user_id, task_id, user_mission_id, is_completed, completed_at, updated_at FROM user_tasks`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var uts []missiondomain.UserTask
+	for rows.Next() {
+		var ut missiondomain.UserTask
+		if err := rows.Scan(&ut.UserTaskID, &ut.UserID, &ut.TaskID, &ut.UserMissionID, &ut.IsCompleted, &ut.CompletedAt, &ut.UpdatedAt); err != nil {
+			return nil, err
+		}
+		uts = append(uts, ut)
+	}
+	return uts, nil
 }

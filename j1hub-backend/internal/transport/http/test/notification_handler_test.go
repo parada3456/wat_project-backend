@@ -28,7 +28,7 @@ func TestNotificationHandler_ListNotifications(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	notifUC.On("ListNotifications", mock.Anything, "usr_1").Return([]notificationdomain.Notification{}, nil).Once()
+	notifUC.On("ListNotifications", mock.Anything, "usr_1", (*bool)(nil), 1, 10).Return([]notificationdomain.Notification{}, 0, nil).Once()
 	req = httptest.NewRequest("GET", "/notifications", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -36,7 +36,7 @@ func TestNotificationHandler_ListNotifications(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// error
-	notifUC.On("ListNotifications", mock.Anything, "usr_1").Return(nil, errors.New("err")).Once()
+	notifUC.On("ListNotifications", mock.Anything, "usr_1", (*bool)(nil), 1, 10).Return(nil, 0, errors.New("err")).Once()
 	req = httptest.NewRequest("GET", "/notifications", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()

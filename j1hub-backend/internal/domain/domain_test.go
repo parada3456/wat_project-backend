@@ -215,7 +215,7 @@ func TestMissionCalculateDueDate(t *testing.T) {
 	// Fixed Type
 	fixed := now.Add(24 * time.Hour)
 	m2 := &missiondomain.Mission{
-		DueDateType:  "Fixed",
+		DueDateType:  "fixed",
 		FixedDueDate: &fixed,
 	}
 	res2 := m2.CalculateDueDate(now)

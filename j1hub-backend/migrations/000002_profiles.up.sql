@@ -1,6 +1,9 @@
 CREATE TABLE profiles (
     profile_id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL UNIQUE REFERENCES users(user_id) ON DELETE CASCADE,
+    username TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
     phone_number TEXT,
     bio TEXT,
     avatar_url TEXT,

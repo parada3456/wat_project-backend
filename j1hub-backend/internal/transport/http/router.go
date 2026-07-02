@@ -72,6 +72,9 @@ func NewRouter(
 			r.Get("/user-missions/{id}", missionH.GetMissionDetail)
 			r.Post("/user-missions/{id}/proof", missionH.SubmitProof)
 			r.Patch("/user-missions/{id}/tasks/{taskId}", missionH.ToggleTask)
+			// New task routes
+			r.Get("/tasks", missionH.ListTasks)
+			r.Get("/user-tasks", missionH.ListUserTasks)
 
 			// Journey routes
 			r.Get("/journey/phases", journeyH.ListPhases)
@@ -140,6 +143,7 @@ func NewRouter(
 			r.Get("/admin/users", adminH.ListUsers)
 			r.Get("/admin/users/{id}", adminH.GetUserDetail)
 			r.Post("/admin/users/{id}/adjust-points", adminH.AdjustPoints)
+			r.Post("/admin/missions", adminH.CreateMission)
 		})
 	})
 

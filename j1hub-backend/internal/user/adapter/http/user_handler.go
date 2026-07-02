@@ -189,14 +189,15 @@ func (h *UserHandler) GetPublicProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respDTO := userhandlerdto.GetPublicProfileResponse{
-		UserID:    user.UserID,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-	}
-	if profile != nil {
-		respDTO.AvatarURL = profile.AvatarURL
-	}
+	// respDTO := userhandlerdto.GetPublicProfileResponse{
+	// 	UserID:    user.UserID,
+	// 	FirstName: user.FirstName,
+	// 	LastName:  user.LastName,
+	// }
+	// if profile != nil {
+	// 	respDTO.Profile.AvatarURL = profile.AvatarURL
+	// }
+	respDTO := userhandlerdto.NewGetPublicProfileResponse(user, profile)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -263,4 +264,3 @@ func (h *UserHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
-

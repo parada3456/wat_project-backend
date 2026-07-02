@@ -1,8 +1,8 @@
 package dto
 
 type UpdateProfileReq struct {
-	FirstName string `json:"first_name" validate:"required"`
-	LastName  string `json:"last_name" validate:"required"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 	Bio       string `json:"bio"`
 	AvatarURL string `json:"avatar_url"`
 }

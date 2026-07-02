@@ -19,6 +19,7 @@ type PointLedgerRepository interface {
 	Insert(ctx context.Context, l *gamificationdomain.PointLedger) error
 	InsertBatch(ctx context.Context, ledgers []gamificationdomain.PointLedger) error
 	FindByUser(ctx context.Context, userID string) ([]gamificationdomain.PointLedger, error)
+	FindByUserAndSourceType(ctx context.Context, userID string, sourceType gamificationdomain.SourceType) ([]gamificationdomain.PointLedger, error)
 }
 
 type BadgeRepository interface {
@@ -51,7 +52,7 @@ type ProfileRepository interface {
 }
 
 type FriendshipRepository interface {
-	FindFriendsOf(ctx context.Context, userID string) ([]frienddomain.Friendship, error)
+	FindFriendsOf(ctx context.Context, userID string, limit, offset int) ([]frienddomain.Friendship, int, error)
 	FindByCanonicalPair(ctx context.Context, u1, u2 string) (*frienddomain.Friendship, error)
 }
 
@@ -64,12 +65,14 @@ type UserMissionRepository interface {
 type JourneyPhaseRepository interface {
 	FindByNumber(ctx context.Context, number int) (*missiondomain.JourneyPhase, error)
 	FindByID(ctx context.Context, id string) (*missiondomain.JourneyPhase, error)
+	ListAll(ctx context.Context) ([]missiondomain.JourneyPhase, error)
 }
 
 type UserPhaseHistoryRepository interface {
 	Insert(ctx context.Context, h *missiondomain.UserPhaseHistory) error
 	CompleteCurrentPhase(ctx context.Context, userID string, points int, completedAt time.Time) error
 	FindByUserAndPhase(ctx context.Context, userID, phaseID string) (*missiondomain.UserPhaseHistory, error)
+	FindByUser(ctx context.Context, userID string) ([]missiondomain.UserPhaseHistory, error)
 }
 
 type MissionRepository interface {

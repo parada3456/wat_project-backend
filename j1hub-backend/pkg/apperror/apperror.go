@@ -17,6 +17,18 @@ type AppError struct {
 	Err     error  `json:"-"`
 }
 
+type PaginationMetadata struct {
+	Page       int `json:"page"`
+	PageSize   int `json:"page_size"`
+	TotalItems int `json:"total_items"`
+	TotalPages int `json:"total_pages"`
+}
+
+type PagedResponse struct {
+	Data       interface{}        `json:"data"`
+	Pagination PaginationMetadata `json:"pagination"`
+}
+
 type ProblemDetails struct {
 	Type     string `json:"type"`
 	Title    string `json:"title"`
@@ -119,31 +131,35 @@ func RespondError(w http.ResponseWriter, err error) {
 }
 
 func RespondList(w http.ResponseWriter, items interface{}, page, pageSize, totalItems int) {
-	var count int
-	if items != nil {
-		v := reflect.ValueOf(items)
-		if v.Kind() == reflect.Slice || v.Kind() == reflect.Array {
-			count = v.Len()
-			// If items is a nil slice, convert it to an empty slice to avoid encoding "null"
-			if v.IsNil() {
-				items = []interface{}{}
-			}
-		}
-	} else {
+	// 1. Safeguard items so it never encodes as JSON "null"
+	if items == nil {
 		items = []interface{}{}
+	} else {
+		v := reflect.ValueOf(items)
+		if (v.Kind() == reflect.Slice || v.Kind() == reflect.Array) && v.IsNil() {
+			items = []interface{}{}
+		}
 	}
 
+	// 2. Calculate the slice length for fallback logic
+	var sliceLen int
+	v := reflect.ValueOf(items)
+	if v.Kind() == reflect.Slice || v.Kind() == reflect.Array {
+		sliceLen = v.Len()
+	}
+
+	// 3. Fallbacks and defaults
 	if page <= 0 {
 		page = 1
 	}
 	if pageSize <= 0 {
-		pageSize = count
+		pageSize = sliceLen
 		if pageSize <= 0 {
 			pageSize = 1
 		}
 	}
 	if totalItems <= 0 {
-		totalItems = count
+		totalItems = sliceLen
 	}
 
 	totalPages := (totalItems + pageSize - 1) / pageSize
@@ -151,22 +167,56 @@ func RespondList(w http.ResponseWriter, items interface{}, page, pageSize, total
 		totalPages = 1
 	}
 
+	// 4. Construct the structured response
+	response := PagedResponse{
+		Data: items,
+		Pagination: PaginationMetadata{
+			Page:       page,
+			PageSize:   pageSize,
+			TotalItems: totalItems,
+			TotalPages: totalPages,
+		},
+	}
+
+	// 5. Send JSON
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"data": items,
-		"pagination": map[string]interface{}{
-			"page":       page,
-			"pageSize":   pageSize,
-			"totalItems": totalItems,
-			"totalPages": totalPages,
-		},
-	})
+	_ = json.NewEncoder(w).Encode(response) // Look ma, no dynamic maps!
 }
 
-func ParsePagination(r *http.Request) (int, int) {
+// PaginationRequest binds and validates incoming query parameters
+type PaginationRequest struct {
+	Page     int
+	PageSize int
+}
+
+// Offset calculates the SQL skip value: (page - 1) * pageSize
+func (p PaginationRequest) Offset() int {
+	return (p.Page - 1) * p.PageSize
+}
+
+// Limit returns the page size, perfect for SQL LIMIT clauses
+func (p PaginationRequest) Limit() int {
+	return p.PageSize
+}
+
+func ParsePagination(r *http.Request) PaginationRequest {
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	pageSize, _ := strconv.Atoi(r.URL.Query().Get("pageSize"))
-	return page, pageSize
-}
 
+	// Apply safe defaults
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	return PaginationRequest{
+		Page:     page,
+		PageSize: pageSize,
+	}
+}

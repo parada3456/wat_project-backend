@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/j1hub/backend/internal/domain"
 	port "github.com/j1hub/backend/internal/auth/port"
+	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/pkg/apperror"
 )
 
@@ -22,9 +22,9 @@ func Authenticate(issuer port.TokenIssuer) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
-			log.Printf("debugprint: Authenticate middleware - incoming Authorization header: %q", authHeader)
+			// log.Printf("debugprint: Authenticate middleware - incoming Authorization header: %q", authHeader)
 			if authHeader == "" {
-				log.Println("debugprint: Authenticate middleware - Missing authorization header")
+				// log.Println("debugprint: Authenticate middleware - Missing authorization header")
 				apperror.RespondError(w, fmt.Errorf("Missing authorization header: %w", domain.ErrUnauthorized))
 				return
 			}
@@ -36,16 +36,16 @@ func Authenticate(issuer port.TokenIssuer) func(http.Handler) http.Handler {
 			} else {
 				token = authHeader
 			}
-			log.Printf("debugprint: Authenticate middleware - extracted token: %q", token)
+			// log.Printf("debugprint: Authenticate middleware - extracted token: %q", token)
 
 			claims, err := issuer.Verify(token)
 			if err != nil {
-				log.Printf("debugprint: Authenticate middleware - Verify failed: %v", err)
+				// log.Printf("debugprint: Authenticate middleware - Verify failed: %v", err)
 				apperror.RespondError(w, fmt.Errorf("Invalid token: %w", domain.ErrUnauthorized))
 				return
 			}
 
-			log.Printf("debugprint: Authenticate middleware - success, user_id: %s, is_admin: %t", claims.UserID, claims.IsAdmin)
+			// log.Printf("debugprint: Authenticate middleware - success, user_id: %s, is_admin: %t", claims.UserID, claims.IsAdmin)
 			ctx := context.WithValue(r.Context(), UserIDKey, claims.UserID)
 			ctx = context.WithValue(ctx, IsAdminKey, claims.IsAdmin)
 			next.ServeHTTP(w, r.WithContext(ctx))

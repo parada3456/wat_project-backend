@@ -91,23 +91,28 @@ func (uc *ManageFriendshipUseCase) RespondToRequest(ctx context.Context, respond
 	return nil
 }
 
-func (uc *ManageFriendshipUseCase) ListFriends(ctx context.Context, userID string) ([]frienddomain.Friendship, error) {
+func (uc *ManageFriendshipUseCase) ListFriends(ctx context.Context, userID string, page, pageSize int) ([]frienddomain.Friendship, int, error) {
 	log.Println("debugprint: entering (*ManageFriendshipUseCase).ListFriends")
-	return uc.friendRepo.FindFriendsOf(ctx, userID)
+	limit := pageSize
+	offset := (page - 1) * pageSize
+	return uc.friendRepo.FindFriendsOf(ctx, userID, limit, offset)
 }
 
-func (uc *ManageFriendshipUseCase) ListPendingRequests(ctx context.Context, userID string) ([]frienddomain.Friendship, error) {
-	log.
-		// Need FindPendingFor in repo
-		Println("debugprint: entering (*ManageFriendshipUseCase).ListPendingRequests")
-
-	return nil, nil
+func (uc *ManageFriendshipUseCase) ListPendingRequests(ctx context.Context, userID string, page, pageSize int) ([]frienddomain.Friendship, int, error) {
+	log.Println("debugprint: entering (*ManageFriendshipUseCase).ListPendingRequests")
+	limit := pageSize
+	offset := (page - 1) * pageSize
+	return uc.friendRepo.FindPendingFor(ctx, userID, limit, offset)
 }
 
 func (uc *ManageFriendshipUseCase) RemoveFriend(ctx context.Context, userID, friendshipID string) error {
-	log.
-		// Need Delete in repo
-		Println("debugprint: entering (*ManageFriendshipUseCase).RemoveFriend")
-
-	return nil
+	log.Println("debugprint: entering (*ManageFriendshipUseCase).RemoveFriend")
+	f, err := uc.friendRepo.FindByID(ctx, friendshipID)
+	if err != nil {
+		return err
+	}
+	if f.UserID1 != userID && f.UserID2 != userID {
+		return domain.ErrForbidden
+	}
+	return uc.friendRepo.Delete(ctx, friendshipID)
 }

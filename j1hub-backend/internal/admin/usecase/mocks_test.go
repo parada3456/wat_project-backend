@@ -146,6 +146,9 @@ func (m *MockMissionRepository) FindByID(ctx context.Context, id string) (*missi
 	}
 	return args.Get(0).(*missiondomain.Mission), args.Error(1)
 }
+func (m *MockMissionRepository) Insert(ctx context.Context, mis *missiondomain.Mission) error {
+	return m.Called(ctx, mis).Error(0)
+}
 
 // MockUserMissionRepository
 type MockUserMissionRepository struct{ mock.Mock }
@@ -193,6 +196,9 @@ func (m *MockTaskRepository) FindByMission(ctx context.Context, missionID string
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]missiondomain.Task), args.Error(1)
+}
+func (m *MockTaskRepository) BulkInsert(ctx context.Context, tasks []missiondomain.Task) error {
+	return m.Called(ctx, tasks).Error(0)
 }
 
 // MockUserTaskRepository
@@ -281,12 +287,22 @@ func (m *MockFriendshipRepository) FindByID(ctx context.Context, id string) (*fr
 func (m *MockFriendshipRepository) UpdateStatus(ctx context.Context, id string, status frienddomain.FriendshipStatus) error {
 	return m.Called(ctx, id, status).Error(0)
 }
-func (m *MockFriendshipRepository) FindFriendsOf(ctx context.Context, userID string) ([]frienddomain.Friendship, error) {
-	args := m.Called(ctx, userID)
+func (m *MockFriendshipRepository) FindFriendsOf(ctx context.Context, userID string, limit, offset int) ([]frienddomain.Friendship, int, error) {
+	args := m.Called(ctx, userID, limit, offset)
 	if args.Get(0) == nil {
-		return nil, args.Error(1)
+		return nil, args.Int(1), args.Error(2)
 	}
-	return args.Get(0).([]frienddomain.Friendship), args.Error(1)
+	return args.Get(0).([]frienddomain.Friendship), args.Int(1), args.Error(2)
+}
+func (m *MockFriendshipRepository) FindPendingFor(ctx context.Context, userID string, limit, offset int) ([]frienddomain.Friendship, int, error) {
+	args := m.Called(ctx, userID, limit, offset)
+	if args.Get(0) == nil {
+		return nil, args.Int(1), args.Error(2)
+	}
+	return args.Get(0).([]frienddomain.Friendship), args.Int(1), args.Error(2)
+}
+func (m *MockFriendshipRepository) Delete(ctx context.Context, id string) error {
+	return m.Called(ctx, id).Error(0)
 }
 
 // MockExpenseTransactionRepository

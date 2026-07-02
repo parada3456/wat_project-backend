@@ -8,10 +8,10 @@ import (
 type PaymentStatus string
 
 const (
-	PaymentPending   PaymentStatus = "Pending"
-	PaymentSubmitted PaymentStatus = "Submitted"
-	PaymentApproved  PaymentStatus = "Approved"
-	PaymentOverdue   PaymentStatus = "Overdue"
+	PaymentPending   PaymentStatus = "pending"
+	PaymentSubmitted PaymentStatus = "submitted"
+	PaymentApproved  PaymentStatus = "approved"
+	PaymentOverdue   PaymentStatus = "overdue"
 )
 
 func (s PaymentStatus) Valid() bool {
@@ -26,9 +26,9 @@ func (s PaymentStatus) Valid() bool {
 type ApprovalStatus string
 
 const (
-	ApprovalPending  ApprovalStatus = "Pending_Approval"
-	ApprovalApproved ApprovalStatus = "Approved"
-	ApprovalRejected ApprovalStatus = "Rejected"
+	ApprovalPending  ApprovalStatus = "pending_approval"
+	ApprovalApproved ApprovalStatus = "approved"
+	ApprovalRejected ApprovalStatus = "rejected"
 )
 
 func (s ApprovalStatus) Valid() bool {

@@ -3,6 +3,7 @@ package port
 import (
 	"context"
 	"time"
+
 	"github.com/jackc/pgx/v5"
 	missiondomain "github.com/j1hub/backend/internal/mission/domain"
 	userdomain "github.com/j1hub/backend/internal/user/domain"
@@ -29,15 +30,50 @@ type PointsAdjustmentResult struct {
 	LedgerID             string `json:"ledgerId"`
 }
 
+type UserWithProfile struct {
+	User    userdomain.User    `json:"user"`
+	Profile userdomain.Profile `json:"profile"`
+}
+
+// CreateMissionCmd holds data for creating a mission with tasks.
+type CreateMissionCmd struct {
+	PhaseID              string
+	Title                string
+	Description          string
+	Location             string
+	BasePoints           int
+	IsMandatory          bool
+	VerificationType     missiondomain.VerificationType
+	DueDateType          string
+	FixedDueDate         *time.Time
+	RelativeTriggerEvent string
+	RelativeDaysOffset   int
+	Tasks                []CreateTaskCmd
+}
+
+type CreateTaskCmd struct {
+	Title       string
+	Description string
+}
+
+type CreateMissionResult struct {
+	Mission missiondomain.Mission `json:"mission"`
+	Tasks   []missiondomain.Task  `json:"tasks"`
+}
+
 type AdminRepository interface {
 	GetStats(ctx context.Context) (*AdminStats, error)
-	ListPendingVerifications(ctx context.Context) ([]missiondomain.UserMission, error)
-	SearchUsers(ctx context.Context, query string) ([]userdomain.User, error)
+	ListPendingVerifications(ctx context.Context, limit, offset int) ([]missiondomain.UserMission, int, error)
+	SearchUsers(ctx context.Context, query string, limit, offset int) ([]UserWithProfile, int, error)
 }
 
 type UserRepository interface {
 	IncrementPoints(ctx context.Context, userID string, lifetimeDelta, phaseDelta int) error
 	FindByID(ctx context.Context, id string) (*userdomain.User, error)
+}
+
+type ProfileRepository interface {
+	FindByUserID(ctx context.Context, userID string) (*userdomain.Profile, error)
 }
 
 type UserMissionRepository interface {
@@ -48,6 +84,11 @@ type UserMissionRepository interface {
 
 type MissionRepository interface {
 	FindByID(ctx context.Context, id string) (*missiondomain.Mission, error)
+	Insert(ctx context.Context, m *missiondomain.Mission) error
+}
+
+type TaskRepository interface {
+	BulkInsert(ctx context.Context, tasks []missiondomain.Task) error
 }
 
 type PointLedgerRepository interface {
@@ -60,9 +101,10 @@ type NotifierPort interface {
 
 type AdminUseCase interface {
 	GetDashboardStats(ctx context.Context) (*AdminStats, error)
-	ListPendingVerifications(ctx context.Context) ([]missiondomain.UserMission, error)
+	ListPendingVerifications(ctx context.Context, page, pageSize int) ([]missiondomain.UserMission, int, error)
 	VerifyMission(ctx context.Context, adminID, userMissionID string, approved bool, rejectionReason *string) (*missiondomain.UserMission, error)
-	ListUsers(ctx context.Context, search string) ([]userdomain.User, error)
-	GetUserDetail(ctx context.Context, id string) (*userdomain.User, error)
+	ListUsers(ctx context.Context, search string, page, pageSize int) ([]UserWithProfile, int, error)
+	GetUserDetail(ctx context.Context, id string) (*UserWithProfile, error)
 	AdjustPoints(ctx context.Context, userID string, delta int, reason string) (*PointsAdjustmentResult, error)
+	CreateMission(ctx context.Context, cmd CreateMissionCmd) (*CreateMissionResult, error)
 }

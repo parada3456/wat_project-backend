@@ -6,17 +6,25 @@ import (
 )
 
 type MissionDetailResponse struct {
-	UserMissionID string                          `json:"user_mission_id"`
-	MissionID     string                          `json:"mission_id"`
-	Status        missiondomain.UserMissionStatus `json:"status"`
-	Tasks         []missiondomain.UserTask        `json:"tasks"`
+	Mission     *missiondomain.Mission    `json:"mission"`
+	UserMission *missiondomain.UserMission `json:"user_mission"`
+	Tasks       []missiondomain.Task      `json:"tasks"`
+	UserTasks   []missiondomain.UserTask  `json:"user_tasks"`
 }
 
 func NewMissionDetailResponse(detail *missionusecase.MissionDetailResponse) *MissionDetailResponse {
+	tasks := detail.Tasks
+	if tasks == nil {
+		tasks = []missiondomain.Task{}
+	}
+	userTasks := detail.UserTasks
+	if userTasks == nil {
+		userTasks = []missiondomain.UserTask{}
+	}
 	return &MissionDetailResponse{
-		UserMissionID: detail.UserMission.UserMissionID,
-		MissionID:     detail.UserMission.MissionID,
-		Status:        detail.UserMission.Status,
-		Tasks:         detail.UserTasks,
+		Mission:     &detail.Mission,
+		UserMission: &detail.UserMission,
+		Tasks:       tasks,
+		UserTasks:   userTasks,
 	}
 }

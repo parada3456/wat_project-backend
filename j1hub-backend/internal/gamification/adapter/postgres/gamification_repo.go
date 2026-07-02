@@ -57,6 +57,25 @@ func (r *pointLedgerRepo) FindByUser(ctx context.Context, userID string) ([]gami
 	return ledgers, nil
 }
 
+func (r *pointLedgerRepo) FindByUserAndSourceType(ctx context.Context, userID string, sourceType gamificationdomain.SourceType) ([]gamificationdomain.PointLedger, error) {
+	log.Println("debugprint: entering (*pointLedgerRepo).FindByUserAndSourceType")
+	query := `SELECT ledger_id, user_id, source_type, source_id, delta, lifetime_balance_after, phase_balance_after, note, created_at FROM point_ledger WHERE user_id = $1 AND source_type = $2 ORDER BY created_at DESC`
+	rows, err := r.pool.Query(ctx, query, userID, sourceType)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var ledgers []gamificationdomain.PointLedger
+	for rows.Next() {
+		var l gamificationdomain.PointLedger
+		if err := rows.Scan(&l.LedgerID, &l.UserID, &l.SourceType, &l.SourceID, &l.Delta, &l.LifetimeBalanceAfter, &l.PhaseBalanceAfter, &l.Note, &l.CreatedAt); err != nil {
+			return nil, err
+		}
+		ledgers = append(ledgers, l)
+	}
+	return ledgers, nil
+}
+
 type badgeRepo struct {
 	pool *pgxpool.Pool
 }
@@ -128,7 +147,14 @@ func (r *userBadgeRepo) Insert(ctx context.Context, ub *gamificationdomain.UserB
 
 func (r *userBadgeRepo) FindByUser(ctx context.Context, userID string) ([]gamificationdomain.UserBadge, error) {
 	log.Println("debugprint: entering (*userBadgeRepo).FindByUser")
-	rows, err := r.pool.Query(ctx, `SELECT user_badge_id, user_id, badge_id, source_id, earned_at FROM user_badges WHERE user_id = $1`, userID)
+	query := `
+		SELECT ub.user_badge_id, ub.user_id, ub.badge_id, ub.source_id, ub.earned_at,
+		       b.badge_id, b.title, b.description, b.trigger_type, b.icon_url, b.created_at
+		FROM user_badges ub
+		INNER JOIN badges b ON ub.badge_id = b.badge_id
+		WHERE ub.user_id = $1
+	`
+	rows, err := r.pool.Query(ctx, query, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -136,9 +162,14 @@ func (r *userBadgeRepo) FindByUser(ctx context.Context, userID string) ([]gamifi
 	var ubs []gamificationdomain.UserBadge
 	for rows.Next() {
 		var ub gamificationdomain.UserBadge
-		if err := rows.Scan(&ub.UserBadgeID, &ub.UserID, &ub.BadgeID, &ub.SourceID, &ub.EarnedAt); err != nil {
+		var b gamificationdomain.Badge
+		if err := rows.Scan(
+			&ub.UserBadgeID, &ub.UserID, &ub.BadgeID, &ub.SourceID, &ub.EarnedAt,
+			&b.BadgeID, &b.Title, &b.Description, &b.TriggerType, &b.IconURL, &b.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
+		ub.Badge = &b
 		ubs = append(ubs, ub)
 	}
 	return ubs, nil

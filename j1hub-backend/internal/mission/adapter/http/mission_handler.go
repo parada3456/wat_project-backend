@@ -19,10 +19,46 @@ import (
 )
 
 type MissionUC interface {
-	ListAvailableMissions(ctx context.Context, userID string) ([]missiondomain.UserMission, error)
-	ListStaticMissions(ctx context.Context, userID string) ([]missiondomain.Mission, error)
+	ListAvailableMissions(ctx context.Context, userID string, ids []string) ([]missiondomain.UserMission, error)
+	ListStaticMissions(ctx context.Context, userID string, ids []string) ([]missiondomain.Mission, error)
 	GetMissionDetail(ctx context.Context, userID, userMissionID string) (*missionusecase.MissionDetailResponse, error)
 	ToggleTask(ctx context.Context, userID, userTaskID string, completed bool) error
+	ListTasks(ctx context.Context, ids []string) ([]missiondomain.Task, error)
+	ListUserTasks(ctx context.Context, ids []string) ([]missiondomain.UserTask, error)
+}
+
+func (h *MissionHandler) ListTasks(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*MissionHandler).ListTasks")
+	claims := middleware.GetClaims(r.Context())
+	if claims == nil {
+		apperror.RespondError(w, domain.ErrUnauthorized)
+		return
+	}
+	ids := r.URL.Query()["ids"]
+	tasks, err := h.missionUC.ListTasks(r.Context(), ids)
+	if err != nil {
+		apperror.RespondError(w, err)
+		return
+	}
+	pago := apperror.ParsePagination(r)
+	apperror.RespondList(w, tasks, pago.Page, pago.PageSize, len(tasks))
+}
+
+func (h *MissionHandler) ListUserTasks(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*MissionHandler).ListUserTasks")
+	claims := middleware.GetClaims(r.Context())
+	if claims == nil {
+		apperror.RespondError(w, domain.ErrUnauthorized)
+		return
+	}
+	ids := r.URL.Query()["ids"]
+	userTasks, err := h.missionUC.ListUserTasks(r.Context(), ids)
+	if err != nil {
+		apperror.RespondError(w, err)
+		return
+	}
+	pago := apperror.ParsePagination(r)
+	apperror.RespondList(w, userTasks, pago.Page, pago.PageSize, len(userTasks))
 }
 
 type CompleteMissionUC interface {
@@ -50,14 +86,15 @@ func (h *MissionHandler) ListMissions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	missions, err := h.missionUC.ListStaticMissions(r.Context(), claims.UserID)
+	ids := r.URL.Query()["ids"]
+	missions, err := h.missionUC.ListStaticMissions(r.Context(), claims.UserID, ids)
 	if err != nil {
 		apperror.RespondError(w, err)
 		return
 	}
 
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, missions, page, pageSize, len(missions))
+	pago := apperror.ParsePagination(r)
+	apperror.RespondList(w, missions, pago.Page, pago.PageSize, len(missions))
 }
 
 func (h *MissionHandler) ListUserMissions(w http.ResponseWriter, r *http.Request) {
@@ -68,14 +105,15 @@ func (h *MissionHandler) ListUserMissions(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	missions, err := h.missionUC.ListAvailableMissions(r.Context(), claims.UserID)
+	ids := r.URL.Query()["ids"]
+	missions, err := h.missionUC.ListAvailableMissions(r.Context(), claims.UserID, ids)
 	if err != nil {
 		apperror.RespondError(w, err)
 		return
 	}
 
-	page, pageSize := apperror.ParsePagination(r)
-	apperror.RespondList(w, missions, page, pageSize, len(missions))
+	pago := apperror.ParsePagination(r)
+	apperror.RespondList(w, missions, pago.Page, pago.PageSize, len(missions))
 }
 
 func (h *MissionHandler) GetMissionDetail(w http.ResponseWriter, r *http.Request) {

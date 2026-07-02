@@ -89,19 +89,13 @@ func TestUserUseCase_UpdateProfile_Success(t *testing.T) {
 		AvatarURL: "https://newavatar.com",
 	}
 
-	mockUser := &userdomain.User{UserID: userID, FirstName: "Old", LastName: "Name"}
 	mockProfile := &userdomain.Profile{ProfileID: "prf_123", UserID: userID, Bio: "Old bio"}
-
-	userRepo.On("FindByID", ctx, userID).Return(mockUser, nil)
-	userRepo.On("Update", ctx, mock.AnythingOfType("*userdomain.User")).Return(nil).Run(func(args mock.Arguments) {
-		u := args.Get(1).(*userdomain.User)
-		assert.Equal(t, "John", u.FirstName)
-		assert.Equal(t, "Doe", u.LastName)
-	})
 
 	profileRepo.On("FindByUserID", ctx, userID).Return(mockProfile, nil)
 	profileRepo.On("Update", ctx, mock.AnythingOfType("*userdomain.Profile")).Return(nil).Run(func(args mock.Arguments) {
 		p := args.Get(1).(*userdomain.Profile)
+		assert.Equal(t, "John", p.FirstName)
+		assert.Equal(t, "Doe", p.LastName)
 		assert.Equal(t, "New bio", p.Bio)
 		assert.Equal(t, "https://newavatar.com", p.AvatarURL)
 	})
@@ -109,7 +103,6 @@ func TestUserUseCase_UpdateProfile_Success(t *testing.T) {
 	err := uc.UpdateProfile(ctx, userID, cmd)
 
 	assert.NoError(t, err)
-	userRepo.AssertExpectations(t)
 	profileRepo.AssertExpectations(t)
 }
 
@@ -122,8 +115,8 @@ func TestUserUseCase_GetPublicProfile_Success(t *testing.T) {
 	uc := userusecase.NewUserUseCase(userRepo, profileRepo, creditRepo, friendRepo, hasher)
 
 	ctx := context.Background()
-	user1 := &userdomain.User{UserID: "usr_1", FirstName: "John"}
-	profile1 := &userdomain.Profile{UserID: "usr_1", RadarVisibility: userdomain.VisibilityShowFriends}
+	user1 := &userdomain.User{UserID: "usr_1"}
+	profile1 := &userdomain.Profile{UserID: "usr_1", FirstName: "John", RadarVisibility: userdomain.VisibilityShowFriends}
 
 	userRepo.On("FindByID", ctx, "usr_1").Return(user1, nil)
 	profileRepo.On("FindByUserID", ctx, "usr_1").Return(profile1, nil)

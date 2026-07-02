@@ -40,6 +40,7 @@ type UserRepository interface {
 
 type ProfileRepository interface {
 	Create(ctx context.Context, p *userdomain.Profile) error
+	FindByUserID(ctx context.Context, userID string) (*userdomain.Profile, error)
 }
 
 type CreditScoreRepository interface {

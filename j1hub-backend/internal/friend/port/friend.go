@@ -11,7 +11,9 @@ type FriendshipRepository interface {
 	FindByCanonicalPair(ctx context.Context, u1, u2 string) (*frienddomain.Friendship, error)
 	FindByID(ctx context.Context, id string) (*frienddomain.Friendship, error)
 	UpdateStatus(ctx context.Context, id string, status frienddomain.FriendshipStatus) error
-	FindFriendsOf(ctx context.Context, userID string) ([]frienddomain.Friendship, error)
+	FindFriendsOf(ctx context.Context, userID string, limit, offset int) ([]frienddomain.Friendship, int, error)
+	FindPendingFor(ctx context.Context, userID string, limit, offset int) ([]frienddomain.Friendship, int, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type UserRepository interface {

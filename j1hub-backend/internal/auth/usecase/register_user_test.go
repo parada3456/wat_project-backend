@@ -160,11 +160,11 @@ func TestRegisterUserUseCase_Register_Success(t *testing.T) {
 		u := args.Get(1).(*userdomain.User)
 		assert.Equal(t, "john@example.com", u.Email)
 		assert.Equal(t, "hashed_password", u.PasswordHash)
-		assert.Equal(t, "John", u.FirstName)
-		assert.Equal(t, "Doe", u.LastName)
 	})
 	profileRepo.On("Create", ctx, mock.AnythingOfType("*userdomain.Profile")).Return(nil).Run(func(args mock.Arguments) {
 		p := args.Get(1).(*userdomain.Profile)
+		assert.Equal(t, "John", p.FirstName)
+		assert.Equal(t, "Doe", p.LastName)
 		assert.Equal(t, userdomain.VisibilityShowAnonymous, p.RadarVisibility)
 	})
 	creditRepo.On("Create", ctx, mock.AnythingOfType("*gamificationdomain.CreditScore")).Return(nil).Run(func(args mock.Arguments) {
@@ -180,7 +180,7 @@ func TestRegisterUserUseCase_Register_Success(t *testing.T) {
 	}
 	issuer.On("Issue", mock.AnythingOfType("string"), false).Return(tokens, nil)
 
-	user, tokPair, err := uc.Register(ctx, cmd)
+	user, _, tokPair, err := uc.Register(ctx, cmd)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, user)
@@ -202,7 +202,7 @@ func TestRegisterUserUseCase_Register_HashError(t *testing.T) {
 	cmd := authusecase.RegisterCommand{Password: "pwd"}
 	hasher.On("Hash", "pwd").Return("", errors.New("hash error"))
 
-	user, tokens, err := uc.Register(ctx, cmd)
+	user, _, tokens, err := uc.Register(ctx, cmd)
 	assert.Error(t, err)
 	assert.Nil(t, user)
 	assert.Nil(t, tokens)
@@ -219,7 +219,7 @@ func TestRegisterUserUseCase_Register_BeginTxError(t *testing.T) {
 	hasher.On("Hash", "pwd").Return("hash", nil)
 	poolMock.On("Begin", ctx).Return((*MockTx)(nil), errors.New("db error"))
 
-	user, tokens, err := uc.Register(ctx, cmd)
+	user, _, tokens, err := uc.Register(ctx, cmd)
 	assert.Error(t, err)
 	assert.Nil(t, user)
 	assert.Nil(t, tokens)
@@ -241,7 +241,7 @@ func TestRegisterUserUseCase_Register_CreateUserError(t *testing.T) {
 	userRepo.On("Create", ctx, mock.Anything).Return(errors.New("insert error"))
 	txMock.On("Rollback", ctx).Return(nil)
 
-	user, tokens, err := uc.Register(ctx, cmd)
+	user, _, tokens, err := uc.Register(ctx, cmd)
 	assert.Error(t, err)
 	assert.Nil(t, user)
 	assert.Nil(t, tokens)

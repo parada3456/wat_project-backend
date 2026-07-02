@@ -6,14 +6,18 @@ import (
 
 type JobDetailResponse struct {
 	Job     *jobdomain.JobPosting       `json:"job"`
-	Housing []jobdomain.JobHousing      `json:"housing"`
+	Housing *jobdomain.JobHousing       `json:"housing"`
 	Rating  *jobdomain.JobOverallRating `json:"rating"`
 }
 
 func NewJobDetailResponse(job *jobdomain.JobPosting, housing []jobdomain.JobHousing, rating *jobdomain.JobOverallRating) *JobDetailResponse {
+	var h *jobdomain.JobHousing
+	if len(housing) > 0 {
+		h = &housing[0]
+	}
 	return &JobDetailResponse{
 		Job:     job,
-		Housing: housing,
+		Housing: h,
 		Rating:  rating,
 	}
 }

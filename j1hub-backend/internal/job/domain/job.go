@@ -8,10 +8,10 @@ import (
 type CartStatus string
 
 const (
-	CartSaved   CartStatus = "Saved"
-	CartViewed  CartStatus = "Viewed"
-	CartApplied CartStatus = "Applied"
-	CartRemoved CartStatus = "Removed"
+	CartSaved   CartStatus = "saved"
+	CartViewed  CartStatus = "viewed"
+	CartApplied CartStatus = "applied"
+	CartRemoved CartStatus = "removed"
 )
 
 func (s CartStatus) Valid() bool {

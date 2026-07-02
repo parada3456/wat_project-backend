@@ -21,12 +21,13 @@ func TestNotificationUseCase_ListNotifications_Success(t *testing.T) {
 		{NotificationID: "notif_1", UserID: userID, Title: "Test Title", Body: "Test Body"},
 	}
 
-	notifRepo.On("FindByUser", ctx, userID).Return(mockNotifs, nil)
+	notifRepo.On("FindByUser", ctx, userID, (*bool)(nil), 10, 0).Return(mockNotifs, 1, nil)
 
-	res, err := uc.ListNotifications(ctx, userID)
+	res, totalCount, err := uc.ListNotifications(ctx, userID, nil, 1, 10)
 
 	assert.NoError(t, err)
 	assert.Equal(t, mockNotifs, res)
+	assert.Equal(t, 1, totalCount)
 }
 
 func TestNotificationUseCase_MarkRead_Success(t *testing.T) {

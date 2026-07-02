@@ -54,20 +54,66 @@ func (r *friendshipRepo) UpdateStatus(ctx context.Context, id string, status fri
 	return err
 }
 
-func (r *friendshipRepo) FindFriendsOf(ctx context.Context, userID string) ([]frienddomain.Friendship, error) {
+func (r *friendshipRepo) FindFriendsOf(ctx context.Context, userID string, limit, offset int) ([]frienddomain.Friendship, int, error) {
 	log.Println("debugprint: entering (*friendshipRepo).FindFriendsOf")
-	rows, err := r.pool.Query(ctx, `SELECT friendship_id, user_id_1, user_id_2, status, created_at, updated_at FROM friendships WHERE (user_id_1 = $1 OR user_id_2 = $1) AND status = 'Accepted'`, userID)
+	
+	var totalCount int
+	err := r.pool.QueryRow(ctx, `SELECT COUNT(*) FROM friendships WHERE (user_id_1 = $1 OR user_id_2 = $1) AND status = 'accepted'`, userID).Scan(&totalCount)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
+	}
+	
+	if totalCount == 0 {
+		return []frienddomain.Friendship{}, 0, nil
+	}
+
+	rows, err := r.pool.Query(ctx, `SELECT friendship_id, user_id_1, user_id_2, status, created_at, updated_at FROM friendships WHERE (user_id_1 = $1 OR user_id_2 = $1) AND status = 'accepted' LIMIT $2 OFFSET $3`, userID, limit, offset)
+	if err != nil {
+		return nil, 0, err
 	}
 	defer rows.Close()
 	var friends []frienddomain.Friendship
 	for rows.Next() {
 		var f frienddomain.Friendship
 		if err := rows.Scan(&f.FriendshipID, &f.UserID1, &f.UserID2, &f.Status, &f.CreatedAt, &f.UpdatedAt); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		friends = append(friends, f)
 	}
-	return friends, nil
+	return friends, totalCount, nil
+}
+
+func (r *friendshipRepo) FindPendingFor(ctx context.Context, userID string, limit, offset int) ([]frienddomain.Friendship, int, error) {
+	log.Println("debugprint: entering (*friendshipRepo).FindPendingFor")
+	
+	var totalCount int
+	err := r.pool.QueryRow(ctx, `SELECT COUNT(*) FROM friendships WHERE (user_id_1 = $1 OR user_id_2 = $1) AND status = 'pending'`, userID).Scan(&totalCount)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if totalCount == 0 {
+		return []frienddomain.Friendship{}, 0, nil
+	}
+
+	rows, err := r.pool.Query(ctx, `SELECT friendship_id, user_id_1, user_id_2, status, created_at, updated_at FROM friendships WHERE (user_id_1 = $1 OR user_id_2 = $1) AND status = 'pending' LIMIT $2 OFFSET $3`, userID, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	var pending []frienddomain.Friendship
+	for rows.Next() {
+		var f frienddomain.Friendship
+		if err := rows.Scan(&f.FriendshipID, &f.UserID1, &f.UserID2, &f.Status, &f.CreatedAt, &f.UpdatedAt); err != nil {
+			return nil, 0, err
+		}
+		pending = append(pending, f)
+	}
+	return pending, totalCount, nil
+}
+
+func (r *friendshipRepo) Delete(ctx context.Context, id string) error {
+	log.Println("debugprint: entering (*friendshipRepo).Delete")
+	_, err := r.pool.Exec(ctx, `DELETE FROM friendships WHERE friendship_id = $1`, id)
+	return err
 }

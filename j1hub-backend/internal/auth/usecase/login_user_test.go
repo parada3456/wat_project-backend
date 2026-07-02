@@ -17,10 +17,11 @@ import (
 
 func TestLoginUseCase_Login_Success(t *testing.T) {
 	userRepo := new(MockUserRepository)
+	profileRepo := new(MockProfileRepository)
 	hasher := new(MockHasher)
 	tokenIssuer := new(MockIssuer)
 
-	uc := authusecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
+	uc := authusecase.NewLoginUseCase(userRepo, profileRepo, hasher, tokenIssuer)
 
 	ctx := context.Background()
 	email := "user@example.com"
@@ -34,6 +35,11 @@ func TestLoginUseCase_Login_Success(t *testing.T) {
 		PasswordHash: hash,
 	}
 
+	mockProfile := &userdomain.Profile{
+		ProfileID: "prf_123",
+		UserID:    userID,
+	}
+
 	mockTokens := &port.TokenPair{
 		AccessToken:  "access_token_jwt",
 		RefreshToken: "refresh_token_jwt",
@@ -41,29 +47,33 @@ func TestLoginUseCase_Login_Success(t *testing.T) {
 	}
 
 	userRepo.On("FindByEmail", ctx, email).Return(mockUser, nil)
+	profileRepo.On("FindByUserID", ctx, userID).Return(mockProfile, nil)
 	hasher.On("Verify", password, hash).Return(true)
 	tokenIssuer.On("Issue", userID, false).Return(mockTokens, nil)
 
-	user, tokens, err := uc.Login(ctx, authusecase.LoginCommand{
+	user, profile, tokens, err := uc.Login(ctx, authusecase.LoginCommand{
 		Email:    email,
 		Password: password,
 	})
 
 	assert.NoError(t, err)
 	assert.Equal(t, mockUser, user)
+	assert.Equal(t, mockProfile, profile)
 	assert.Equal(t, mockTokens, tokens)
 
 	userRepo.AssertExpectations(t)
+	profileRepo.AssertExpectations(t)
 	hasher.AssertExpectations(t)
 	tokenIssuer.AssertExpectations(t)
 }
 
 func TestLoginUseCase_Login_IssueTokenError(t *testing.T) {
 	userRepo := new(MockUserRepository)
+	profileRepo := new(MockProfileRepository)
 	hasher := new(MockHasher)
 	tokenIssuer := new(MockIssuer)
 
-	uc := authusecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
+	uc := authusecase.NewLoginUseCase(userRepo, profileRepo, hasher, tokenIssuer)
 
 	ctx := context.Background()
 	email := "user@example.com"
@@ -81,46 +91,50 @@ func TestLoginUseCase_Login_IssueTokenError(t *testing.T) {
 	hasher.On("Verify", password, hash).Return(true)
 	tokenIssuer.On("Issue", userID, false).Return((*port.TokenPair)(nil), errors.New("issuance error"))
 
-	user, tokens, err := uc.Login(ctx, authusecase.LoginCommand{
+	user, profile, tokens, err := uc.Login(ctx, authusecase.LoginCommand{
 		Email:    email,
 		Password: password,
 	})
 
 	assert.Error(t, err)
 	assert.Nil(t, user)
+	assert.Nil(t, profile)
 	assert.Nil(t, tokens)
 	assert.Equal(t, "issuance error", err.Error())
 }
 
 func TestLoginUseCase_Login_UserNotFound(t *testing.T) {
 	userRepo := new(MockUserRepository)
+	profileRepo := new(MockProfileRepository)
 	hasher := new(MockHasher)
 	tokenIssuer := new(MockIssuer)
 
-	uc := authusecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
+	uc := authusecase.NewLoginUseCase(userRepo, profileRepo, hasher, tokenIssuer)
 
 	ctx := context.Background()
 	email := "nonexistent@example.com"
 
 	userRepo.On("FindByEmail", ctx, email).Return((*userdomain.User)(nil), domain.ErrNotFound)
 
-	user, tokens, err := uc.Login(ctx, authusecase.LoginCommand{
+	user, profile, tokens, err := uc.Login(ctx, authusecase.LoginCommand{
 		Email:    email,
 		Password: "somepassword",
 	})
 
 	assert.Error(t, err)
 	assert.Nil(t, user)
+	assert.Nil(t, profile)
 	assert.Nil(t, tokens)
 	assert.Contains(t, err.Error(), "Invalid credentials")
 }
 
 func TestLoginUseCase_Login_WrongPassword(t *testing.T) {
 	userRepo := new(MockUserRepository)
+	profileRepo := new(MockProfileRepository)
 	hasher := new(MockHasher)
 	tokenIssuer := new(MockIssuer)
 
-	uc := authusecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
+	uc := authusecase.NewLoginUseCase(userRepo, profileRepo, hasher, tokenIssuer)
 
 	ctx := context.Background()
 	email := "user@example.com"
@@ -136,23 +150,25 @@ func TestLoginUseCase_Login_WrongPassword(t *testing.T) {
 	userRepo.On("FindByEmail", ctx, email).Return(mockUser, nil)
 	hasher.On("Verify", password, hash).Return(false)
 
-	user, tokens, err := uc.Login(ctx, authusecase.LoginCommand{
+	user, profile, tokens, err := uc.Login(ctx, authusecase.LoginCommand{
 		Email:    email,
 		Password: password,
 	})
 
 	assert.Error(t, err)
 	assert.Nil(t, user)
+	assert.Nil(t, profile)
 	assert.Nil(t, tokens)
 	assert.Contains(t, err.Error(), "Invalid credentials")
 }
 
 func TestLoginUseCase_Refresh_Success(t *testing.T) {
 	userRepo := new(MockUserRepository)
+	profileRepo := new(MockProfileRepository)
 	hasher := new(MockHasher)
 	tokenIssuer := new(MockIssuer)
 
-	uc := authusecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
+	uc := authusecase.NewLoginUseCase(userRepo, profileRepo, hasher, tokenIssuer)
 
 	ctx := context.Background()
 	refreshToken := "valid_refresh_token"
@@ -171,10 +187,11 @@ func TestLoginUseCase_Refresh_Success(t *testing.T) {
 
 func TestLoginUseCase_Refresh_Error(t *testing.T) {
 	userRepo := new(MockUserRepository)
+	profileRepo := new(MockProfileRepository)
 	hasher := new(MockHasher)
 	tokenIssuer := new(MockIssuer)
 
-	uc := authusecase.NewLoginUseCase(userRepo, hasher, tokenIssuer)
+	uc := authusecase.NewLoginUseCase(userRepo, profileRepo, hasher, tokenIssuer)
 
 	ctx := context.Background()
 	refreshToken := "invalid_refresh_token"

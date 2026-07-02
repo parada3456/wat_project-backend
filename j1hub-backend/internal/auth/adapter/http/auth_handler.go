@@ -11,18 +11,18 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/j1hub/backend/internal/domain"
-	authusecase "github.com/j1hub/backend/internal/auth/usecase"
 	port "github.com/j1hub/backend/internal/auth/port"
+	authusecase "github.com/j1hub/backend/internal/auth/usecase"
+	"github.com/j1hub/backend/internal/domain"
 	"github.com/j1hub/backend/pkg/apperror"
 )
 
 type RegisterUserUC interface {
-	Register(ctx context.Context, cmd authusecase.RegisterCommand) (*userdomain.User, *port.TokenPair, error)
+	Register(ctx context.Context, cmd authusecase.RegisterCommand) (*userdomain.User, *userdomain.Profile, *port.TokenPair, error)
 }
 
 type LoginUC interface {
-	Login(ctx context.Context, cmd authusecase.LoginCommand) (*userdomain.User, *port.TokenPair, error)
+	Login(ctx context.Context, cmd authusecase.LoginCommand) (*userdomain.User, *userdomain.Profile, *port.TokenPair, error)
 	Refresh(ctx context.Context, refreshToken string) (*port.TokenPair, error)
 }
 
@@ -54,7 +54,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, tokens, err := h.registerUC.Register(r.Context(), authusecase.RegisterCommand{
+	user, profile, tokens, err := h.registerUC.Register(r.Context(), authusecase.RegisterCommand{
 		Email:     req.Email,
 		Password:  req.Password,
 		FirstName: req.FirstName,
@@ -67,7 +67,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	respDTO := dto.NewRegisterResponse(user, tokens)
+	respDTO := dto.NewLoginResponse(user, profile, tokens)
 	json.NewEncoder(w).Encode(respDTO)
 }
 
@@ -90,7 +90,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, tokens, err := h.loginUC.Login(r.Context(), authusecase.LoginCommand{
+	user, profile, tokens, err := h.loginUC.Login(r.Context(), authusecase.LoginCommand{
 		Email:    req.Email,
 		Password: req.Password,
 	})
@@ -102,7 +102,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	respDTO := dto.NewLoginResponse(user, tokens)
+	respDTO := dto.NewLoginResponse(user, profile, tokens)
 	if err := json.NewEncoder(w).Encode(respDTO); err != nil {
 		log.Printf("failed to encode login response: %v", err)
 	}

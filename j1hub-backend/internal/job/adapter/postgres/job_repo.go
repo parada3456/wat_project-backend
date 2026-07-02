@@ -21,11 +21,35 @@ func NewJobRepository(pool *pgxpool.Pool) port.JobPostingRepository {
 	return &jobRepo{pool: pool}
 }
 
-func (r *jobRepo) FindWithFilters(ctx context.Context, filters map[string]interface{}) ([]jobdomain.JobPosting, error) {
-	log.
-		// Simple implementation with static filters for now, can be expanded to dynamic
-		Println("debugprint: entering (*jobRepo).FindWithFilters")
+func (r *jobRepo) FindWithFilters(ctx context.Context, filters map[string]interface{}, limit, offset int) ([]jobdomain.JobPosting, int, error) {
+	log.Println("debugprint: entering (*jobRepo).FindWithFilters")
 
+	// 1. Build Count Query
+	countQuery := `SELECT COUNT(*) FROM job_postings WHERE 1=1`
+	var countArgs []interface{}
+	ci := 1
+	if v, ok := filters["position_type"]; ok {
+		countQuery += fmt.Sprintf(" AND position_type = $%d", ci)
+		countArgs = append(countArgs, v)
+		ci++
+	}
+	if v, ok := filters["location_state"]; ok {
+		countQuery += fmt.Sprintf(" AND location_state = $%d", ci)
+		countArgs = append(countArgs, v)
+		ci++
+	}
+
+	var totalCount int
+	err := r.pool.QueryRow(ctx, countQuery, countArgs...).Scan(&totalCount)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if totalCount == 0 {
+		return []jobdomain.JobPosting{}, 0, nil
+	}
+
+	// 2. Build Data Query
 	query := `SELECT job_id, agency_name, employer_title, position, position_type, location_city, location_state, group_location, us_sponsor, salary_range_min, salary_range_max, available_slots, description, source_url, scrape_at, posted_at, updated_at FROM job_postings WHERE 1=1`
 	var args []interface{}
 	i := 1
@@ -40,20 +64,25 @@ func (r *jobRepo) FindWithFilters(ctx context.Context, filters map[string]interf
 		i++
 	}
 
+	// Append pagination LIMIT and OFFSET
+	query += fmt.Sprintf(" LIMIT $%d OFFSET $%d", i, i+1)
+	args = append(args, limit, offset)
+
 	rows, err := r.pool.Query(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
+
 	var jobs []jobdomain.JobPosting
 	for rows.Next() {
 		var j jobdomain.JobPosting
 		if err := rows.Scan(&j.JobID, &j.AgencyName, &j.EmployerTitle, &j.Position, &j.PositionType, &j.LocationCity, &j.LocationState, &j.GroupLocation, &j.USSponsor, &j.SalaryRangeMin, &j.SalaryRangeMax, &j.AvailableSlots, &j.Description, &j.SourceURL, &j.ScrapeAt, &j.PostedAt, &j.UpdatedAt); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		jobs = append(jobs, j)
 	}
-	return jobs, nil
+	return jobs, totalCount, nil
 }
 
 func (r *jobRepo) FindByID(ctx context.Context, id string) (*jobdomain.JobPosting, error) {
