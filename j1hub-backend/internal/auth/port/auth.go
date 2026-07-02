@@ -3,10 +3,11 @@ package port
 import (
 	"context"
 	"time"
+
 	"github.com/jackc/pgx/v5"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 )
 
 type PasswordHasher interface {

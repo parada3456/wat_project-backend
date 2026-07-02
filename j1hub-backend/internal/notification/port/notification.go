@@ -2,7 +2,8 @@ package port
 
 import (
 	"context"
-	notificationdomain "github.com/j1hub/backend/internal/notification/domain"
+
+	notificationdomain "github.com/parada3456/wat_project-backend/internal/notification/domain"
 )
 
 type NotificationRepository interface {

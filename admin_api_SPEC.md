@@ -49,9 +49,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
-	"github.com/j1hub/backend/internal/adapter/http/middleware"
-	"github.com/j1hub/backend/internal/port"
-	"github.com/j1hub/backend/pkg/apperror"
+	"github.com/parada3456/wat_project-backend/internal/adapter/http/middleware"
+	"github.com/parada3456/wat_project-backend/internal/port"
+	"github.com/parada3456/wat_project-backend/pkg/apperror"
 )
 
 type AdminHandler struct {

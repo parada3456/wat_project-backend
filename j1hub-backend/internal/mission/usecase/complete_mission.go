@@ -5,14 +5,14 @@ import (
 	"io"
 	"log"
 
-	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	gamificationusecase "github.com/parada3456/wat_project-backend/internal/gamification/usecase"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
 
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
 
-	"github.com/j1hub/backend/internal/domain"
-	port "github.com/j1hub/backend/internal/mission/port"
-	"github.com/j1hub/backend/pkg/timeutil"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	port "github.com/parada3456/wat_project-backend/internal/mission/port"
+	"github.com/parada3456/wat_project-backend/pkg/timeutil"
 )
 
 type CompleteMissionUseCase struct {

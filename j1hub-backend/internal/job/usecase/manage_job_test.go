@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/j1hub/backend/internal/domain"
-	jobdomain "github.com/j1hub/backend/internal/job/domain"
-	jobusecase "github.com/j1hub/backend/internal/job/usecase"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	jobdomain "github.com/parada3456/wat_project-backend/internal/job/domain"
+	jobusecase "github.com/parada3456/wat_project-backend/internal/job/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

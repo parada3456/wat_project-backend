@@ -1,7 +1,6 @@
 package test
 
 import (
-	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
 	"context"
 	"errors"
 	"net/http"
@@ -9,12 +8,14 @@ import (
 	"strings"
 	"testing"
 
-	frienddomain "github.com/j1hub/backend/internal/friend/domain"
+	gamificationusecase "github.com/parada3456/wat_project-backend/internal/gamification/usecase"
+
+	frienddomain "github.com/parada3456/wat_project-backend/internal/friend/domain"
 
 	"github.com/go-chi/chi/v5"
-	friendhandler "github.com/j1hub/backend/internal/friend/adapter/http"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	port "github.com/j1hub/backend/internal/auth/port"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
+	friendhandler "github.com/parada3456/wat_project-backend/internal/friend/adapter/http"
+	"github.com/parada3456/wat_project-backend/internal/transport/http/middleware"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

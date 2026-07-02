@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/j1hub/backend/internal/infrastructure/outbound/scraper/ihappy"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/outbound/scraper/ihappy"
 )
 
 func TestIHappyScraper_GetJobLinks(t *testing.T) {

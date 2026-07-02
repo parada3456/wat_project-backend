@@ -1,7 +1,6 @@
 package test
 
 import (
-	userusecase "github.com/j1hub/backend/internal/user/usecase"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -10,13 +9,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/j1hub/backend/internal/user/adapter/http/dto"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	userusecase "github.com/parada3456/wat_project-backend/internal/user/usecase"
+
+	"github.com/parada3456/wat_project-backend/internal/user/adapter/http/dto"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
 	"github.com/go-chi/chi/v5"
-	userhandler "github.com/j1hub/backend/internal/user/adapter/http"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	port "github.com/j1hub/backend/internal/auth/port"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
+	"github.com/parada3456/wat_project-backend/internal/transport/http/middleware"
+	userhandler "github.com/parada3456/wat_project-backend/internal/user/adapter/http"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -245,4 +246,3 @@ func TestUserHandler_UpdatePassword_ValidationFailed(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
-

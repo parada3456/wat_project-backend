@@ -4,13 +4,13 @@ import (
 	"context"
 	"log"
 
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
 
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-	"github.com/j1hub/backend/internal/infrastructure/config"
-	port "github.com/j1hub/backend/internal/gamification/port"
+	port "github.com/parada3456/wat_project-backend/internal/gamification/port"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/config"
 )
 
 type RewardEngine struct {

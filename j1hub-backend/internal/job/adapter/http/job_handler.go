@@ -1,7 +1,7 @@
 package http
 
 import (
-	"github.com/j1hub/backend/internal/job/adapter/http/dto"
+	"github.com/parada3456/wat_project-backend/internal/job/adapter/http/dto"
 
 	"context"
 	"encoding/json"
@@ -10,10 +10,10 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	jobdomain "github.com/j1hub/backend/internal/job/domain"
-	"github.com/j1hub/backend/pkg/apperror"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	jobdomain "github.com/parada3456/wat_project-backend/internal/job/domain"
+	"github.com/parada3456/wat_project-backend/internal/transport/http/middleware"
+	"github.com/parada3456/wat_project-backend/pkg/apperror"
 )
 
 type JobUC interface {
@@ -222,7 +222,6 @@ func (h *JobHandler) CreateReview(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusCreated)
 }
-
 
 func (h *JobHandler) CreateJob(w http.ResponseWriter, r *http.Request) {
 	log.Println("debugprint: entering (*JobHandler).CreateJob")

@@ -4,12 +4,12 @@ import (
 	"context"
 	"log"
 
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
-	expensedomain "github.com/j1hub/backend/internal/expense/domain"
-	expenseport "github.com/j1hub/backend/internal/expense/port"
-	gamificationport "github.com/j1hub/backend/internal/gamification/port"
-	notificationport "github.com/j1hub/backend/internal/notification/port"
-	"github.com/j1hub/backend/pkg/uid"
+	expensedomain "github.com/parada3456/wat_project-backend/internal/expense/domain"
+	expenseport "github.com/parada3456/wat_project-backend/internal/expense/port"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
+	gamificationport "github.com/parada3456/wat_project-backend/internal/gamification/port"
+	notificationport "github.com/parada3456/wat_project-backend/internal/notification/port"
+	"github.com/parada3456/wat_project-backend/pkg/uid"
 )
 
 type OverdueExpenseJob struct {

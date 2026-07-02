@@ -1,8 +1,8 @@
 package http
 
 import (
-	"github.com/j1hub/backend/internal/auth/adapter/http/dto"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	"github.com/parada3456/wat_project-backend/internal/auth/adapter/http/dto"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
 	"context"
 	"encoding/json"
@@ -11,10 +11,10 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	port "github.com/j1hub/backend/internal/auth/port"
-	authusecase "github.com/j1hub/backend/internal/auth/usecase"
-	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/pkg/apperror"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
+	authusecase "github.com/parada3456/wat_project-backend/internal/auth/usecase"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	"github.com/parada3456/wat_project-backend/pkg/apperror"
 )
 
 type RegisterUserUC interface {

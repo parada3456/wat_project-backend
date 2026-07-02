@@ -92,8 +92,8 @@ import (
     "log"
     "sync"
 
-    "github.com/j1hub/backend/internal/port"
-    "github.com/j1hub/backend/internal/scraper"
+    "github.com/parada3456/wat_project-backend/internal/port"
+    "github.com/parada3456/wat_project-backend/internal/scraper"
 )
 
 type ScrapeJobsUseCase struct {

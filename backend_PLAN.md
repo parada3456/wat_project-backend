@@ -18,7 +18,7 @@
 ## Phase 1 — Project Scaffold
 
 ### Task 1.1 — Repository Init
-- [ ] Create `go.mod` (`module github.com/j1hub/backend`, `go 1.22`)
+- [ ] Create `go.mod` (`module github.com/parada3456/wat_project-backend`, `go 1.22`)
 - [ ] Add all dependencies from `SKILL.md` Tech Stack table with exact versions
 - [ ] Create `Makefile` with targets: `run`, `build`, `migrate-up`, `migrate-down`, `test`, `lint`, `docker-up`
 - [ ] Create `docker-compose.yml` with services: `postgres` (postgis/postgis:16-3.4), `app`

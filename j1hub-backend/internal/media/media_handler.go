@@ -10,9 +10,9 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/pkg/apperror"
-	"github.com/j1hub/backend/pkg/uid"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	"github.com/parada3456/wat_project-backend/pkg/apperror"
+	"github.com/parada3456/wat_project-backend/pkg/uid"
 )
 
 type StoragePort interface {

@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/j1hub/backend/internal/infrastructure/config"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/config"
 )
 
 type supabaseStorage struct {

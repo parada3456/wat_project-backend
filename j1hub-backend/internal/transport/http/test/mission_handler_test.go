@@ -1,7 +1,6 @@
 package test
 
 import (
-	missionusecase "github.com/j1hub/backend/internal/mission/usecase"
 	"bytes"
 	"context"
 	"errors"
@@ -11,12 +10,14 @@ import (
 	"strings"
 	"testing"
 
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	missionusecase "github.com/parada3456/wat_project-backend/internal/mission/usecase"
+
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
 
 	"github.com/go-chi/chi/v5"
-	missionhandler "github.com/j1hub/backend/internal/mission/adapter/http"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	port "github.com/j1hub/backend/internal/auth/port"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
+	missionhandler "github.com/parada3456/wat_project-backend/internal/mission/adapter/http"
+	"github.com/parada3456/wat_project-backend/internal/transport/http/middleware"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

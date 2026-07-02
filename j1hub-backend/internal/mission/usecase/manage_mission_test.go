@@ -4,12 +4,12 @@ package missionusecase_test
 // 	"context"
 // 	"testing"
 
-// 	missionusecase "github.com/j1hub/backend/internal/mission/usecase"
+// 	missionusecase "github.com/parada3456/wat_project-backend/internal/mission/usecase"
 
-// 	missiondomain "github.com/j1hub/backend/internal/mission/domain"
-// 	userdomain "github.com/j1hub/backend/internal/user/domain"
+// 	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
+// 	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-// 	"github.com/j1hub/backend/internal/domain"
+// 	"github.com/parada3456/wat_project-backend/internal/domain"
 // 	"github.com/stretchr/testify/assert"
 // 	"github.com/stretchr/testify/mock"
 // )

@@ -5,12 +5,12 @@ import (
 	"log"
 	"time"
 
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
 
-	"github.com/j1hub/backend/internal/domain"
-	port "github.com/j1hub/backend/internal/gamification/port"
-	"github.com/j1hub/backend/pkg/timeutil"
-	"github.com/j1hub/backend/pkg/uid"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	port "github.com/parada3456/wat_project-backend/internal/gamification/port"
+	"github.com/parada3456/wat_project-backend/pkg/timeutil"
+	"github.com/parada3456/wat_project-backend/pkg/uid"
 )
 
 type AdvancePhaseUseCase struct {

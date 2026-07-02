@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	jobdomain "github.com/j1hub/backend/internal/job/domain"
+	jobdomain "github.com/parada3456/wat_project-backend/internal/job/domain"
 )
 
 type IHappyScraper struct {

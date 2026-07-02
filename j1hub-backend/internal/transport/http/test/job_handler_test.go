@@ -9,10 +9,10 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
-	jobhandler "github.com/j1hub/backend/internal/job/adapter/http"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	jobdomain "github.com/j1hub/backend/internal/job/domain"
-	port "github.com/j1hub/backend/internal/auth/port"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
+	jobhandler "github.com/parada3456/wat_project-backend/internal/job/adapter/http"
+	jobdomain "github.com/parada3456/wat_project-backend/internal/job/domain"
+	"github.com/parada3456/wat_project-backend/internal/transport/http/middleware"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

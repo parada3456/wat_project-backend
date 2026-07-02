@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/j1hub/backend/internal/domain"
-	jobdomain "github.com/j1hub/backend/internal/job/domain"
-	port "github.com/j1hub/backend/internal/job/port"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	jobdomain "github.com/parada3456/wat_project-backend/internal/job/domain"
+	port "github.com/parada3456/wat_project-backend/internal/job/port"
 )
 
 type jobRepo struct {

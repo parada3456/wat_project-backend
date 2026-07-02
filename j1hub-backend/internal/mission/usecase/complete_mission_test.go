@@ -7,14 +7,14 @@ package missionusecase_test
 // 	"testing"
 // 	"time"
 
-// 	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
-// 	missionusecase "github.com/j1hub/backend/internal/mission/usecase"
+// 	gamificationusecase "github.com/parada3456/wat_project-backend/internal/gamification/usecase"
+// 	missionusecase "github.com/parada3456/wat_project-backend/internal/mission/usecase"
 
-// 	missiondomain "github.com/j1hub/backend/internal/mission/domain"
-// 	userdomain "github.com/j1hub/backend/internal/user/domain"
+// 	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
+// 	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-// 	"github.com/j1hub/backend/internal/domain"
-// 	"github.com/j1hub/backend/internal/infrastructure/config"
+// 	"github.com/parada3456/wat_project-backend/internal/domain"
+// 	"github.com/parada3456/wat_project-backend/internal/infrastructure/config"
 // 	"github.com/stretchr/testify/assert"
 // 	"github.com/stretchr/testify/mock"
 // )

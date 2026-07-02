@@ -4,11 +4,11 @@ import (
 	"context"
 	"log"
 
-	"github.com/j1hub/backend/internal/domain"
-	jobdomain "github.com/j1hub/backend/internal/job/domain"
-	port "github.com/j1hub/backend/internal/job/port"
-	"github.com/j1hub/backend/pkg/timeutil"
-	"github.com/j1hub/backend/pkg/uid"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	jobdomain "github.com/parada3456/wat_project-backend/internal/job/domain"
+	port "github.com/parada3456/wat_project-backend/internal/job/port"
+	"github.com/parada3456/wat_project-backend/pkg/timeutil"
+	"github.com/parada3456/wat_project-backend/pkg/uid"
 )
 
 type ManageJobUseCase struct {

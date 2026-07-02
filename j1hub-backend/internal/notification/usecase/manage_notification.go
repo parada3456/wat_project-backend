@@ -4,9 +4,9 @@ import (
 	"context"
 	"log"
 
-	notificationdomain "github.com/j1hub/backend/internal/notification/domain"
+	notificationdomain "github.com/parada3456/wat_project-backend/internal/notification/domain"
 
-	port "github.com/j1hub/backend/internal/notification/port"
+	port "github.com/parada3456/wat_project-backend/internal/notification/port"
 )
 
 type NotificationUseCase struct {

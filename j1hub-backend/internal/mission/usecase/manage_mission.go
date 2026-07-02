@@ -5,10 +5,10 @@ import (
 	"log"
 	"time"
 
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
 
-	"github.com/j1hub/backend/internal/domain"
-	port "github.com/j1hub/backend/internal/mission/port"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	port "github.com/parada3456/wat_project-backend/internal/mission/port"
 )
 
 type MissionUseCase struct {

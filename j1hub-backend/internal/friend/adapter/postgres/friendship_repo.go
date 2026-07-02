@@ -4,12 +4,12 @@ import (
 	"context"
 	"log"
 
-	frienddomain "github.com/j1hub/backend/internal/friend/domain"
+	frienddomain "github.com/parada3456/wat_project-backend/internal/friend/domain"
 
-	"github.com/j1hub/backend/internal/domain"
-	port "github.com/j1hub/backend/internal/friend/port"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	port "github.com/parada3456/wat_project-backend/internal/friend/port"
 )
 
 type friendshipRepo struct {
@@ -56,13 +56,13 @@ func (r *friendshipRepo) UpdateStatus(ctx context.Context, id string, status fri
 
 func (r *friendshipRepo) FindFriendsOf(ctx context.Context, userID string, limit, offset int) ([]frienddomain.Friendship, int, error) {
 	log.Println("debugprint: entering (*friendshipRepo).FindFriendsOf")
-	
+
 	var totalCount int
 	err := r.pool.QueryRow(ctx, `SELECT COUNT(*) FROM friendships WHERE (user_id_1 = $1 OR user_id_2 = $1) AND status = 'accepted'`, userID).Scan(&totalCount)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	if totalCount == 0 {
 		return []frienddomain.Friendship{}, 0, nil
 	}
@@ -85,7 +85,7 @@ func (r *friendshipRepo) FindFriendsOf(ctx context.Context, userID string, limit
 
 func (r *friendshipRepo) FindPendingFor(ctx context.Context, userID string, limit, offset int) ([]frienddomain.Friendship, int, error) {
 	log.Println("debugprint: entering (*friendshipRepo).FindPendingFor")
-	
+
 	var totalCount int
 	err := r.pool.QueryRow(ctx, `SELECT COUNT(*) FROM friendships WHERE (user_id_1 = $1 OR user_id_2 = $1) AND status = 'pending'`, userID).Scan(&totalCount)
 	if err != nil {

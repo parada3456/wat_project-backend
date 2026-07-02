@@ -1,15 +1,15 @@
 package dto
 
 import (
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
-	missionusecase "github.com/j1hub/backend/internal/mission/usecase"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
+	missionusecase "github.com/parada3456/wat_project-backend/internal/mission/usecase"
 )
 
 type MissionDetailResponse struct {
-	Mission     *missiondomain.Mission    `json:"mission"`
+	Mission     *missiondomain.Mission     `json:"mission"`
 	UserMission *missiondomain.UserMission `json:"user_mission"`
-	Tasks       []missiondomain.Task      `json:"tasks"`
-	UserTasks   []missiondomain.UserTask  `json:"user_tasks"`
+	Tasks       []missiondomain.Task       `json:"tasks"`
+	UserTasks   []missiondomain.UserTask   `json:"user_tasks"`
 }
 
 func NewMissionDetailResponse(detail *missionusecase.MissionDetailResponse) *MissionDetailResponse {

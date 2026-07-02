@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/j1hub/backend/internal/infrastructure/config"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/config"
 	"github.com/stretchr/testify/assert"
 )
 

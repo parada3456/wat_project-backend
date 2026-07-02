@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	userdto "github.com/j1hub/backend/internal/user/adapter/http/dto"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	userdto "github.com/parada3456/wat_project-backend/internal/user/adapter/http/dto"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-	port "github.com/j1hub/backend/internal/auth/port"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
 )
 
 type AuthData struct {

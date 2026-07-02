@@ -7,11 +7,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/j1hub/backend/internal/domain"
-	expensedomain "github.com/j1hub/backend/internal/expense/domain"
-	port "github.com/j1hub/backend/internal/expense/port"
-	"github.com/j1hub/backend/pkg/timeutil"
-	"github.com/j1hub/backend/pkg/uid"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	expensedomain "github.com/parada3456/wat_project-backend/internal/expense/domain"
+	port "github.com/parada3456/wat_project-backend/internal/expense/port"
+	"github.com/parada3456/wat_project-backend/pkg/timeutil"
+	"github.com/parada3456/wat_project-backend/pkg/uid"
 )
 
 type ManageExpenseUseCase struct {

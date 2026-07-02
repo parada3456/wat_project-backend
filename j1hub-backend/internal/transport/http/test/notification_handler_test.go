@@ -7,12 +7,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	notificationdomain "github.com/j1hub/backend/internal/notification/domain"
+	notificationdomain "github.com/parada3456/wat_project-backend/internal/notification/domain"
 
 	"github.com/go-chi/chi/v5"
-	notifhandler "github.com/j1hub/backend/internal/notification/adapter/http"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	port "github.com/j1hub/backend/internal/auth/port"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
+	notifhandler "github.com/parada3456/wat_project-backend/internal/notification/adapter/http"
+	"github.com/parada3456/wat_project-backend/internal/transport/http/middleware"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

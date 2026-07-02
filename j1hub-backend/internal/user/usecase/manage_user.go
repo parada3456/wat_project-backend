@@ -5,13 +5,13 @@ import (
 	"log"
 	"time"
 
-	frienddomain "github.com/j1hub/backend/internal/friend/domain"
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+	frienddomain "github.com/parada3456/wat_project-backend/internal/friend/domain"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
 
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-	"github.com/j1hub/backend/internal/domain"
-	port "github.com/j1hub/backend/internal/user/port"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	port "github.com/parada3456/wat_project-backend/internal/user/port"
 )
 
 type UserUseCase struct {
@@ -43,7 +43,7 @@ type UserProfileResponse struct {
 	User        *userdomain.User                `json:"user"`
 	Profile     *userdomain.Profile             `json:"profile"`
 	CreditScore *gamificationdomain.CreditScore `json:"credit_score_detail,omitempty"`
-	UserJob     *userdomain.UserJob             `json:"user_job,omitempty"` // Main job
+	UserJob     *userdomain.UserJob             `json:"user_job,omitempty"`  // Main job
 	UserJobs    []userdomain.UserJob            `json:"user_jobs,omitempty"` // All jobs
 }
 
@@ -199,4 +199,3 @@ func (uc *UserUseCase) UpdatePassword(ctx context.Context, userID string, curren
 
 	return uc.userRepo.Update(ctx, user)
 }
-

@@ -1,7 +1,7 @@
 package dto
 
 import (
-	jobdomain "github.com/j1hub/backend/internal/job/domain"
+	jobdomain "github.com/parada3456/wat_project-backend/internal/job/domain"
 )
 
 type JobDetailResponse struct {

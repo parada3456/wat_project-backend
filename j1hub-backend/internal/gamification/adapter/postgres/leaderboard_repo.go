@@ -5,10 +5,10 @@ import (
 	"log"
 	"time"
 
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-	port "github.com/j1hub/backend/internal/gamification/port"
 	"github.com/jackc/pgx/v5/pgxpool"
+	port "github.com/parada3456/wat_project-backend/internal/gamification/port"
 )
 
 type leaderboardRepo struct {
