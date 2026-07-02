@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/j1hub/backend/pkg/timeutil"
+	"github.com/parada3456/wat_project-backend/pkg/timeutil"
 	"github.com/stretchr/testify/assert"
 )
 

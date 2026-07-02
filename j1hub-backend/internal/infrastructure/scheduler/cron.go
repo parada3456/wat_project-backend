@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/j1hub/backend/internal/infrastructure/config"
-	scraper "github.com/j1hub/backend/internal/infrastructure/outbound/scraper"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/config"
+	scraper "github.com/parada3456/wat_project-backend/internal/infrastructure/outbound/scraper"
 	"github.com/robfig/cron/v3"
 )
 

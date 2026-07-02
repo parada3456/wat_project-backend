@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/j1hub/backend/internal/domain"
+	"github.com/parada3456/wat_project-backend/internal/domain"
 )
 
 type AppError struct {

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/j1hub/backend/internal/infrastructure/config"
-	"github.com/j1hub/backend/internal/infrastructure/db"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/config"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/db"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
