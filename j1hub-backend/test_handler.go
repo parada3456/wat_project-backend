@@ -8,9 +8,9 @@ package main
 // 	"strings"
 
 // 	"github.com/jackc/pgx/v5/pgxpool"
-// 	missionpostgres "github.com/j1hub/backend/internal/mission/adapter/postgres"
-// 	missionusecase "github.com/j1hub/backend/internal/mission/usecase"
-// 	userpostgres "github.com/j1hub/backend/internal/user/adapter/postgres"
+// 	missionpostgres "github.com/parada3456/wat_project-backend/internal/mission/adapter/postgres"
+// 	missionusecase "github.com/parada3456/wat_project-backend/internal/mission/usecase"
+// 	userpostgres "github.com/parada3456/wat_project-backend/internal/user/adapter/postgres"
 // )
 
 // func main() {

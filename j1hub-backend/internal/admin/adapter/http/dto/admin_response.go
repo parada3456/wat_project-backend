@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
 )
 
 //	{

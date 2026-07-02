@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"strconv"
 
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
 
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
 
-	"github.com/j1hub/backend/internal/domain"
-	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	"github.com/j1hub/backend/pkg/apperror"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	gamificationusecase "github.com/parada3456/wat_project-backend/internal/gamification/usecase"
+	"github.com/parada3456/wat_project-backend/internal/transport/http/middleware"
+	"github.com/parada3456/wat_project-backend/pkg/apperror"
 )
 
 type JourneyUC interface {

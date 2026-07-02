@@ -6,12 +6,12 @@ import (
 	"log"
 	"time"
 
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-	"github.com/j1hub/backend/internal/domain"
-	port "github.com/j1hub/backend/internal/user/port"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	port "github.com/parada3456/wat_project-backend/internal/user/port"
 )
 
 type userRepo struct {
@@ -258,7 +258,7 @@ func (r *userRepo) AssignJob(ctx context.Context, userID, jobID string, isMain b
 		VALUES ($1, $2, NOW(), $3, $4, $5)
 		ON CONFLICT (user_id, job_id) 
 		DO UPDATE SET is_main = EXCLUDED.is_main, start_date = EXCLUDED.start_date, end_date = EXCLUDED.end_date, assigned_at = NOW()`
-	
+
 	_, err = tx.Exec(ctx, query, userID, jobID, isMain, startDate, endDate)
 	if err != nil {
 		return fmt.Errorf("failed to assign job to user: %w", err)

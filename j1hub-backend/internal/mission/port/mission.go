@@ -2,11 +2,12 @@ package port
 
 import (
 	"context"
-	"time"
 	"io"
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	"time"
+
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 )
 
 type JourneyPhaseRepository interface {

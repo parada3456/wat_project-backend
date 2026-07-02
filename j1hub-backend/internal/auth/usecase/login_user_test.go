@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	authusecase "github.com/j1hub/backend/internal/auth/usecase"
+	authusecase "github.com/parada3456/wat_project-backend/internal/auth/usecase"
 
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-	"github.com/j1hub/backend/internal/domain"
-	port "github.com/j1hub/backend/internal/auth/port"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
+	"github.com/parada3456/wat_project-backend/internal/domain"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -8,7 +8,7 @@ import (
 	"log"
 	"strings"
 
-	port "github.com/j1hub/backend/internal/auth/port"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
 	"golang.org/x/crypto/argon2"
 )
 

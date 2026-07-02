@@ -10,12 +10,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
-	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	userhandlerdto "github.com/j1hub/backend/internal/user/adapter/http/dto"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
-	userusecase "github.com/j1hub/backend/internal/user/usecase"
-	"github.com/j1hub/backend/pkg/apperror"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	"github.com/parada3456/wat_project-backend/internal/transport/http/middleware"
+	userhandlerdto "github.com/parada3456/wat_project-backend/internal/user/adapter/http/dto"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
+	userusecase "github.com/parada3456/wat_project-backend/internal/user/usecase"
+	"github.com/parada3456/wat_project-backend/pkg/apperror"
 )
 
 type UserUC interface {

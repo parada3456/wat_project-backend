@@ -1,8 +1,8 @@
 package http
 
 import (
-	"github.com/j1hub/backend/internal/mission/adapter/http/dto"
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	"github.com/parada3456/wat_project-backend/internal/mission/adapter/http/dto"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
 
 	"context"
 	"encoding/json"
@@ -12,10 +12,10 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	missionusecase "github.com/j1hub/backend/internal/mission/usecase"
-	"github.com/j1hub/backend/pkg/apperror"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	missionusecase "github.com/parada3456/wat_project-backend/internal/mission/usecase"
+	"github.com/parada3456/wat_project-backend/internal/transport/http/middleware"
+	"github.com/parada3456/wat_project-backend/pkg/apperror"
 )
 
 type MissionUC interface {

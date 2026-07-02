@@ -1,7 +1,7 @@
 package http
 
 import (
-	"github.com/j1hub/backend/internal/expense/adapter/http/dto"
+	"github.com/parada3456/wat_project-backend/internal/expense/adapter/http/dto"
 
 	"context"
 	"encoding/json"
@@ -12,11 +12,11 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
-	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	expensedomain "github.com/j1hub/backend/internal/expense/domain"
-	expenseusecase "github.com/j1hub/backend/internal/expense/usecase"
-	"github.com/j1hub/backend/pkg/apperror"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	expensedomain "github.com/parada3456/wat_project-backend/internal/expense/domain"
+	expenseusecase "github.com/parada3456/wat_project-backend/internal/expense/usecase"
+	"github.com/parada3456/wat_project-backend/internal/transport/http/middleware"
+	"github.com/parada3456/wat_project-backend/pkg/apperror"
 )
 
 type ManageExpenseUC interface {

@@ -6,12 +6,12 @@ import (
 	"log"
 	"time"
 
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-	"github.com/j1hub/backend/internal/domain"
-	port "github.com/j1hub/backend/internal/user/port"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	port "github.com/parada3456/wat_project-backend/internal/user/port"
 )
 
 type profileRepo struct {

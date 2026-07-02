@@ -1,4 +1,4 @@
-module github.com/j1hub/backend
+module github.com/parada3456/wat_project-backend
 
 go 1.26.2
 

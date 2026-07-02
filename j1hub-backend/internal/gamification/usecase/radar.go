@@ -4,11 +4,11 @@ import (
 	"context"
 	"log"
 
-	frienddomain "github.com/j1hub/backend/internal/friend/domain"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	frienddomain "github.com/parada3456/wat_project-backend/internal/friend/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-	"github.com/j1hub/backend/internal/infrastructure/config"
-	port "github.com/j1hub/backend/internal/gamification/port"
+	port "github.com/parada3456/wat_project-backend/internal/gamification/port"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/config"
 )
 
 type RadarUseCase struct {

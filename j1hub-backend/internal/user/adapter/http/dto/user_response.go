@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	userdomain "github.com/j1hub/backend/internal/user/domain"
-	userusecase "github.com/j1hub/backend/internal/user/usecase"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
+	userusecase "github.com/parada3456/wat_project-backend/internal/user/usecase"
 )
 
 type UserAccountDTO struct {

@@ -4,12 +4,12 @@ import (
 	"context"
 	"log"
 
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
 
-	"github.com/j1hub/backend/internal/domain"
-	port "github.com/j1hub/backend/internal/gamification/port"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	port "github.com/parada3456/wat_project-backend/internal/gamification/port"
 )
 
 type pointLedgerRepo struct {

@@ -3,14 +3,14 @@ package scheduler
 import (
 	"context"
 
-	expensedomain "github.com/j1hub/backend/internal/expense/domain"
-	expenseport "github.com/j1hub/backend/internal/expense/port"
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
-	gamificationport "github.com/j1hub/backend/internal/gamification/port"
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
-	missionport "github.com/j1hub/backend/internal/mission/port"
-	notificationport "github.com/j1hub/backend/internal/notification/port"
-	userport "github.com/j1hub/backend/internal/user/port"
+	expensedomain "github.com/parada3456/wat_project-backend/internal/expense/domain"
+	expenseport "github.com/parada3456/wat_project-backend/internal/expense/port"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
+	gamificationport "github.com/parada3456/wat_project-backend/internal/gamification/port"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
+	missionport "github.com/parada3456/wat_project-backend/internal/mission/port"
+	notificationport "github.com/parada3456/wat_project-backend/internal/notification/port"
+	userport "github.com/parada3456/wat_project-backend/internal/user/port"
 	"github.com/stretchr/testify/mock"
 )
 

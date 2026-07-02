@@ -7,16 +7,16 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/j1hub/backend/internal/admin/adapter/http/dto"
+	"github.com/parada3456/wat_project-backend/internal/admin/adapter/http/dto"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
-	port "github.com/j1hub/backend/internal/admin/port"
-	"github.com/j1hub/backend/internal/domain"
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	userdto "github.com/j1hub/backend/internal/user/adapter/http/dto"
-	"github.com/j1hub/backend/pkg/apperror"
+	port "github.com/parada3456/wat_project-backend/internal/admin/port"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
+	"github.com/parada3456/wat_project-backend/internal/transport/http/middleware"
+	userdto "github.com/parada3456/wat_project-backend/internal/user/adapter/http/dto"
+	"github.com/parada3456/wat_project-backend/pkg/apperror"
 )
 
 type AdminHandler struct {

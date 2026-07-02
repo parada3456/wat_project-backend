@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/j1hub/backend/internal/domain"
-	expensedomain "github.com/j1hub/backend/internal/expense/domain"
-	expenseusecase "github.com/j1hub/backend/internal/expense/usecase"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	expensedomain "github.com/parada3456/wat_project-backend/internal/expense/domain"
+	expenseusecase "github.com/parada3456/wat_project-backend/internal/expense/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

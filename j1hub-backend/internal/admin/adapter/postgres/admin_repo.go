@@ -7,11 +7,11 @@ import (
 	"log"
 	"time"
 
-	adminport "github.com/j1hub/backend/internal/admin/port"
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	adminport "github.com/parada3456/wat_project-backend/internal/admin/port"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 )
 
 type adminRepo struct {

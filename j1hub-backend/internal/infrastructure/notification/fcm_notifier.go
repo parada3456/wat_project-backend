@@ -6,9 +6,9 @@ import (
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/messaging"
-	"github.com/j1hub/backend/internal/infrastructure/config"
-	notificationport "github.com/j1hub/backend/internal/notification/port"
-	userport "github.com/j1hub/backend/internal/user/port"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/config"
+	notificationport "github.com/parada3456/wat_project-backend/internal/notification/port"
+	userport "github.com/parada3456/wat_project-backend/internal/user/port"
 	"google.golang.org/api/option"
 )
 

@@ -1,20 +1,21 @@
 package notificationusecase_test
 
 import (
-	authport "github.com/j1hub/backend/internal/auth/port"
 	"context"
 	"io"
 	"time"
 
-	frienddomain "github.com/j1hub/backend/internal/friend/domain"
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
-	notificationdomain "github.com/j1hub/backend/internal/notification/domain"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	authport "github.com/parada3456/wat_project-backend/internal/auth/port"
 
-	expensedomain "github.com/j1hub/backend/internal/expense/domain"
-	jobdomain "github.com/j1hub/backend/internal/job/domain"
+	frienddomain "github.com/parada3456/wat_project-backend/internal/friend/domain"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
+	notificationdomain "github.com/parada3456/wat_project-backend/internal/notification/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
+
 	"github.com/jackc/pgx/v5"
+	expensedomain "github.com/parada3456/wat_project-backend/internal/expense/domain"
+	jobdomain "github.com/parada3456/wat_project-backend/internal/job/domain"
 	"github.com/stretchr/testify/mock"
 )
 
