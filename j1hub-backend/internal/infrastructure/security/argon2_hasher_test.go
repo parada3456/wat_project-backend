@@ -3,7 +3,7 @@ package security_test
 import (
 	"testing"
 
-	"github.com/j1hub/backend/internal/infrastructure/security"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/security"
 	"github.com/stretchr/testify/assert"
 )
 

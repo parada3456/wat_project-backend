@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	expensedomain "github.com/j1hub/backend/internal/expense/domain"
+	expensedomain "github.com/parada3456/wat_project-backend/internal/expense/domain"
 	"github.com/stretchr/testify/mock"
 )
 

@@ -7,15 +7,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/j1hub/backend/internal/domain"
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-	port "github.com/j1hub/backend/internal/auth/port"
-	"github.com/j1hub/backend/pkg/timeutil"
-	"github.com/j1hub/backend/pkg/uid"
 	"github.com/jackc/pgx/v5"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
+	"github.com/parada3456/wat_project-backend/pkg/timeutil"
+	"github.com/parada3456/wat_project-backend/pkg/uid"
 )
 
 type TxBeginner interface {

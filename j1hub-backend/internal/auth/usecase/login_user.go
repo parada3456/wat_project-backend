@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/j1hub/backend/internal/domain"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-	port "github.com/j1hub/backend/internal/auth/port"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
 )
 
 type LoginUseCase struct {

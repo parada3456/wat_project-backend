@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-	"github.com/j1hub/backend/internal/infrastructure/config"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

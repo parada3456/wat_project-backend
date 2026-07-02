@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
 
-	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
+	gamificationusecase "github.com/parada3456/wat_project-backend/internal/gamification/usecase"
 	"github.com/stretchr/testify/assert"
 )
 

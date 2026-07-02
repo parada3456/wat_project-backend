@@ -6,11 +6,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/j1hub/backend/internal/infrastructure/outbound/scraper/acadex"
-	"github.com/j1hub/backend/internal/infrastructure/outbound/scraper/iee"
-	"github.com/j1hub/backend/internal/infrastructure/outbound/scraper/ihappy"
-	jobdomain "github.com/j1hub/backend/internal/job/domain"
-	jobport "github.com/j1hub/backend/internal/job/port"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/outbound/scraper/acadex"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/outbound/scraper/iee"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/outbound/scraper/ihappy"
+	jobdomain "github.com/parada3456/wat_project-backend/internal/job/domain"
+	jobport "github.com/parada3456/wat_project-backend/internal/job/port"
 )
 
 type ScrapeJobsUseCase struct {

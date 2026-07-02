@@ -3,10 +3,11 @@ package port
 import (
 	"context"
 	"time"
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
-	frienddomain "github.com/j1hub/backend/internal/friend/domain"
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+
+	frienddomain "github.com/parada3456/wat_project-backend/internal/friend/domain"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 )
 
 type CreditScoreRepository interface {

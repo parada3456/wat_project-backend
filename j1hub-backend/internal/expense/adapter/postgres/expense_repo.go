@@ -5,11 +5,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/j1hub/backend/internal/domain"
-	expensedomain "github.com/j1hub/backend/internal/expense/domain"
-	port "github.com/j1hub/backend/internal/expense/port"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	expensedomain "github.com/parada3456/wat_project-backend/internal/expense/domain"
+	port "github.com/parada3456/wat_project-backend/internal/expense/port"
 )
 
 type expenseRepo struct {
@@ -46,7 +46,7 @@ func (r *expenseRepo) MarkSettled(ctx context.Context, id string) error {
 
 func (r *expenseRepo) FindByUser(ctx context.Context, userID string, limit, offset int) ([]expensedomain.ExpenseTransaction, int, error) {
 	log.Println("debugprint: entering (*expenseRepo).FindByUser")
-	
+
 	var totalCount int
 	err := r.pool.QueryRow(ctx, `SELECT COUNT(*) FROM expense_transactions WHERE paid_by_user_id = $1`, userID).Scan(&totalCount)
 	if err != nil {
@@ -153,7 +153,7 @@ func (r *expenseSplitRepo) CountUnsettled(ctx context.Context, transactionID str
 
 func (r *expenseSplitRepo) FindByUser(ctx context.Context, userID string, limit, offset int) ([]expensedomain.ExpenseSplit, int, error) {
 	log.Println("debugprint: entering (*expenseSplitRepo).FindByUser")
-	
+
 	var totalCount int
 	err := r.pool.QueryRow(ctx, `SELECT COUNT(*) FROM expense_splits WHERE user_id = $1`, userID).Scan(&totalCount)
 	if err != nil {
@@ -183,7 +183,7 @@ func (r *expenseSplitRepo) FindByUser(ctx context.Context, userID string, limit,
 
 func (r *expenseSplitRepo) FindPendingByUser(ctx context.Context, userID string, limit, offset int) ([]expensedomain.ExpenseSplit, int, error) {
 	log.Println("debugprint: entering (*expenseSplitRepo).FindPendingByUser")
-	
+
 	var totalCount int
 	err := r.pool.QueryRow(ctx, `SELECT COUNT(*) FROM expense_splits WHERE user_id = $1 AND payment_status != 'approved'`, userID).Scan(&totalCount)
 	if err != nil {

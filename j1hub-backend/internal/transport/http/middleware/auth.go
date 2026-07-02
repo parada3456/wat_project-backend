@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	port "github.com/j1hub/backend/internal/auth/port"
-	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/pkg/apperror"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	"github.com/parada3456/wat_project-backend/pkg/apperror"
 )
 
 type contextKey string

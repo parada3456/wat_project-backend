@@ -6,13 +6,13 @@ import (
 	"testing"
 	"time"
 
-	authusecase "github.com/j1hub/backend/internal/auth/usecase"
+	authusecase "github.com/parada3456/wat_project-backend/internal/auth/usecase"
 
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-	port "github.com/j1hub/backend/internal/auth/port"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

@@ -1,19 +1,20 @@
 package test
 
 import (
-	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
 	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	gamificationusecase "github.com/parada3456/wat_project-backend/internal/gamification/usecase"
 
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
 
-	journeyhandler "github.com/j1hub/backend/internal/gamification/adapter/http"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	port "github.com/j1hub/backend/internal/auth/port"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
+
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
+	journeyhandler "github.com/parada3456/wat_project-backend/internal/gamification/adapter/http"
+	"github.com/parada3456/wat_project-backend/internal/transport/http/middleware"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

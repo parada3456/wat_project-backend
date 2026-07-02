@@ -4,10 +4,10 @@ import (
 	"context"
 	"log"
 
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
-	missionport "github.com/j1hub/backend/internal/mission/port"
-	notificationport "github.com/j1hub/backend/internal/notification/port"
-	userport "github.com/j1hub/backend/internal/user/port"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
+	missionport "github.com/parada3456/wat_project-backend/internal/mission/port"
+	notificationport "github.com/parada3456/wat_project-backend/internal/notification/port"
+	userport "github.com/parada3456/wat_project-backend/internal/user/port"
 )
 
 type OverdueMissionJob struct {

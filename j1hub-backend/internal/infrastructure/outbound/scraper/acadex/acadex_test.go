@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/j1hub/backend/internal/infrastructure/outbound/scraper/acadex"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/outbound/scraper/acadex"
 )
 
 func TestAcadexScraper_GetJobLinks(t *testing.T) {

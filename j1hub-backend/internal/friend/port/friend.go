@@ -2,8 +2,9 @@ package port
 
 import (
 	"context"
-	frienddomain "github.com/j1hub/backend/internal/friend/domain"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+
+	frienddomain "github.com/parada3456/wat_project-backend/internal/friend/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 )
 
 type FriendshipRepository interface {

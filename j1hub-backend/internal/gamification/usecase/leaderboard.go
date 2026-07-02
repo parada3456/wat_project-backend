@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	port "github.com/j1hub/backend/internal/gamification/port"
+	port "github.com/parada3456/wat_project-backend/internal/gamification/port"
 )
 
 type LeaderboardUseCase struct {

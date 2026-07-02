@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-	"github.com/j1hub/backend/internal/domain"
-	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	gamificationusecase "github.com/parada3456/wat_project-backend/internal/gamification/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/j1hub/backend/internal/infrastructure/config"
-	port "github.com/j1hub/backend/internal/auth/port"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/config"
 )
 
 type jwtIssuer struct {

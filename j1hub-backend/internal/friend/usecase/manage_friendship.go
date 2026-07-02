@@ -4,12 +4,12 @@ import (
 	"context"
 	"log"
 
-	frienddomain "github.com/j1hub/backend/internal/friend/domain"
+	frienddomain "github.com/parada3456/wat_project-backend/internal/friend/domain"
 
-	"github.com/j1hub/backend/internal/domain"
-	port "github.com/j1hub/backend/internal/friend/port"
-	"github.com/j1hub/backend/pkg/timeutil"
-	"github.com/j1hub/backend/pkg/uid"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	port "github.com/parada3456/wat_project-backend/internal/friend/port"
+	"github.com/parada3456/wat_project-backend/pkg/timeutil"
+	"github.com/parada3456/wat_project-backend/pkg/uid"
 )
 
 type ManageFriendshipUseCase struct {

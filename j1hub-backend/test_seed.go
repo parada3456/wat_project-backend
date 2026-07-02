@@ -9,7 +9,7 @@ package main
 // 	"strings"
 
 // 	"github.com/jackc/pgx/v5/pgxpool"
-// 	"github.com/j1hub/backend/internal/infrastructure/db"
+// 	"github.com/parada3456/wat_project-backend/internal/infrastructure/db"
 // )
 
 // func main() {

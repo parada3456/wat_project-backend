@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	friendusecase "github.com/j1hub/backend/internal/friend/usecase"
+	friendusecase "github.com/parada3456/wat_project-backend/internal/friend/usecase"
 
-	frienddomain "github.com/j1hub/backend/internal/friend/domain"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	frienddomain "github.com/parada3456/wat_project-backend/internal/friend/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-	"github.com/j1hub/backend/internal/domain"
+	"github.com/parada3456/wat_project-backend/internal/domain"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

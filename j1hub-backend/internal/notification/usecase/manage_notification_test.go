@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	notificationusecase "github.com/j1hub/backend/internal/notification/usecase"
+	notificationusecase "github.com/parada3456/wat_project-backend/internal/notification/usecase"
 
-	notificationdomain "github.com/j1hub/backend/internal/notification/domain"
+	notificationdomain "github.com/parada3456/wat_project-backend/internal/notification/domain"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -1,7 +1,6 @@
 package test
 
 import (
-	authusecase "github.com/j1hub/backend/internal/auth/usecase"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -10,11 +9,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/j1hub/backend/internal/domain"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	authusecase "github.com/parada3456/wat_project-backend/internal/auth/usecase"
 
-	authhandler "github.com/j1hub/backend/internal/auth/adapter/http"
-	port "github.com/j1hub/backend/internal/auth/port"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
+
+	authhandler "github.com/parada3456/wat_project-backend/internal/auth/adapter/http"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -67,8 +68,8 @@ func TestAuthHandler_Register_Success(t *testing.T) {
 	h := authhandler.NewAuthHandler(regUC, logUC)
 
 	user := &userdomain.User{
-		UserID:    "usr_123",
-		Email:     "john@example.com",
+		UserID: "usr_123",
+		Email:  "john@example.com",
 	}
 	profile := &userdomain.Profile{
 		ProfileID: "prf_123",

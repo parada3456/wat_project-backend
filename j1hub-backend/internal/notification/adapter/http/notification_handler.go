@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"strconv"
 
-	notificationdomain "github.com/j1hub/backend/internal/notification/domain"
+	notificationdomain "github.com/parada3456/wat_project-backend/internal/notification/domain"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	"github.com/j1hub/backend/pkg/apperror"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	"github.com/parada3456/wat_project-backend/internal/transport/http/middleware"
+	"github.com/parada3456/wat_project-backend/pkg/apperror"
 )
 
 type NotificationUC interface {

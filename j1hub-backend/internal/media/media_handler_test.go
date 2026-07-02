@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/j1hub/backend/internal/media"
+	"github.com/parada3456/wat_project-backend/internal/media"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -90,7 +90,7 @@ func TestMediaHandler_DeleteFile_Success(t *testing.T) {
 	mockStorage.On("DeleteFile", mock.Anything, "media", "med_123.png").Return(nil)
 
 	req := httptest.NewRequest("DELETE", "/api/v1/media/med_123.png", nil)
-	
+
 	// Add chi route context
 	rctx := chi.NewRouteContext()
 	rctx.URLParams.Add("key", "med_123.png")
@@ -110,7 +110,7 @@ func TestMediaHandler_DeleteFile_StorageError(t *testing.T) {
 	mockStorage.On("DeleteFile", mock.Anything, "custom", "med_123.png").Return(errors.New("storage error"))
 
 	req := httptest.NewRequest("DELETE", "/api/v1/media/med_123.png?bucket=custom", nil)
-	
+
 	rctx := chi.NewRouteContext()
 	rctx.URLParams.Add("key", "med_123.png")
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))

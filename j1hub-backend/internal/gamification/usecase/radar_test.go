@@ -4,13 +4,13 @@ import (
 	"context"
 	"testing"
 
-	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
+	gamificationusecase "github.com/parada3456/wat_project-backend/internal/gamification/usecase"
 
-	frienddomain "github.com/j1hub/backend/internal/friend/domain"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	frienddomain "github.com/parada3456/wat_project-backend/internal/friend/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/infrastructure/config"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	"github.com/parada3456/wat_project-backend/internal/infrastructure/config"
 	"github.com/stretchr/testify/assert"
 )
 

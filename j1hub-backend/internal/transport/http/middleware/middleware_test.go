@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	port "github.com/j1hub/backend/internal/auth/port"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
+	"github.com/parada3456/wat_project-backend/internal/transport/http/middleware"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

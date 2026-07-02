@@ -6,14 +6,14 @@ import (
 	"testing"
 	"time"
 
-	userusecase "github.com/j1hub/backend/internal/user/usecase"
+	userusecase "github.com/parada3456/wat_project-backend/internal/user/usecase"
 
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
 
-	frienddomain "github.com/j1hub/backend/internal/friend/domain"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	frienddomain "github.com/parada3456/wat_project-backend/internal/friend/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 
-	"github.com/j1hub/backend/internal/domain"
+	"github.com/parada3456/wat_project-backend/internal/domain"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -267,4 +267,3 @@ func TestUserUseCase_UpdatePassword_HashError(t *testing.T) {
 	userRepo.AssertExpectations(t)
 	hasher.AssertExpectations(t)
 }
-

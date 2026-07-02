@@ -4,11 +4,11 @@ import (
 	"context"
 	"log"
 
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
 
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
 
-	port "github.com/j1hub/backend/internal/gamification/port"
+	port "github.com/parada3456/wat_project-backend/internal/gamification/port"
 )
 
 type JourneyUseCase struct {

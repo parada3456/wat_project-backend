@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	jobdomain "github.com/j1hub/backend/internal/job/domain"
-	jobport "github.com/j1hub/backend/internal/job/port"
+	jobdomain "github.com/parada3456/wat_project-backend/internal/job/domain"
+	jobport "github.com/parada3456/wat_project-backend/internal/job/port"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

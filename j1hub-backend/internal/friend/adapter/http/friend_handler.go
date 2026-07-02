@@ -1,8 +1,8 @@
 package http
 
 import (
-	"github.com/j1hub/backend/internal/friend/adapter/http/dto"
-	frienddomain "github.com/j1hub/backend/internal/friend/domain"
+	"github.com/parada3456/wat_project-backend/internal/friend/adapter/http/dto"
+	frienddomain "github.com/parada3456/wat_project-backend/internal/friend/domain"
 
 	"context"
 	"encoding/json"
@@ -11,10 +11,10 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/j1hub/backend/internal/domain"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	gamificationusecase "github.com/j1hub/backend/internal/gamification/usecase"
-	"github.com/j1hub/backend/pkg/apperror"
+	"github.com/parada3456/wat_project-backend/internal/domain"
+	gamificationusecase "github.com/parada3456/wat_project-backend/internal/gamification/usecase"
+	"github.com/parada3456/wat_project-backend/internal/transport/http/middleware"
+	"github.com/parada3456/wat_project-backend/pkg/apperror"
 )
 
 type FriendshipUC interface {

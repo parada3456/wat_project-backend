@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	expensedomain "github.com/j1hub/backend/internal/expense/domain"
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
+	expensedomain "github.com/parada3456/wat_project-backend/internal/expense/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

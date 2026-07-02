@@ -11,10 +11,10 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
-	expensehandler "github.com/j1hub/backend/internal/expense/adapter/http"
-	"github.com/j1hub/backend/internal/transport/http/middleware"
-	expensedomain "github.com/j1hub/backend/internal/expense/domain"
-	port "github.com/j1hub/backend/internal/auth/port"
+	port "github.com/parada3456/wat_project-backend/internal/auth/port"
+	expensehandler "github.com/parada3456/wat_project-backend/internal/expense/adapter/http"
+	expensedomain "github.com/parada3456/wat_project-backend/internal/expense/domain"
+	"github.com/parada3456/wat_project-backend/internal/transport/http/middleware"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

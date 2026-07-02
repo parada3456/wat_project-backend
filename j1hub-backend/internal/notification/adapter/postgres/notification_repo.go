@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log"
 
-	notificationdomain "github.com/j1hub/backend/internal/notification/domain"
+	notificationdomain "github.com/parada3456/wat_project-backend/internal/notification/domain"
 
 	sq "github.com/Masterminds/squirrel"
-	port "github.com/j1hub/backend/internal/notification/port"
 	"github.com/jackc/pgx/v5/pgxpool"
+	port "github.com/parada3456/wat_project-backend/internal/notification/port"
 )
 
 type notificationRepository struct {
