@@ -11,6 +11,7 @@ import (
 type UserAccountDTO struct {
 	ID                  string     `json:"user_id"`
 	Email               string     `json:"email"`
+	Username            string     `json:"username"`
 	FirstName           string     `json:"first_name"`
 	LastName            string     `json:"last_name"`
 	ProfileID           string     `json:"profile_id,omitempty"`
@@ -173,6 +174,7 @@ func NewGetProfileResponse(resp *userusecase.UserProfileResponse) GetProfileResp
 				coords = fmt.Sprintf("%f,%f", resp.Profile.Lat, resp.Profile.Lng)
 			}
 			dto.User.ProfileID = resp.Profile.ProfileID
+			dto.User.Username = resp.Profile.Username
 			dto.User.FirstName = resp.Profile.FirstName
 			dto.User.LastName = resp.Profile.LastName
 			dto.User.PhoneNumber = resp.Profile.PhoneNumber

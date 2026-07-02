@@ -3,6 +3,7 @@ package port
 import (
 	"context"
 	"time"
+
 	"github.com/jackc/pgx/v5"
 	missiondomain "github.com/j1hub/backend/internal/mission/domain"
 	userdomain "github.com/j1hub/backend/internal/user/domain"
@@ -34,6 +35,32 @@ type UserWithProfile struct {
 	Profile userdomain.Profile `json:"profile"`
 }
 
+// CreateMissionCmd holds data for creating a mission with tasks.
+type CreateMissionCmd struct {
+	PhaseID              string
+	Title                string
+	Description          string
+	Location             string
+	BasePoints           int
+	IsMandatory          bool
+	VerificationType     missiondomain.VerificationType
+	DueDateType          string
+	FixedDueDate         *time.Time
+	RelativeTriggerEvent string
+	RelativeDaysOffset   int
+	Tasks                []CreateTaskCmd
+}
+
+type CreateTaskCmd struct {
+	Title       string
+	Description string
+}
+
+type CreateMissionResult struct {
+	Mission missiondomain.Mission `json:"mission"`
+	Tasks   []missiondomain.Task  `json:"tasks"`
+}
+
 type AdminRepository interface {
 	GetStats(ctx context.Context) (*AdminStats, error)
 	ListPendingVerifications(ctx context.Context, limit, offset int) ([]missiondomain.UserMission, int, error)
@@ -57,6 +84,11 @@ type UserMissionRepository interface {
 
 type MissionRepository interface {
 	FindByID(ctx context.Context, id string) (*missiondomain.Mission, error)
+	Insert(ctx context.Context, m *missiondomain.Mission) error
+}
+
+type TaskRepository interface {
+	BulkInsert(ctx context.Context, tasks []missiondomain.Task) error
 }
 
 type PointLedgerRepository interface {
@@ -74,4 +106,5 @@ type AdminUseCase interface {
 	ListUsers(ctx context.Context, search string, page, pageSize int) ([]UserWithProfile, int, error)
 	GetUserDetail(ctx context.Context, id string) (*UserWithProfile, error)
 	AdjustPoints(ctx context.Context, userID string, delta int, reason string) (*PointsAdjustmentResult, error)
+	CreateMission(ctx context.Context, cmd CreateMissionCmd) (*CreateMissionResult, error)
 }

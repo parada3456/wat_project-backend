@@ -85,7 +85,9 @@ INSERT INTO badges (badge_id, title, description, trigger_type, icon_url) VALUES
 INSERT INTO user_badges (user_badge_id, user_id, badge_id, source_id, earned_at) VALUES
 ('ubg_som_1', 'usr_somchai', 'bdg_001', 'ums_somchai_mis_001', NOW() - INTERVAL '20 days'),
 ('ubg_som_2', 'usr_somchai', 'bdg_002', NULL, NOW() - INTERVAL '10 days'),
-('ubg_ali_1', 'usr_alice', 'bdg_001', 'ums_alice_mis_001', NOW() - INTERVAL '45 days');
+('ubg_ali_1', 'usr_alice', 'bdg_001', 'ums_alice_mis_001', NOW() - INTERVAL '45 days'),
+('ubg_ali_2', 'usr_alice', 'bdg_002', NULL, NOW() - INTERVAL '40 days'),
+('ubg_ali_3', 'usr_alice', 'bdg_003', 'ums_alice_mis_002', NOW() - INTERVAL '35 days');
 
 -- 13. Seed Credit Scores
 INSERT INTO credit_scores (credit_id, user_id, current_score, last_updated) VALUES

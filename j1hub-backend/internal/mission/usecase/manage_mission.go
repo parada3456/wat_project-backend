@@ -43,21 +43,34 @@ type MissionDetailResponse struct {
 	UserTasks   []missiondomain.UserTask  `json:"user_tasks"`
 }
 
-func (uc *MissionUseCase) ListAvailableMissions(ctx context.Context, userID string) ([]missiondomain.UserMission, error) {
+func (uc *MissionUseCase) ListAvailableMissions(ctx context.Context, userID string, ids []string) ([]missiondomain.UserMission, error) {
 	log.Println("debugprint: entering (*MissionUseCase).ListAvailableMissions")
+	if len(ids) > 0 {
+		return uc.umRepo.FindByIDs(ctx, ids)
+	}
 	user, err := uc.userRepo.FindByID(ctx, userID)
 	if err != nil {
+		print("error ")
 		return nil, err
+	}
+	if user.CurrentPhaseID == "" {
+		return []missiondomain.UserMission{}, nil
 	}
 
 	return uc.umRepo.FindByUserAndPhase(ctx, userID, user.CurrentPhaseID)
 }
 
-func (uc *MissionUseCase) ListStaticMissions(ctx context.Context, userID string) ([]missiondomain.Mission, error) {
+func (uc *MissionUseCase) ListStaticMissions(ctx context.Context, userID string, ids []string) ([]missiondomain.Mission, error) {
 	log.Println("debugprint: entering (*MissionUseCase).ListStaticMissions")
+	if len(ids) > 0 {
+		return uc.missionRepo.FindByIDs(ctx, ids)
+	}
 	user, err := uc.userRepo.FindByID(ctx, userID)
 	if err != nil {
 		return nil, err
+	}
+	if user.CurrentPhaseID == "" {
+		return []missiondomain.Mission{}, nil
 	}
 
 	return uc.missionRepo.FindByPhase(ctx, user.CurrentPhaseID)
@@ -118,4 +131,20 @@ func (uc *MissionUseCase) ToggleTask(ctx context.Context, userID, userTaskID str
 	ut.UpdatedAt = time.Now()
 
 	return uc.utRepo.Upsert(ctx, ut)
+}
+
+func (uc *MissionUseCase) ListTasks(ctx context.Context, ids []string) ([]missiondomain.Task, error) {
+	log.Println("debugprint: entering (*MissionUseCase).ListTasks")
+	if len(ids) > 0 {
+		return uc.taskRepo.FindByIDs(ctx, ids)
+	}
+	return uc.taskRepo.ListAll(ctx)
+}
+
+func (uc *MissionUseCase) ListUserTasks(ctx context.Context, ids []string) ([]missiondomain.UserTask, error) {
+	log.Println("debugprint: entering (*MissionUseCase).ListUserTasks")
+	if len(ids) > 0 {
+		return uc.utRepo.FindByIDs(ctx, ids)
+	}
+	return uc.utRepo.ListAll(ctx)
 }

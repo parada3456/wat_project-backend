@@ -55,6 +55,9 @@ func NewLoginResponse(user *userdomain.User, profile *userdomain.Profile, tokens
 				coords = fmt.Sprintf("%f,%f", profile.Lat, profile.Lng)
 			}
 			userDTO.ProfileID = profile.ProfileID
+			userDTO.Username = profile.Username
+			userDTO.FirstName = profile.FirstName
+			userDTO.LastName = profile.LastName
 			userDTO.PhoneNumber = profile.PhoneNumber
 			userDTO.Bio = profile.Bio
 			userDTO.AvatarURL = profile.AvatarURL

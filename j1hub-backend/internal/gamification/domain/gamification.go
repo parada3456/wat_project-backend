@@ -71,6 +71,7 @@ type UserBadge struct {
 	BadgeID     string    `json:"badge_id"`
 	SourceID    string    `json:"source_id"`
 	EarnedAt    time.Time `json:"earned_at"`
+	Badge       *Badge    `json:"badge,omitempty"`
 }
 
 type CreditScore struct {

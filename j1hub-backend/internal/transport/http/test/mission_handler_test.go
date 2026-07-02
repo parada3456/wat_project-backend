@@ -32,7 +32,7 @@ func TestMissionHandler_ListUserMissions(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	missionUC.On("ListAvailableMissions", mock.Anything, "usr_1").Return([]missiondomain.UserMission{}, nil).Once()
+	missionUC.On("ListAvailableMissions", mock.Anything, "usr_1", mock.Anything).Return([]missiondomain.UserMission{}, nil).Once()
 	req = httptest.NewRequest("GET", "/user-missions", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -40,7 +40,7 @@ func TestMissionHandler_ListUserMissions(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// error
-	missionUC.On("ListAvailableMissions", mock.Anything, "usr_1").Return(nil, errors.New("err")).Once()
+	missionUC.On("ListAvailableMissions", mock.Anything, "usr_1", mock.Anything).Return(nil, errors.New("err")).Once()
 	req = httptest.NewRequest("GET", "/user-missions", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -59,7 +59,7 @@ func TestMissionHandler_ListMissions(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 
 	// success
-	missionUC.On("ListStaticMissions", mock.Anything, "usr_1").Return([]missiondomain.Mission{}, nil).Once()
+	missionUC.On("ListStaticMissions", mock.Anything, "usr_1", mock.Anything).Return([]missiondomain.Mission{}, nil).Once()
 	req = httptest.NewRequest("GET", "/missions", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()
@@ -67,7 +67,7 @@ func TestMissionHandler_ListMissions(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// error
-	missionUC.On("ListStaticMissions", mock.Anything, "usr_1").Return(nil, errors.New("err")).Once()
+	missionUC.On("ListStaticMissions", mock.Anything, "usr_1", mock.Anything).Return(nil, errors.New("err")).Once()
 	req = httptest.NewRequest("GET", "/missions", nil)
 	req = req.WithContext(middleware.ContextWithClaims(req.Context(), &port.Claims{UserID: "usr_1"}))
 	w = httptest.NewRecorder()

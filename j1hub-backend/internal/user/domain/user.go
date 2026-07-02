@@ -39,6 +39,7 @@ type User struct {
 type Profile struct {
 	ProfileID         string          `json:"profile_id"`
 	UserID            string          `json:"user_id"`
+	Username          string          `json:"username"`
 	FirstName         string          `json:"first_name"`
 	LastName          string          `json:"last_name"`
 	PhoneNumber       string          `json:"phone_number"`

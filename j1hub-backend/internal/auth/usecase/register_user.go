@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/j1hub/backend/internal/domain"
@@ -97,9 +98,15 @@ func (uc *RegisterUserUseCase) Register(ctx context.Context, cmd RegisterCommand
 		return nil, nil, nil, fmt.Errorf("%w: Failed to create user in the database.", domain.ErrUserCreationFailed)
 	}
 
+	username := cmd.Email
+	if idx := strings.Index(cmd.Email, "@"); idx != -1 {
+		username = cmd.Email[:idx]
+	}
+
 	profile := &userdomain.Profile{
 		ProfileID:       uid.New("prf_"),
 		UserID:          user.UserID,
+		Username:        username,
 		FirstName:       cmd.FirstName,
 		LastName:        cmd.LastName,
 		RadarVisibility: userdomain.VisibilityShowAnonymous,

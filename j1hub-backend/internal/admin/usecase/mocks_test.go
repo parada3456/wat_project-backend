@@ -146,6 +146,9 @@ func (m *MockMissionRepository) FindByID(ctx context.Context, id string) (*missi
 	}
 	return args.Get(0).(*missiondomain.Mission), args.Error(1)
 }
+func (m *MockMissionRepository) Insert(ctx context.Context, mis *missiondomain.Mission) error {
+	return m.Called(ctx, mis).Error(0)
+}
 
 // MockUserMissionRepository
 type MockUserMissionRepository struct{ mock.Mock }
@@ -193,6 +196,9 @@ func (m *MockTaskRepository) FindByMission(ctx context.Context, missionID string
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]missiondomain.Task), args.Error(1)
+}
+func (m *MockTaskRepository) BulkInsert(ctx context.Context, tasks []missiondomain.Task) error {
+	return m.Called(ctx, tasks).Error(0)
 }
 
 // MockUserTaskRepository

@@ -27,12 +27,12 @@ func (r *profileRepo) Create(ctx context.Context, p *userdomain.Profile) error {
 	log.Println("debugprint: entering (*profileRepo).Create")
 	query := `
 		INSERT INTO profiles (
-			profile_id, user_id, first_name, last_name, phone_number, bio, avatar_url, 
+			profile_id, user_id, username, first_name, last_name, phone_number, bio, avatar_url, 
 			radar_visibility, current_coordinates, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, ST_SetSRID(ST_MakePoint($9, $10), 4326), $11)`
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, ST_SetSRID(ST_MakePoint($10, $11), 4326), $12)`
 
 	_, err := r.pool.Exec(ctx, query,
-		p.ProfileID, p.UserID, p.FirstName, p.LastName, p.PhoneNumber, p.Bio, p.AvatarURL,
+		p.ProfileID, p.UserID, p.Username, p.FirstName, p.LastName, p.PhoneNumber, p.Bio, p.AvatarURL,
 		p.RadarVisibility, p.Lng, p.Lat, p.UpdatedAt,
 	)
 	if err != nil {
@@ -45,7 +45,7 @@ func (r *profileRepo) FindByUserID(ctx context.Context, userID string) (*userdom
 	log.Println("debugprint: entering (*profileRepo).FindByUserID")
 	query := `
 		SELECT 
-			profile_id, user_id, first_name, last_name, phone_number, bio, avatar_url, 
+			profile_id, user_id, username, first_name, last_name, phone_number, bio, avatar_url, 
 			radar_visibility, ST_X(current_coordinates::geometry), ST_Y(current_coordinates::geometry), 
 			location_updated_at, updated_at
 		FROM profiles WHERE user_id = $1`
@@ -54,7 +54,7 @@ func (r *profileRepo) FindByUserID(ctx context.Context, userID string) (*userdom
 	var p userdomain.Profile
 	var locUpdated *time.Time
 	err := row.Scan(
-		&p.ProfileID, &p.UserID, &p.FirstName, &p.LastName, &p.PhoneNumber, &p.Bio, &p.AvatarURL,
+		&p.ProfileID, &p.UserID, &p.Username, &p.FirstName, &p.LastName, &p.PhoneNumber, &p.Bio, &p.AvatarURL,
 		&p.RadarVisibility, &p.Lng, &p.Lat, &locUpdated, &p.UpdatedAt,
 	)
 	if err == nil && locUpdated != nil {

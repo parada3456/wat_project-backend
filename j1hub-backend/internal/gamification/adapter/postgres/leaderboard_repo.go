@@ -46,8 +46,10 @@ func (r *leaderboardRepo) FindByScope(ctx context.Context, scope, jobID string) 
 		var currentPhaseID *string
 		var arrivalDate *time.Time
 		var jobStartDate *time.Time
+		var firstName, lastName string
 		if err := rows.Scan(
 			&u.UserID, &u.Email,
+			&firstName, &lastName,
 			&currentPhaseID, &u.TotalLifetimePoints, &u.CurrentPhasePoints,
 			&u.MissionStreak, &arrivalDate, &jobStartDate, &u.CreatedAt, &u.UpdatedAt,
 		); err != nil {

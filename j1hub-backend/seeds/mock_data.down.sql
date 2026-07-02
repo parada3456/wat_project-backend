@@ -10,7 +10,7 @@ DELETE FROM job_postings WHERE job_id IN ('job_001', 'job_002', 'job_003');
 DELETE FROM expense_splits WHERE split_id IN ('spl_001');
 DELETE FROM expense_transactions WHERE transaction_id IN ('tx_001');
 DELETE FROM credit_scores WHERE credit_id IN ('crd_admin', 'crd_somchai', 'crd_alice');
-DELETE FROM user_badges WHERE user_badge_id IN ('ubg_som_1', 'ubg_som_2', 'ubg_ali_1');
+DELETE FROM user_badges WHERE user_badge_id IN ('ubg_som_1', 'ubg_som_2', 'ubg_ali_1', 'ubg_ali_2', 'ubg_ali_3');
 DELETE FROM badges WHERE badge_id IN ('bdg_001', 'bdg_002', 'bdg_003');
 DELETE FROM point_ledger WHERE ledger_id LIKE 'plg_%';
 DELETE FROM user_tasks WHERE user_task_id LIKE 'utk_%';

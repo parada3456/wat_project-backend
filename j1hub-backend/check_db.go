@@ -5,11 +5,9 @@ package main
 // 	"fmt"
 // 	"io/ioutil"
 // 	"log"
-// 	"os"
 // 	"strings"
 
 // 	"github.com/jackc/pgx/v5/pgxpool"
-// 	"github.com/j1hub/backend/internal/infrastructure/db"
 // )
 
 // func main() {
@@ -28,10 +26,6 @@ package main
 // 		}
 // 	}
 
-// 	if dbURL == "" {
-// 		log.Fatal("DATABASE_URL not found in .env")
-// 	}
-
 // 	ctx := context.Background()
 // 	pool, err := pgxpool.New(ctx, dbURL)
 // 	if err != nil {
@@ -39,11 +33,29 @@ package main
 // 	}
 // 	defer pool.Close()
 
-// 	fmt.Println("Running SeedMockData...")
-// 	err = db.SeedMockData(pool)
+// 	var userCount int
+// 	err = pool.QueryRow(ctx, "SELECT COUNT(*) FROM users").Scan(&userCount)
 // 	if err != nil {
-// 		fmt.Printf("SEEDING FAILED WITH ERROR:\n%v\n", err)
-// 		os.Exit(1)
+// 		log.Fatalf("Query failed: %v", err)
 // 	}
-// 	fmt.Println("Seeding completed successfully!")
+// 	fmt.Printf("Total users in database: %d\n", userCount)
+
+// 	rows, err := pool.Query(ctx, "SELECT user_id, email, current_phase_id FROM users")
+// 	if err != nil {
+// 		log.Fatalf("Query failed: %v", err)
+// 	}
+// 	defer rows.Close()
+
+// 	for rows.Next() {
+// 		var id, email string
+// 		var phase *string
+// 		if err := rows.Scan(&id, &email, &phase); err != nil {
+// 			log.Fatalf("Scan failed: %v", err)
+// 		}
+// 		pStr := "NULL"
+// 		if phase != nil {
+// 			pStr = *phase
+// 		}
+// 		fmt.Printf("User: ID=%s, Email=%s, Phase=%s\n", id, email, pStr)
+// 	}
 // }

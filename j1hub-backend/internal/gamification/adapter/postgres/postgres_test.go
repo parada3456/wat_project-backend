@@ -187,6 +187,7 @@ func TestUserRepository(t *testing.T) {
 	err = profileRepo.Create(ctx, &userdomain.Profile{
 		ProfileID:       "prf_1",
 		UserID:          "usr_1",
+		Username:        "user1",
 		FirstName:       "First",
 		LastName:        "Last",
 		RadarVisibility: userdomain.VisibilityShowAnonymous,
@@ -276,6 +277,7 @@ func TestProfileRepository(t *testing.T) {
 	p := &userdomain.Profile{
 		ProfileID:         "prof_1",
 		UserID:            "usr_1",
+		Username:          "user1",
 		FirstName:         "First",
 		LastName:          "Last",
 		PhoneNumber:       "123456",
@@ -420,6 +422,7 @@ func TestRadarRepository(t *testing.T) {
 	p1 := &userdomain.Profile{
 		ProfileID:       "prof_1",
 		UserID:          "usr_1",
+		Username:        "user1",
 		RadarVisibility: userdomain.VisibilityShowFriends,
 		Lat:             1.23,
 		Lng:             4.56,
@@ -850,6 +853,9 @@ func TestGamificationRepository(t *testing.T) {
 	ubs, err := ubRepo.FindByUser(ctx, "usr_1")
 	assert.NoError(t, err)
 	assert.Len(t, ubs, 1)
+	assert.NotNil(t, ubs[0].Badge)
+	assert.Equal(t, "badge_1", ubs[0].Badge.BadgeID)
+	assert.Equal(t, "Badge 1", ubs[0].Badge.Title)
 
 	// Test CreditScoreRepository
 	c1 := &gamificationdomain.CreditScore{

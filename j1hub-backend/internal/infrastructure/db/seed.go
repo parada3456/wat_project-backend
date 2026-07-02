@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -114,8 +115,10 @@ func SeedMockData(pool *pgxpool.Pool) error {
 		// 12. Seed User Badges
 		`INSERT INTO user_badges (user_badge_id, user_id, badge_id, source_id, earned_at) VALUES
 		('ubg_som_1', 'usr_somchai', 'bdg_001', 'ums_somchai_mis_001', NOW() - INTERVAL '20 days'),
-		('ubg_som_2', 'usr_somchai', 'bdg_002', NULL, NOW() - INTERVAL '10 days'),
-		('ubg_ali_1', 'usr_alice', 'bdg_001', 'ums_alice_mis_001', NOW() - INTERVAL '45 days');`,
+		('ubg_som_2', 'usr_somchai', 'bdg_002', 'ums_somchai_mis_001', NOW() - INTERVAL '10 days'),
+		('ubg_ali_1', 'usr_alice', 'bdg_001', 'ums_alice_mis_001', NOW() - INTERVAL '45 days'),
+		('ubg_ali_2', 'usr_alice', 'bdg_002', 'ums_alice_mis_001', NOW() - INTERVAL '40 days'),
+		('ubg_ali_3', 'usr_alice', 'bdg_003', 'ums_alice_mis_002', NOW() - INTERVAL '35 days');`,
 
 		// 13. Seed Credit Scores
 		`INSERT INTO credit_scores (credit_id, user_id, current_score, last_updated) VALUES
@@ -165,6 +168,124 @@ func SeedMockData(pool *pgxpool.Pool) error {
 		_, err := tx.Exec(ctx, query)
 		if err != nil {
 			return fmt.Errorf("failed to execute seed query %d: %w", i+1, err)
+		}
+	}
+
+	// Generate 50 mock missions and corresponding user_missions
+	for i := 1; i <= 50; i++ {
+		missionID := fmt.Sprintf("mis_mock_%03d", i)
+		phaseNum := (i % 4) + 1
+		phaseID := fmt.Sprintf("phs_%03d", phaseNum)
+		title := fmt.Sprintf("Mock Mission %d", i)
+		description := fmt.Sprintf("This is the description for mock mission %d", i)
+		location := "Office"
+		if i%2 == 0 {
+			location = "Online"
+		}
+		basePoints := 50 + (i*10)%200
+		isMandatory := i%2 == 0
+
+		verificationType := "none"
+		if i%3 == 1 {
+			verificationType = "upload"
+		} else if i%3 == 2 {
+			verificationType = "admin"
+		}
+
+		_, err = tx.Exec(ctx, `
+			INSERT INTO missions (mission_id, phase_id, title, description, location, base_points, is_mandatory, verification_type, due_date_type, relative_trigger_event, relative_days_offset)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'relative', 'arrival_date', $9)`,
+			missionID, phaseID, title, description, location, basePoints, isMandatory, verificationType, i%15,
+		)
+		if err != nil {
+			return fmt.Errorf("failed to seed mock mission %d: %w", i, err)
+		}
+
+		// Seed user missions for usr_somchai and usr_alice
+		var status string
+		var dueDateOffset string
+
+		if i%3 == 0 {
+			status = "in_progress"
+			dueDateOffset = "-5 days" // Overdue
+		} else if i%3 == 1 {
+			status = "completed"
+			dueDateOffset = "-2 days" // Completed
+		} else {
+			status = "in_progress"
+			dueDateOffset = "5 days"  // In Progress
+		}
+
+		for _, userID := range []string{"usr_somchai", "usr_alice"} {
+			umID := fmt.Sprintf("ums_%s_mock_%03d", userID, i)
+
+			var verifiedAt interface{}
+			var verifiedBy interface{}
+			var rewardedAt interface{}
+			var pointsEarned int
+
+			if status == "completed" {
+				now := time.Now()
+				verifiedAt = &now
+				verifiedBy = "usr_admin"
+				rewardedAt = &now
+				pointsEarned = basePoints
+			}
+
+			_, err = tx.Exec(ctx, fmt.Sprintf(`
+				INSERT INTO user_missions (
+					user_mission_id, user_id, mission_id, status, calculated_due_date, 
+					verified_at, verified_by, base_points_earned, total_points_earned, rewarded_at
+				) VALUES ($1, $2, $3, $4, NOW() + INTERVAL '%s', $5, $6, $7, $7, $8)`, dueDateOffset),
+				umID, userID, missionID, status, verifiedAt, verifiedBy, pointsEarned, rewardedAt,
+			)
+			if err != nil {
+				return fmt.Errorf("failed to seed user mission for mock mission %d: %w", i, err)
+			}
+		}
+	}
+
+	// 10 more user missions for completed, in progress, locked/not_started
+	for i := 1; i <= 10; i++ {
+		missionID := fmt.Sprintf("mis_mock_extra_%03d", i)
+		phaseID := "phs_003"
+		title := fmt.Sprintf("Extra Mock Mission %d", i)
+
+		_, err = tx.Exec(ctx, `
+			INSERT INTO missions (mission_id, phase_id, title, description, location, base_points, is_mandatory, verification_type, due_date_type, relative_trigger_event, relative_days_offset)
+			VALUES ($1, $2, $3, 'Extra mission', 'Virtual', 100, false, 'none', 'relative', 'arrival_date', 10)`,
+			missionID, phaseID, title,
+		)
+		if err != nil {
+			return fmt.Errorf("failed to seed extra mock mission %d: %w", i, err)
+		}
+
+		var status string
+		var dueDateOffset string
+		if i%3 == 1 {
+			status = "completed"
+			dueDateOffset = "-1 days"
+		} else if i%3 == 2 {
+			status = "in_progress"
+			dueDateOffset = "5 days"
+		} else {
+			status = "not_started"
+			dueDateOffset = "10 days"
+		}
+
+		umID := fmt.Sprintf("ums_alice_extra_%03d", i)
+		var pointsEarned int
+		if status == "completed" {
+			pointsEarned = 100
+		}
+
+		_, err = tx.Exec(ctx, fmt.Sprintf(`
+			INSERT INTO user_missions (user_mission_id, user_id, mission_id, status, calculated_due_date, base_points_earned, total_points_earned)
+			VALUES ($1, 'usr_alice', $2, $3, NOW() + INTERVAL '%s', $4, $4)`, dueDateOffset),
+			umID, missionID, status, pointsEarned,
+		)
+		if err != nil {
+			return fmt.Errorf("failed to seed extra user mission %d: %w", i, err)
 		}
 	}
 

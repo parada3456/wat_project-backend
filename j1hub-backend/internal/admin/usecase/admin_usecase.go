@@ -24,6 +24,7 @@ type adminUseCase struct {
 	profileRepo  port.ProfileRepository
 	umRepo       port.UserMissionRepository
 	missionRepo  port.MissionRepository
+	taskRepo     port.TaskRepository
 	ledgerRepo   port.PointLedgerRepository
 	notifier     port.NotifierPort
 	rewardEngine *gamificationusecase.RewardEngine
@@ -37,6 +38,7 @@ func NewAdminUseCase(
 	profileRepo port.ProfileRepository,
 	umRepo port.UserMissionRepository,
 	missionRepo port.MissionRepository,
+	taskRepo port.TaskRepository,
 	ledgerRepo port.PointLedgerRepository,
 	notifier port.NotifierPort,
 	rewardEngine *gamificationusecase.RewardEngine,
@@ -50,6 +52,7 @@ func NewAdminUseCase(
 		profileRepo:  profileRepo,
 		umRepo:       umRepo,
 		missionRepo:  missionRepo,
+		taskRepo:     taskRepo,
 		ledgerRepo:   ledgerRepo,
 		notifier:     notifier,
 		rewardEngine: rewardEngine,
@@ -323,4 +326,53 @@ func (u *adminUseCase) VerifyMission(ctx context.Context, adminID, userMissionID
 	u.notifier.Send(ctx, um.UserID, "Mission verified and completed!", fmt.Sprintf("You earned %d total points!", reward.Total))
 
 	return &um, nil
+}
+
+func (u *adminUseCase) CreateMission(ctx context.Context, cmd port.CreateMissionCmd) (*port.CreateMissionResult, error) {
+	log.Println("debugprint: entering (*adminUseCase).CreateMission")
+	now := u.clock.Now()
+
+	mission := missiondomain.Mission{
+		MissionID:            uid.New("mis_"),
+		PhaseID:              cmd.PhaseID,
+		Title:                cmd.Title,
+		Description:          cmd.Description,
+		Location:             cmd.Location,
+		BasePoints:           cmd.BasePoints,
+		IsMandatory:          cmd.IsMandatory,
+		VerificationType:     cmd.VerificationType,
+		DueDateType:          cmd.DueDateType,
+		FixedDueDate:         cmd.FixedDueDate,
+		RelativeTriggerEvent: cmd.RelativeTriggerEvent,
+		RelativeDaysOffset:   cmd.RelativeDaysOffset,
+		CreatedAt:            now,
+		UpdatedAt:            now,
+	}
+
+	if err := u.missionRepo.Insert(ctx, &mission); err != nil {
+		return nil, fmt.Errorf("failed to insert mission: %w", err)
+	}
+
+	tasks := make([]missiondomain.Task, len(cmd.Tasks))
+	for i, tc := range cmd.Tasks {
+		tasks[i] = missiondomain.Task{
+			TaskID:      uid.New("tsk_"),
+			MissionID:   mission.MissionID,
+			Title:       tc.Title,
+			Description: tc.Description,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		}
+	}
+
+	if len(tasks) > 0 {
+		if err := u.taskRepo.BulkInsert(ctx, tasks); err != nil {
+			return nil, fmt.Errorf("failed to insert tasks: %w", err)
+		}
+	}
+
+	return &port.CreateMissionResult{
+		Mission: mission,
+		Tasks:   tasks,
+	}, nil
 }

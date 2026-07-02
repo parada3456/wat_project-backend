@@ -115,7 +115,7 @@ func main() {
 
 	notifRepo := notificationpostgres.NewNotificationRepository(pool)
 	notifUC := notificationusecase.NewNotificationUseCase(notifRepo)
-	adminUC := adminusecase.NewAdminUseCase(pool, adminRepo, userRepo, profileRepo, umRepo, missionRepo, ledgerRepo, notifier, rewardEngine, clock)
+	adminUC := adminusecase.NewAdminUseCase(pool, adminRepo, userRepo, profileRepo, umRepo, missionRepo, taskRepo, ledgerRepo, notifier, rewardEngine, clock)
 
 	jobRepo := jobpostgres.NewJobRepository(pool)
 	housingRepo := jobpostgres.NewJobHousingRepository(pool)

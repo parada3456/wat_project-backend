@@ -13,6 +13,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	port "github.com/j1hub/backend/internal/admin/port"
 	"github.com/j1hub/backend/internal/domain"
+	missiondomain "github.com/j1hub/backend/internal/mission/domain"
 	"github.com/j1hub/backend/internal/transport/http/middleware"
 	userdto "github.com/j1hub/backend/internal/user/adapter/http/dto"
 	"github.com/j1hub/backend/pkg/apperror"
@@ -53,6 +54,7 @@ func mapUserWithProfileToDTO(up port.UserWithProfile) *userdto.UserAccountDTO {
 	return &userdto.UserAccountDTO{
 		ID:                  up.User.UserID,
 		Email:               up.User.Email,
+		Username:            up.Profile.Username,
 		FirstName:           up.Profile.FirstName,
 		LastName:            up.Profile.LastName,
 		ProfileID:           up.Profile.ProfileID,
@@ -172,4 +174,47 @@ func (h *AdminHandler) AdjustPoints(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(res)
+}
+
+func (h *AdminHandler) CreateMission(w http.ResponseWriter, r *http.Request) {
+	log.Println("debugprint: entering (*AdminHandler).CreateMission")
+	var req dto.CreateMissionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		apperror.RespondError(w, fmt.Errorf("Malformed request body: %w", domain.ErrInvalidInput))
+		return
+	}
+	if err := h.validate.Struct(req); err != nil {
+		apperror.RespondError(w, fmt.Errorf("%s: %w", err.Error(), domain.ErrInvalidInput))
+		return
+	}
+
+	taskCmds := make([]port.CreateTaskCmd, len(req.Tasks))
+	for i, t := range req.Tasks {
+		taskCmds[i] = port.CreateTaskCmd{Title: t.Title, Description: t.Description}
+	}
+
+	cmd := port.CreateMissionCmd{
+		PhaseID:              req.PhaseID,
+		Title:                req.Title,
+		Description:          req.Description,
+		Location:             req.Location,
+		BasePoints:           req.BasePoints,
+		IsMandatory:          req.IsMandatory,
+		VerificationType:     missiondomain.VerificationType(req.VerificationType),
+		DueDateType:          req.DueDateType,
+		FixedDueDate:         req.FixedDueDate,
+		RelativeTriggerEvent: req.RelativeTriggerEvent,
+		RelativeDaysOffset:   req.RelativeDaysOffset,
+		Tasks:                taskCmds,
+	}
+
+	result, err := h.adminUseCase.CreateMission(r.Context(), cmd)
+	if err != nil {
+		apperror.RespondError(w, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(result)
 }

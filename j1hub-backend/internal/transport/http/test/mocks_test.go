@@ -267,16 +267,16 @@ type MockMissionUC struct {
 	mock.Mock
 }
 
-func (m *MockMissionUC) ListAvailableMissions(ctx context.Context, userID string) ([]missiondomain.UserMission, error) {
-	args := m.Called(ctx, userID)
+func (m *MockMissionUC) ListAvailableMissions(ctx context.Context, userID string, ids []string) ([]missiondomain.UserMission, error) {
+	args := m.Called(ctx, userID, ids)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]missiondomain.UserMission), args.Error(1)
 }
 
-func (m *MockMissionUC) ListStaticMissions(ctx context.Context, userID string) ([]missiondomain.Mission, error) {
-	args := m.Called(ctx, userID)
+func (m *MockMissionUC) ListStaticMissions(ctx context.Context, userID string, ids []string) ([]missiondomain.Mission, error) {
+	args := m.Called(ctx, userID, ids)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -293,6 +293,22 @@ func (m *MockMissionUC) GetMissionDetail(ctx context.Context, userID, userMissio
 
 func (m *MockMissionUC) ToggleTask(ctx context.Context, userID, userTaskID string, completed bool) error {
 	return m.Called(ctx, userID, userTaskID, completed).Error(0)
+}
+
+func (m *MockMissionUC) ListTasks(ctx context.Context, ids []string) ([]missiondomain.Task, error) {
+	args := m.Called(ctx, ids)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]missiondomain.Task), args.Error(1)
+}
+
+func (m *MockMissionUC) ListUserTasks(ctx context.Context, ids []string) ([]missiondomain.UserTask, error) {
+	args := m.Called(ctx, ids)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]missiondomain.UserTask), args.Error(1)
 }
 
 // MockCompleteMissionUC

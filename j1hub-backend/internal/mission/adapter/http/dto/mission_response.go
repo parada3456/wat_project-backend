@@ -6,25 +6,25 @@ import (
 )
 
 type MissionDetailResponse struct {
-	Mission     *missiondomain.Mission     `json:"mission"`
+	Mission     *missiondomain.Mission    `json:"mission"`
 	UserMission *missiondomain.UserMission `json:"user_mission"`
-	Tasks       []string                   `json:"tasks"`
-	UserTasks   []string                   `json:"user_tasks"`
+	Tasks       []missiondomain.Task      `json:"tasks"`
+	UserTasks   []missiondomain.UserTask  `json:"user_tasks"`
 }
 
 func NewMissionDetailResponse(detail *missionusecase.MissionDetailResponse) *MissionDetailResponse {
-	taskIDs := make([]string, len(detail.Tasks))
-	for i, t := range detail.Tasks {
-		taskIDs[i] = t.TaskID
+	tasks := detail.Tasks
+	if tasks == nil {
+		tasks = []missiondomain.Task{}
 	}
-	userTaskIDs := make([]string, len(detail.UserTasks))
-	for i, ut := range detail.UserTasks {
-		userTaskIDs[i] = ut.UserTaskID
+	userTasks := detail.UserTasks
+	if userTasks == nil {
+		userTasks = []missiondomain.UserTask{}
 	}
 	return &MissionDetailResponse{
 		Mission:     &detail.Mission,
 		UserMission: &detail.UserMission,
-		Tasks:       taskIDs,
-		UserTasks:   userTaskIDs,
+		Tasks:       tasks,
+		UserTasks:   userTasks,
 	}
 }
