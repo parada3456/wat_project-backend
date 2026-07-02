@@ -4,12 +4,12 @@ import (
 	"testing"
 	"time"
 
-	expensedomain "github.com/j1hub/backend/internal/expense/domain"
-	frienddomain "github.com/j1hub/backend/internal/friend/domain"
-	gamificationdomain "github.com/j1hub/backend/internal/gamification/domain"
-	jobdomain "github.com/j1hub/backend/internal/job/domain"
-	missiondomain "github.com/j1hub/backend/internal/mission/domain"
-	userdomain "github.com/j1hub/backend/internal/user/domain"
+	expensedomain "github.com/parada3456/wat_project-backend/internal/expense/domain"
+	frienddomain "github.com/parada3456/wat_project-backend/internal/friend/domain"
+	gamificationdomain "github.com/parada3456/wat_project-backend/internal/gamification/domain"
+	jobdomain "github.com/parada3456/wat_project-backend/internal/job/domain"
+	missiondomain "github.com/parada3456/wat_project-backend/internal/mission/domain"
+	userdomain "github.com/parada3456/wat_project-backend/internal/user/domain"
 )
 
 func TestPaymentStatusValid(t *testing.T) {

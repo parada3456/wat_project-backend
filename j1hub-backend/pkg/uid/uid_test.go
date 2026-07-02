@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/j1hub/backend/pkg/uid"
+	"github.com/parada3456/wat_project-backend/pkg/uid"
 	"github.com/stretchr/testify/assert"
 )
 
